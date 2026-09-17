@@ -125,3 +125,4 @@ modern-landing-cms/
 | `ADMIN_USERNAME` | Usuario administrador inicial | `admin` |
 | `ADMIN_PASSWORD` | Contraseña administrador inicial | `admin` |
 | `SITE_URL` | Dominio canónico para etiquetas SEO y Sitemap | `http://localhost:3000` |
+# landing_kkidsrace
