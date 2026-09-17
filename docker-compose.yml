@@ -1,0 +1,47 @@
+services:
+  # Base de Datos PostgreSQL para Inscripciones
+  postgres:
+    image: postgres:16-alpine
+    container_name: kidsrun_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kidsrun}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-kidsrun_secret}
+      POSTGRES_DB: ${POSTGRES_DB:-kidsrundb}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-kidsrun} -d ${POSTGRES_DB:-kidsrundb}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # Aplicación Web & CMS
+  landing-cms:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: kidsrun_landing_cms
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "${PORT:-3000}:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=production
+      - SESSION_SECRET=${SESSION_SECRET:-kidsrun_cms_super_secret_key_change_in_production}
+      - ADMIN_USERNAME=${ADMIN_USERNAME:-admin}
+      - ADMIN_PASSWORD=${ADMIN_PASSWORD:-admin}
+      - SITE_URL=${SITE_URL:-http://localhost:3000}
+      - DATABASE_URL=postgres://${POSTGRES_USER:-kidsrun}:${POSTGRES_PASSWORD:-kidsrun_secret}@postgres:5432/${POSTGRES_DB:-kidsrundb}
+    volumes:
+      # Volumen persistente para contenido CMS (imágenes, textos, configuración)
+      - ./data:/app/data
+
+volumes:
+  postgres_data:
+    driver: local

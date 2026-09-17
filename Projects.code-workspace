@@ -1,0 +1,12 @@
+{
+	"folders": [
+		{
+			"path": ".."
+		},
+		{
+			"name": "SSH FS - kkidsrace",
+			"uri": "ssh://kkidsrace/"
+		}
+	],
+	"settings": {}
+}

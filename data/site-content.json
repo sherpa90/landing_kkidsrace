@@ -1,0 +1,257 @@
+{
+  "brand": {
+    "name": "KidsRun 2026",
+    "tagline": "La Gran Corrida Infantil & Familiar",
+    "logoText": "KidsRun 2026",
+    "logoIcon": "trophy",
+    "logoUrl": "",
+    "accentColor": "green_yellow",
+    "themeMode": "light"
+  },
+  "countdown": {
+    "targetDate": "2026-11-15T09:00:00",
+    "eventDateDisplay": "Domingo 15 de Noviembre, 2026",
+    "eventTime": "09:00 AM",
+    "locationName": "Parque Bicentenario • Circuito Deportivo Cerrado",
+    "locationCity": "Sector Explanada Central",
+    "badge": "⏰ ¡FALTAN SÓLO!"
+  },
+  "seo": {
+    "metaTitle": "KidsRun 2026 | La Gran Corrida Infantil y Familiar",
+    "metaDescription": "Inscribe a tus hijos en la corrida infantil más alegre, segura y emocionante del año. Circuitos de 500m a 3K, medalla finisher garantizada para todos, polera técnica oficial y actividades familiares.",
+    "keywords": "corrida de niños, corrida infantil, maraton infantil, carrera familiar, kids run, running niños, deporte infantil, medallas niños",
+    "canonicalUrl": "http://localhost:3000",
+    "ogImage": "https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=1200&h=630&q=80",
+    "ogType": "website",
+    "twitterCard": "summary_large_image",
+    "twitterHandle": "@kidsrun2026",
+    "enableRobotsIndex": true,
+    "analyticsCode": ""
+  },
+  "hero": {
+    "badgeText": "👟 ¡INSCRIPCIONES ABIERTAS EDICIÓN 2026!",
+    "badgeLink": "#pricing",
+    "headlinePrefix": "La Carrera Más Alegre del Año para",
+    "headlineGradient": "Pequeños Campeones & Familias",
+    "subheadline": "Un día inolvidable de deporte, risas y diversión en un circuito 100% cerrado y seguro. ¡Medalla de metal oficial y polera de corredor para todos los niños al cruzar la meta!",
+    "primaryCtaText": "Inscribir a mi Pequeño/a",
+    "primaryCtaLink": "#contact",
+    "secondaryCtaText": "Ver Galería & Circuitos",
+    "secondaryCtaLink": "#gallery",
+    "statsNotice": "🏅 Medalla finisher garantizada para todos los niños • Cupos limitados por seguridad"
+  },
+  "metrics": [
+    { "value": "+2,500", "label": "Niños y Familias Corriendo", "icon": "users" },
+    { "value": "100%", "label": "Medallas Finisher Aseguradas", "icon": "award" },
+    { "value": "4", "label": "Circuitos por Edades (500m - 3K)", "icon": "flag" },
+    { "value": "0", "label": "Incidentes • Seguridad Máxima", "icon": "shield-check" }
+  ],
+  "categories": [
+    {
+      "id": "cat-1",
+      "distance": "500 Metros",
+      "badge": "3 a 5 años",
+      "title": "Mini Runners (Con Papás)",
+      "description": "El primer paso en el deporte. Los más pequeñitos corren de la mano con mamá o papá en una pista suave con obstáculos inflables divertidos.",
+      "icon": "smile"
+    },
+    {
+      "id": "cat-2",
+      "distance": "1 Kilómetro",
+      "badge": "6 a 8 años",
+      "title": "Pequeños Rayos",
+      "description": "Una vuelta emocionante llena de color y música. Los niños corren de forma autónoma con supervisores y guías en todo el trayecto.",
+      "icon": "zap"
+    },
+    {
+      "id": "cat-3",
+      "distance": "2 Kilómetros",
+      "badge": "9 a 11 años",
+      "title": "Súper Campeones",
+      "description": "Circuito con cronometraje electrónico por chip para los niños que disfrutan el desafío del running y quieren medir su tiempo personal.",
+      "icon": "trophy"
+    },
+    {
+      "id": "cat-4",
+      "distance": "3 Kilómetros",
+      "badge": "12 a 14 años",
+      "title": "Jóvenes Titanes",
+      "description": "Nuestra distancia mayor. Diseñada para preadolescentes que practican deporte escolar y buscan superarse con podio oficial y trofeos.",
+      "icon": "flame"
+    }
+  ],
+  "gallery": [
+    {
+      "id": "gal-1",
+      "title": "¡Cruzando la Meta con Alegría!",
+      "category": "Carrera",
+      "url": "https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=800&q=80",
+      "caption": "Sonrisas y pura emoción al cruzar el arco de meta inflable."
+    },
+    {
+      "id": "gal-2",
+      "title": "Medallas de Metal para Todos",
+      "category": "Medallas",
+      "url": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
+      "caption": "Cada niño recibe su hermosa medalla grabada de finisher."
+    },
+    {
+      "id": "gal-3",
+      "title": "Calentamiento Animado con Baile",
+      "category": "Animación",
+      "url": "https://images.unsplash.com/photo-1472162072942-cd5147eb3902?auto=format&fit=crop&w=800&q=80",
+      "caption": "Música, mascotas y monitores preparando a los niños antes de largar."
+    },
+    {
+      "id": "gal-4",
+      "title": "Papás e Hijos Unidos en la Pista",
+      "category": "Familia",
+      "url": "https://images.unsplash.com/photo-1476703993599-0035a21b17a9?auto=format&fit=crop&w=800&q=80",
+      "caption": "Familias enteras disfrutando una mañana al aire libre."
+    },
+    {
+      "id": "gal-5",
+      "title": "Kits y Poleras Técnicas Oficiales",
+      "category": "Kits",
+      "url": "https://images.unsplash.com/photo-1552674605-db6ffd4facb5?auto=format&fit=crop&w=800&q=80",
+      "caption": "Poleras de alta transpirabilidad y números personalizados con el nombre del niño."
+    },
+    {
+      "id": "gal-6",
+      "title": "Fiesta de Espuma y Premiación",
+      "category": "Fiesta",
+      "url": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80",
+      "caption": "El cierre más divertido con espectáculos infantiles y sorteos de bicicletas."
+    }
+  ],
+  "schedule": [
+    { "time": "08:00 AM", "title": "Apertura del Recinto & Entrega de Kits", "desc": "Acceso de familias, validación de pulseras de seguridad y retiro de poleras y números de corredor." },
+    { "time": "08:30 AM", "title": "Gran Calentamiento Musical", "desc": "Zumba Kids y monitores disfrazados preparan a todos los participantes con saltos y estiramientos." },
+    { "time": "09:00 AM", "title": "Largada Mini Runners 500m", "desc": "Circuito especial para los pequeños de 3 a 5 años junto a sus padres." },
+    { "time": "09:30 AM", "title": "Largada Pequeños Rayos 1K", "desc": "Salida para corredores de 6 a 8 años con banderilleros y puntos de hidratación." },
+    { "time": "10:15 AM", "title": "Largada 2K y 3K", "desc": "Competencia con chip de cronometraje para las categorías de 9 a 14 años." },
+    { "time": "11:15 AM", "title": "Show Infantil, Fiesta de Espuma & Premiación", "desc": "Reconocimiento a todos los niños, show de magia, sorteos de bicicletas y regalos de auspiciadores." }
+  ],
+  "pricing": {
+    "discountNotice": "Ahorra inscribiendo a 2 o más hermanitos",
+    "plans": [
+      {
+        "id": "kit-basico",
+        "name": "Kit Corredor Básico",
+        "badge": "Esencial",
+        "priceMonthly": 12,
+        "priceYearly": 10,
+        "description": "Ideal para una experiencia deportiva completa y divertida.",
+        "features": [
+          "Polera oficial KidsRun Dry-Fit",
+          "Hermosa Medalla Finisher de metal",
+          "Número de corredor personalizado",
+          "Pulsera de seguridad vinculada a los padres",
+          "Puesto de hidratación y fruta fresca en meta"
+        ],
+        "isPopular": false,
+        "ctaText": "Inscribir con Kit Básico",
+        "ctaLink": "#contact"
+      },
+      {
+        "id": "kit-pro",
+        "name": "Kit Campeón Pro",
+        "badge": "MÁS ELEGIDO",
+        "priceMonthly": 22,
+        "priceYearly": 18,
+        "description": "El favorito de las familias: incluye cronometraje por chip y fotos de recuerdo.",
+        "features": [
+          "Todo lo del Kit Básico",
+          "Chip de cronometraje electrónico oficial",
+          "Descarga ilimitada de fotos profesionales en pista",
+          "Morral deportivo reflectante KidsRun",
+          "Acceso preferencial a juegos inflables post-carrera"
+        ],
+        "isPopular": true,
+        "ctaText": "Inscribir Kit Campeón Pro",
+        "ctaLink": "#contact"
+      },
+      {
+        "id": "kit-familiar",
+        "name": "Pack Dúo Hermanos / Familia",
+        "badge": "Promo Hermanitos",
+        "priceMonthly": 35,
+        "priceYearly": 30,
+        "description": "Tarifa especial para inscribir a dos niños o un niño y un adulto.",
+        "features": [
+          "2 Kits Completos con poleras y medallas",
+          "2 Chips de cronometraje incluidos",
+          "Fotografías en alta resolución descargables",
+          "Kit de hidratación familiar premium",
+          "Participación doble en sorteo de bicicletas"
+        ],
+        "isPopular": false,
+        "ctaText": "Aprovechar Pack Dúo",
+        "ctaLink": "#contact"
+      }
+    ]
+  },
+  "testimonials": [
+    {
+      "name": "Mariana y Tomás (7 años)",
+      "role": "Mamá de corredor 1K",
+      "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80",
+      "quote": "¡Fue la mejor mañana del año! Tomás estaba tan emocionado con su medalla que durmió con ella puesta. La organización y la seguridad con las pulseras para padres nos dio una tranquilidad total.",
+      "stars": 5
+    },
+    {
+      "name": "Rodrigo Valenzuela",
+      "role": "Papá de Martina (4 años) y Sofía (10 años)",
+      "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80",
+      "quote": "Poder correr los 500 metros con mi hija menor y luego ver a la mayor correr sus 2K con chip fue una experiencia familiar maravillosa. 100% recomendada.",
+      "stars": 5
+    },
+    {
+      "name": "Camila Soto",
+      "role": "Profesora de Educación Física y Mamá",
+      "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80",
+      "quote": "El ambiente positivo, la música y la hidratación impecable. Fomenta el deporte sano sin presiones, celebrando el esfuerzo de cada niño por igual.",
+      "stars": 5
+    }
+  ],
+  "faqs": [
+    {
+      "question": "¿Los padres o tutores pueden correr junto a los niños?",
+      "answer": "¡Por supuesto! En la categoría de 500 metros (3 a 5 años) es obligatorio que un adulto acompañe al niño. En 1K, 2K y 3K los padres pueden acompañarlos o alentarlos a lo largo del circuito cerrado."
+    },
+    {
+      "question": "¿Todos los niños reciben medalla al terminar?",
+      "answer": "¡Sí! En KidsRun premiamos la participación y el amor por el movimiento. Cada niño y niña que cruza el arco de meta recibe su hermosa medalla finisher de metal con cinta conmemorativa."
+    },
+    {
+      "question": "¿Cómo funciona la seguridad de los niños en el evento?",
+      "answer": "La seguridad es nuestra prioridad #1. El circuito es completamente cerrado sin tráfico vehicular, contamos con ambulancias y paramédicos certificados, y cada niño recibe una pulsera numerada idéntica a la que se le coloca a su tutor para el control de salida."
+    },
+    {
+      "question": "¿Cuándo y dónde se retiran los kits de corredor (polera y número)?",
+      "answer": "Los kits se pueden retirar los días viernes y sábado previos al evento en el mall auspiciador, o el mismo domingo desde las 08:00 AM en la carpa de acreditaciones del parque."
+    },
+    {
+      "question": "¿Qué incluye el Kit oficial de corredor?",
+      "answer": "Incluye la polera técnica oficial con tejido respirable, número de corredor, chip electrónico (en distancias 2K y 3K), pulseras de seguridad, medalla de metal finisher, morral y snacks saludables de hidratación."
+    }
+  ],
+  "contact": {
+    "title": "Inscribe a tu Pequeño Corredor",
+    "subtitle": "Completa el formulario y te enviaremos la confirmación oficial y guía del evento a tu correo electrónico.",
+    "email": "contacto@kidsrun2026.com",
+    "phone": "+56 9 8765 4321",
+    "location": "Parque Bicentenario • Explanada Central",
+    "formButtonText": "Completar Pre-Inscripción Oficial"
+  },
+  "footer": {
+    "description": "La corrida infantil más alegre, segura e inspiradora. Fomentando hábitos saludables y unión familiar a través del running.",
+    "copyright": "© 2026 KidsRun. Todos los derechos reservados. Evento deportivo familiar.",
+    "socialLinks": {
+      "twitter": "https://twitter.com",
+      "github": "https://instagram.com",
+      "linkedin": "https://facebook.com",
+      "youtube": "https://youtube.com"
+    }
+  }
+}

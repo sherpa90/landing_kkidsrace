@@ -1,0 +1,11 @@
+User-agent: *
+<% if (allowIndex) { %>
+Allow: /
+Disallow: /admin
+Disallow: /admin/*
+Disallow: /api/*
+
+Sitemap: <%= siteUrl %>/sitemap.xml
+<% } else { %>
+Disallow: /
+<% } %>

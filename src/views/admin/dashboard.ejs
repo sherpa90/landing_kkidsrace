@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="csrf-token" content="<%= csrfToken || '' %>">
+  <title>CMS Dashboard | <%= content.brand?.name || 'KidsRun 2026' %></title>
+  <meta name="robots" content="noindex, nofollow">
+
+  <!-- Tailwind CSS & Lucide -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://unpkg.com/lucide@1.47.0"></script>
+  <link rel="stylesheet" href="/css/custom.css">
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col antialiased">
+
+  <!-- BARRA SUPERIOR DEL DASHBOARD -->
+  <header class="h-16 border-b border-gray-800 bg-gray-950/90 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-8 flex items-center justify-between">
+    <div class="flex items-center gap-4">
+      <div class="flex items-center gap-2.5">
+        <div class="w-8 h-8 rounded-xl bg-yellow-400 flex items-center justify-center text-gray-950 font-black shadow-md">
+          <i data-lucide="trophy" class="w-4 h-4"></i>
+        </div>
+        <div>
+          <span class="font-black text-sm text-white tracking-tight"><%= content.brand?.name || 'KidsRun 2026' %></span>
+          <span class="text-[10px] bg-emerald-500 text-white font-bold px-1.5 py-0.5 rounded-full ml-1.5 border border-emerald-500">CMS Evento</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Acciones Rápidas -->
+    <div class="flex items-center gap-3">
+      <a href="/" target="_blank" class="text-xs font-semibold px-3 py-2 rounded-3xl text-gray-300 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-700 transition-all flex items-center gap-1.5">
+        <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+        <span>Ver Web en Vivo</span>
+      </a>
+
+      <button type="button" id="btn-save-cms" class="text-xs font-bold px-5 py-2.5 rounded-3xl text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/60 transition-all flex items-center gap-2">
+        <i data-lucide="save" class="w-4 h-4"></i>
+        <span>Guardar Cambios</span>
+      </button>
+
+      <a href="/admin/logout" class="p-2 text-gray-400 hover:text-red-400 rounded-3xl hover:bg-red-950/20 transition-all" title="Cerrar Sesión">
+        <i data-lucide="log-out" class="w-4 h-4"></i>
+      </a>
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL: SIDEBAR + PANELES -->
+  <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6">
+    
+    <!-- BARRA LATERAL DE NAVEGACIÓN (TABS) -->
+    <aside class="w-full md:w-64 flex-shrink-0 space-y-1">
+      <div class="p-3 bg-gray-900/50 rounded-3xl border border-gray-800/80 mb-3">
+        <div class="flex items-center gap-3">
+          <div class="w-9 h-9 rounded-3xl bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">
+            <%= (username || 'A')[0].toUpperCase() %>
+          </div>
+          <div class="overflow-hidden">
+            <p class="text-xs font-bold text-white truncate"><%= username %></p>
+            <p class="text-[10px] text-emerald-400 flex items-center gap-1">
+              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span> Organizador
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <nav class="space-y-1">
+        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold bg-emerald-600 text-white shadow-lg shadow-emerald-500/40 hover:bg-emerald-700 transition-all text-left" data-tab="countdown">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          <span>⏰ Cuenta Regresiva</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="gallery">
+          <i data-lucide="image" class="w-4 h-4"></i>
+          <span>🖼️ Galería de Fotos</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="brand">
+          <i data-lucide="palette" class="w-4 h-4"></i>
+          <span>Identidad & Marca</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="hero">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>Sección Principal (Hero)</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="circuits">
+          <i data-lucide="flag" class="w-4 h-4"></i>
+          <span>Circuitos & Edades</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="kits">
+          <i data-lucide="tag" class="w-4 h-4"></i>
+          <span>Kits de Corredor</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="testimonials">
+          <i data-lucide="message-square" class="w-4 h-4"></i>
+          <span>Testimonios Familiares</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="faqs">
+          <i data-lucide="help-circle" class="w-4 h-4"></i>
+          <span>Preguntas Frecuentes</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="seo">
+          <i data-lucide="search" class="w-4 h-4"></i>
+          <span>SEO & Google Events</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="leads">
+          <div class="flex items-center gap-3">
+            <i data-lucide="inbox" class="w-4 h-4"></i>
+            <span>Inscripciones</span>
+          </div>
+          <% if (leads && leads.length > 0) { %>
+          <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full"><%= leads.length %></span>
+          <% } %>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="security">
+          <i data-lucide="shield" class="w-4 h-4"></i>
+          <span>Seguridad & Clave</span>
+        </button>
+      </nav>
+    </aside>
+
+    <!-- ÁREA DE CONTENIDO / FORMULARIO CMS -->
+    <main class="flex-1 min-w-0">
+      <form id="cms-form" onsubmit="return false;" class="space-y-6">
+        
+        <!-- PESTAÑA: CUENTA REGRESIVA & FECHA DEL EVENTO -->
+        <div id="tab-countdown" class="tab-pane space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+              <i data-lucide="clock" class="w-4 h-4 text-emerald-400"></i>
+              Configuración de la Cuenta Regresiva
+            </h2>
+            <p class="text-xs text-gray-400 mb-6">Define el día exacto de la corrida infantil para el contador en vivo de la portada.</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Fecha y Hora Objetivo (ISO / Estándar)</label>
+                <input type="text" id="input-cdTargetDate" value="<%= content.countdown?.targetDate || '2026-11-15T09:00:00' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400 font-mono" placeholder="YYYY-MM-DDTHH:mm:ss">
+                <span class="text-[10px] text-gray-500 mt-1 block">Ejemplo: 2026-11-15T09:00:00</span>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Fecha Visible para Familias</label>
+                <input type="text" id="input-cdEventDateDisplay" value="<%= content.countdown?.eventDateDisplay || 'Domingo 15 de Noviembre, 2026' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Hora de Largada</label>
+                <input type="text" id="input-cdEventTime" value="<%= content.countdown?.eventTime || '09:00 AM' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto del Badge Superior</label>
+                <input type="text" id="input-cdBadge" value="<%= content.countdown?.badge || '⏰ ¡FALTAN SÓLO!' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Lugar / Parque del Evento</label>
+                <input type="text" id="input-cdLocationName" value="<%= content.countdown?.locationName || 'Parque Bicentenario • Circuito Cerrado' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Sector o Ciudad</label>
+                <input type="text" id="input-cdLocationCity" value="<%= content.countdown?.locationCity || 'Sector Explanada Central' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: GALERÍA DE FOTOS -->
+        <div id="tab-gallery" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <div class="flex items-center justify-between mb-6">
+              <div>
+                <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+                  <i data-lucide="image" class="w-4 h-4 text-emerald-400"></i>
+                  Gestión de la Galería de Fotos
+                </h2>
+                <p class="text-xs text-gray-400">Fotos de alta resolución de la carrera, medallas y familias con visor modal.</p>
+              </div>
+              <button type="button" id="btn-add-gallery" class="px-3.5 py-2 rounded-3xl text-xs font-bold text-yellow-300 bg-yellow-200/50 border border-yellow-400/60 hover:bg-yellow-300/60 transition-all flex items-center gap-1.5">
+                <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+                <span>Agregar Foto</span>
+              </button>
+            </div>
+
+            <div id="gallery-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <% (content.gallery || []).forEach((photo, idx) => { %>
+              <div class="gallery-admin-item p-4 rounded-3xl bg-gray-900/70 border border-gray-800 relative space-y-3">
+                <button type="button" class="btn-delete-item absolute top-3 right-3 text-red-400 hover:text-red-300 p-1 bg-red-950/40 rounded-xl" title="Eliminar">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+
+                <div class="flex items-center gap-3">
+                  <img src="<%= photo.url %>" alt="" class="w-16 h-16 rounded-3xl object-cover border border-gray-800 bg-gray-950 flex-shrink-0">
+                  <div class="flex-1 min-w-0 pr-8">
+                    <label class="block text-[11px] text-gray-400 mb-0.5">Título de la Foto</label>
+                    <input type="text" name="gallery[<%= idx %>][title]" value="<%= photo.title %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-400 font-bold">
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-2">
+                  <div>
+                    <label class="block text-[11px] text-gray-400 mb-0.5">Categoría (Tag)</label>
+                    <input type="text" name="gallery[<%= idx %>][category]" value="<%= photo.category || 'Carrera' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-400">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-gray-400 mb-0.5">URL de la Imagen</label>
+                    <input type="text" name="gallery[<%= idx %>][url]" value="<%= photo.url %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-400">
+                  </div>
+                </div>
+
+                <div>
+                  <label class="block text-[11px] text-gray-400 mb-0.5">Descripción / Pie de Foto</label>
+                  <textarea name="gallery[<%= idx %>][caption]" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-2.5 py-1.5 text-xs text-gray-300 focus:outline-none focus:border-emerald-400"><%= photo.caption %></textarea>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: IDENTIDAD & MARCA -->
+        <div id="tab-brand" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+              <i data-lucide="palette" class="w-4 h-4 text-emerald-400"></i>
+              Identidad de Marca & Tema
+            </h2>
+            <p class="text-xs text-gray-400 mb-6">Nombre del evento infantil y paleta de colores vibrantes.</p>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nombre del Evento</label>
+                <input type="text" id="input-brandName" value="<%= content.brand?.name || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto del Logo</label>
+                <input type="text" id="input-logoText" value="<%= content.brand?.logoText || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Lema / Subtítulo Oficial</label>
+                <input type="text" id="input-brandTagline" value="<%= content.brand?.tagline || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+
+              <div class="sm:col-span-2">
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">URL de Imagen del Logo (Opcional - Imagen PNG/SVG)</label>
+                <input type="text" id="input-logoUrl" value="<%= content.brand?.logoUrl || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400" placeholder="https://.../mi-logo.png">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Icono del Logo (Lucide - si no hay imagen)</label>
+                <input type="text" id="input-logoIcon" value="<%= content.brand?.logoIcon || 'trophy' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Modo Visual Predeterminado de la Web</label>
+                <select id="input-themeMode" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                  <option value="light" <%= (content.brand?.themeMode !== 'dark') ? 'selected' : '' %>>☀️ Modo Claro (White Mode)</option>
+                  <option value="dark" <%= (content.brand?.themeMode === 'dark') ? 'selected' : '' %>>🌙 Modo Oscuro (Dark Mode)</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Paleta de Color de Acento</label>
+                <input type="hidden" id="input-accentColor" value="<%= content.brand?.accentColor || 'green_yellow' %>">
+                <div class="flex items-center gap-2 pt-1">
+                  <% Object.entries(themes).forEach(([key, thm]) => { %>
+                  <button type="button" class="color-choice-btn w-8 h-8 rounded-full border border-white/20 transition-transform <%= content.brand?.accentColor === key ? 'ring-4 ring-white/40 scale-110' : '' %>" data-color="<%= key %>" style="background-color: <%= thm.primaryHex %>;" title="<%= thm.name %>"></button>
+                  <% }); %>
+                </div>
+              </div>
+            </div>
+
+            <h3 class="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3 pt-4 border-t border-gray-800">Redes Sociales Oficiales</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">Instagram URL</label>
+                <input type="text" id="input-socialInstagram" value="<%= content.footer?.socialLinks?.instagram || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-3 py-2 text-xs text-white">
+              </div>
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">Facebook URL</label>
+                <input type="text" id="input-socialFacebook" value="<%= content.footer?.socialLinks?.facebook || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-3 py-2 text-xs text-white">
+              </div>
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">Twitter / X URL</label>
+                <input type="text" id="input-socialTwitter" value="<%= content.footer?.socialLinks?.twitter || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-3 py-2 text-xs text-white">
+              </div>
+              <div>
+                <label class="block text-xs text-gray-400 mb-1">YouTube URL</label>
+                <input type="text" id="input-socialYoutube" value="<%= content.footer?.socialLinks?.youtube || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-3 py-2 text-xs text-white">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: HERO -->
+        <div id="tab-hero" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+              <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i>
+              Cabecera Principal (Hero)
+            </h2>
+            <p class="text-xs text-gray-400 mb-6">El mensaje principal de bienvenida y llamado a inscripción.</p>
+
+            <div class="space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto del Badge</label>
+                  <input type="text" id="input-badgeText" value="<%= content.hero?.badgeText || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Enlace del Badge</label>
+                  <input type="text" id="input-badgeLink" value="<%= content.hero?.badgeLink || '#pricing' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título Línea 1</label>
+                <input type="text" id="input-headlinePrefix" value="<%= content.hero?.headlinePrefix || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título con Gradiente (Línea 2)</label>
+                <input type="text" id="input-headlineGradient" value="<%= content.hero?.headlineGradient || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Subtítulo Descriptivo</label>
+                <textarea id="input-subheadline" rows="3" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400"><%= content.hero?.subheadline || '' %></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto Botón Primario</label>
+                  <input type="text" id="input-primaryCtaText" value="<%= content.hero?.primaryCtaText || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Enlace Botón Primario</label>
+                  <input type="text" id="input-primaryCtaLink" value="<%= content.hero?.primaryCtaLink || '#contact' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto Botón Secundario</label>
+                  <input type="text" id="input-secondaryCtaText" value="<%= content.hero?.secondaryCtaText || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Enlace Botón Secundario</label>
+                  <input type="text" id="input-secondaryCtaLink" value="<%= content.hero?.secondaryCtaLink || '#gallery' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Mensaje de Garantía (Micro-copy)</label>
+                <input type="text" id="input-statsNotice" value="<%= content.hero?.statsNotice || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: CIRCUITOS Y EDADES -->
+        <div id="tab-circuits" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+              <i data-lucide="flag" class="w-4 h-4 text-emerald-400"></i>
+              Categorías y Circuitos por Edades
+            </h2>
+            <p class="text-xs text-gray-400 mb-6">Las 4 distancias adaptadas para los pequeños corredores.</p>
+
+            <div id="categories-container" class="space-y-4">
+              <% (content.categories || []).forEach((cat, idx) => { %>
+              <div class="category-item p-4 rounded-3xl bg-gray-900/60 border border-gray-800 space-y-3">
+                <input type="hidden" name="categories[<%= idx %>][id]" value="<%= cat.id %>">
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Distancia (ej: 500 Metros, 1 Km)</label>
+                    <input type="text" name="categories[<%= idx %>][distance]" value="<%= cat.distance %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-bold">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Rango de Edad</label>
+                    <input type="text" name="categories[<%= idx %>][badge]" value="<%= cat.badge %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Nombre Categoría</label>
+                    <input type="text" name="categories[<%= idx %>][title]" value="<%= cat.title %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                  </div>
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-1">Descripción del Circuito</label>
+                  <textarea name="categories[<%= idx %>][description]" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white"><%= cat.description %></textarea>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: KITS Y PRECIOS -->
+        <div id="tab-kits" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+              <i data-lucide="tag" class="w-4 h-4 text-emerald-400"></i>
+              Kits de Inscripción y Valores
+            </h2>
+            <p class="text-xs text-gray-400 mb-6">Gestiona los kits con sus poleras oficiales, medallas y beneficios.</p>
+
+            <div class="space-y-6">
+              <% (content.pricing?.plans || []).forEach((plan, idx) => { %>
+              <div class="pricing-item p-5 rounded-3xl bg-gray-900/70 border <%= plan.isPopular ? 'border-yellow-400/70' : 'border-gray-800' %> space-y-4">
+                <input type="hidden" name="plans[<%= idx %>][id]" value="<%= plan.id %>">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Nombre del Kit</label>
+                    <input type="text" name="plans[<%= idx %>][name]" value="<%= plan.name %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-bold">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Valor Mensual ($)</label>
+                    <input type="number" name="plans[<%= idx %>][priceMonthly]" value="<%= plan.priceMonthly %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Valor Anual ($)</label>
+                    <input type="number" name="plans[<%= idx %>][priceYearly]" value="<%= plan.priceYearly || plan.priceMonthly %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Badge de Tarjeta</label>
+                    <input type="text" name="plans[<%= idx %>][badge]" value="<%= plan.badge || '' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" id="popular-<%= idx %>" name="plans[<%= idx %>][isPopular]" <%= plan.isPopular ? 'checked' : '' %> class="w-4 h-4 rounded text-yellow-500 focus:ring-emerald-400 bg-gray-950 border-gray-800">
+                  <label for="popular-<%= idx %>" class="text-xs font-semibold text-yellow-300">Marcar como Kit "Más Elegido" (con halo dorado)</label>
+                </div>
+
+                <div>
+                  <label class="block text-xs text-gray-400 mb-1">Elementos Incluidos en el Kit (Uno por línea)</label>
+                  <textarea name="plans[<%= idx %>][features]" rows="4" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono leading-relaxed"><%= (plan.features || []).join('\n') %></textarea>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Texto del Botón</label>
+                    <input type="text" name="plans[<%= idx %>][ctaText]" value="<%= plan.ctaText || 'Inscribir Ahora' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Enlace de Destino</label>
+                    <input type="text" name="plans[<%= idx %>][ctaLink]" value="<%= plan.ctaLink || '#contact' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white">
+                  </div>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: TESTIMONIOS -->
+        <div id="tab-testimonials" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+              <i data-lucide="message-square" class="w-4 h-4 text-emerald-400"></i>
+              Testimonios de Familias
+            </h2>
+            <p class="text-xs text-gray-400 mb-6">Opiniones de padres y tutores de carreras anteriores.</p>
+
+            <div id="testimonials-container" class="space-y-4">
+              <% (content.testimonials || []).forEach((testi, idx) => { %>
+              <div class="testimonial-item p-4 rounded-3xl bg-gray-900/60 border border-gray-800 relative">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-3">
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Nombre Familia / Papá</label>
+                    <input type="text" name="testimonials[<%= idx %>][name]" value="<%= testi.name %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Rol / Categoría</label>
+                    <input type="text" name="testimonials[<%= idx %>][role]" value="<%= testi.role %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Estrellas</label>
+                    <input type="number" name="testimonials[<%= idx %>][stars]" value="<%= testi.stars || 5 %>" min="1" max="5" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                  </div>
+                </div>
+                <div class="mb-3">
+                  <label class="block text-xs text-gray-400 mb-1">URL Avatar / Foto</label>
+                  <input type="text" name="testimonials[<%= idx %>][avatar]" value="<%= testi.avatar %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-1">Testimonio</label>
+                  <textarea name="testimonials[<%= idx %>][quote]" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white"><%= testi.quote %></textarea>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: FAQS -->
+        <div id="tab-faqs" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+              <i data-lucide="help-circle" class="w-4 h-4 text-emerald-400"></i>
+              Preguntas Frecuentes para Padres
+            </h2>
+            <p class="text-xs text-gray-400 mb-6">Responde dudas de seguridad, retiro de kits y medallas.</p>
+
+            <div id="faqs-container" class="space-y-4">
+              <% (content.faqs || []).forEach((faq, idx) => { %>
+              <div class="faq-admin-item p-4 rounded-3xl bg-gray-900/60 border border-gray-800">
+                <div class="mb-3">
+                  <label class="block text-xs text-gray-400 mb-1">Pregunta</label>
+                  <input type="text" name="faqs[<%= idx %>][question]" value="<%= faq.question %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                </div>
+                <div>
+                  <label class="block text-xs text-gray-400 mb-1">Respuesta</label>
+                  <textarea name="faqs[<%= idx %>][answer]" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white"><%= faq.answer %></textarea>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: SEO -->
+        <div id="tab-seo" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+              <i data-lucide="search" class="w-4 h-4 text-emerald-400"></i>
+              SEO & Google SportsEvent
+            </h2>
+            <p class="text-xs text-gray-400 mb-6">Optimiza la aparición de la corrida en Google, redes sociales y buscadores locales.</p>
+
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Meta Title</label>
+                <input type="text" id="input-metaTitle" value="<%= content.seo?.metaTitle || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white">
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Meta Description</label>
+                <textarea id="input-metaDescription" rows="3" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white"><%= content.seo?.metaDescription || '' %></textarea>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Palabras Clave (Keywords)</label>
+                  <input type="text" id="input-keywords" value="<%= content.seo?.keywords || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">URL Canónica</label>
+                  <input type="text" id="input-canonicalUrl" value="<%= content.seo?.canonicalUrl || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white">
+                </div>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Imagen OpenGraph (WhatsApp, Redes)</label>
+                <input type="text" id="input-ogImage" value="<%= content.seo?.ogImage || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: BANDEJA DE INSCRIPCIONES (LEADS) -->
+        <div id="tab-leads" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+              <div>
+                <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+                  <i data-lucide="inbox" class="w-4 h-4 text-emerald-400"></i>
+                  Bandeja de Pequeños Corredores Inscritos (<%= (leads || []).length %>)
+                </h2>
+                <p class="text-xs text-gray-400">Inscripciones y solicitudes de kits registradas en la base de datos.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <% if (isPostgres) { %>
+                <span class="text-xs bg-emerald-500/30 text-emerald-200 font-bold px-3 py-1.5 rounded-3xl border border-emerald-400 flex items-center gap-1.5 shadow-sm">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  <i data-lucide="database" class="w-3.5 h-3.5"></i> PostgreSQL Activo
+                </span>
+                <% } else { %>
+                <span class="text-xs bg-red-500/30 text-red-200 font-bold px-3 py-1.5 rounded-3xl border border-red-400 flex items-center gap-1.5">
+                  <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i> Almacenamiento Local (Backup)
+                </span>
+                <% } %>
+              </div>
+            </div>
+
+            <% if (!leads || leads.length === 0) { %>
+            <div class="text-center py-12 text-gray-500">
+              <i data-lucide="user-check" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
+              <p class="text-sm">Aún no hay inscripciones registradas.</p>
+            </div>
+            <% } else { %>
+            <div class="space-y-4">
+              <% leads.forEach(lead => { %>
+              <div id="lead-row-<%= lead.id %>" class="p-4 rounded-3xl bg-gray-900/60 border border-gray-800 flex flex-col sm:flex-row items-start justify-between gap-4">
+                <div class="space-y-1">
+                  <div class="flex flex-wrap items-center gap-2">
+                    <span class="text-sm font-bold text-white"><%= lead.name %> (Tutor)</span>
+                    <span class="text-xs text-emerald-400 font-mono"><%= lead.email %></span>
+                    <% if (lead.phone) { %>
+                    <span class="text-xs text-gray-400 font-mono">• <%= lead.phone %></span>
+                    <% } %>
+                  </div>
+                  <% if (lead.kidName) { %>
+                  <p class="text-xs font-bold text-emerald-400 flex items-center gap-1.5 pt-1">
+                    <i data-lucide="smile" class="w-3.5 h-3.5"></i>
+                    Niño/a: <%= lead.kidName %> <%= lead.kidAge ? '(' + lead.kidAge + ' años)' : '' %>
+                    <% if (lead.distance) { %>
+                    <span class="px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-200 border border-emerald-400 text-[10px] ml-1">
+                      <%= lead.distance %>
+                    </span>
+                    <% } %>
+                  </p>
+                  <% } %>
+                  <p class="text-xs text-gray-400 mt-1 leading-relaxed bg-gray-950/60 p-3 rounded-xl border border-gray-800">
+                    <%= lead.message %>
+                  </p>
+                  <p class="text-[10px] text-gray-500 pt-1">
+                    Inscripción enviada el <%= new Date(lead.createdAt).toLocaleString('es-ES') %>
+                  </p>
+                </div>
+                <button type="button" data-lead-id="<%= lead.id %>" class="btn-delete-lead text-xs text-red-400 hover:text-red-300 px-3 py-1.5 rounded-xl bg-red-950/30 border border-red-900/40 hover:bg-red-950/60 transition-all flex items-center gap-1">
+                  <i data-lucide="trash" class="w-3.5 h-3.5"></i>
+                  <span>Eliminar</span>
+                </button>
+              </div>
+              <% }); %>
+            </div>
+            <% } %>
+          </div>
+        </div>
+
+        <!-- PESTAÑA: SEGURIDAD -->
+        <div id="tab-security" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800 max-w-md">
+            <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+              <i data-lucide="shield" class="w-4 h-4 text-emerald-400"></i>
+              Cambiar Contraseña de Administrador
+            </h2>
+            <p class="text-xs text-gray-400 mb-6">Actualiza tu clave de acceso de forma segura.</p>
+
+            <form id="form-change-password" class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Contraseña Actual</label>
+                <input type="password" id="input-currentPassword" required class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nueva Contraseña (mínimo 6 caracteres)</label>
+                <input type="password" id="input-newPassword" required minlength="6" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+              </div>
+              <button type="submit" class="px-5 py-2.5 rounded-3xl text-xs font-bold text-white bg-yellow-500 hover:bg-yellow-400 transition-all">
+                Actualizar Clave
+              </button>
+            </form>
+          </div>
+        </div>
+
+      </form>
+    </main>
+
+  </div>
+
+  <script src="/js/admin.js"></script>
+</body>
+</html>
