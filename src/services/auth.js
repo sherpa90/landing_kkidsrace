@@ -18,7 +18,28 @@ function getUsers() {
     if (fs.existsSync(USERS_FILE)) {
       const raw = fs.readFileSync(USERS_FILE, 'utf-8');
       const list = JSON.parse(raw);
-      // Garantizar que root siempre esté presente
+      // Sincronizar o crear el usuario definido en ADMIN_USERNAME y ADMIN_PASSWORD si fue configurado en el entorno
+      const envUser = (process.env.ADMIN_USERNAME || '').trim();
+      const envPass = (process.env.ADMIN_PASSWORD || '').trim();
+      if (envUser && envPass) {
+        const existingIdx = list.findIndex(u => u.username.toLowerCase() === envUser.toLowerCase());
+        if (existingIdx !== -1) {
+          list[existingIdx].passwordHash = bcrypt.hashSync(envPass, 10);
+          list[existingIdx].role = 'admin';
+        } else {
+          list.push({
+            id: `usr_${Date.now()}`,
+            username: envUser,
+            name: 'Administrador Principal',
+            role: 'admin',
+            passwordHash: bcrypt.hashSync(envPass, 10),
+            createdAt: new Date().toISOString()
+          });
+        }
+        saveUsers(list);
+      }
+
+      // Garantizar que root siempre esté presente como superadministrador de respaldo
       if (!list.some(u => u.username.toLowerCase() === 'root')) {
         list.unshift({
           id: 'usr_root',
@@ -112,7 +133,20 @@ function verifyCredentials(username, password) {
     };
   }
 
-  if (cleanUser === 'admin' && cleanPass === (process.env.ADMIN_PASSWORD || 'admin')) {
+  const envAdminUser = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
+  const envAdminPass = (process.env.ADMIN_PASSWORD || 'admin').trim();
+
+  if (cleanUser === envAdminUser && cleanPass === envAdminPass) {
+    return {
+      id: 'usr_admin',
+      username: process.env.ADMIN_USERNAME || 'admin',
+      name: 'Administrador Principal',
+      role: 'admin'
+    };
+  }
+
+  // Si ADMIN_USERNAME fue personalizado, mantener también admin con ADMIN_PASSWORD
+  if (cleanUser === 'admin' && cleanPass === envAdminPass) {
     return {
       id: 'usr_admin',
       username: 'admin',
@@ -121,7 +155,7 @@ function verifyCredentials(username, password) {
     };
   }
 
-  if (cleanUser === 'editor' && cleanPass === (process.env.EDITOR_PASSWORD || 'editor2026')) {
+  if (cleanUser === 'editor' && cleanPass === (process.env.EDITOR_PASSWORD || 'editor2026').trim()) {
     return {
       id: 'usr_editor',
       username: 'editor',
