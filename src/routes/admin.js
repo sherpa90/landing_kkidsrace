@@ -10,10 +10,10 @@ const imageService = require('../services/imageService');
 // Asegurar que la base de datos de usuarios (Admin/Editor) esté inicializada
 auth.getUsers();
 
-// Rate limiting para login (permisivo para pruebas y desarrollo)
+// Rate limiting para login: 10 intentos cada 15 minutos por IP
 const loginLimiter = rateLimit({
-  windowMs: 5 * 60 * 1000,
-  max: 50,
+  windowMs: 15 * 60 * 1000,
+  max: 10,
   message: 'Demasiados intentos de inicio de sesión. Inténtalo más tarde.',
   keyGenerator: (req) => req.ip
 });
@@ -37,7 +37,18 @@ router.post('/login', loginLimiter, validateCsrf, (req, res) => {
     return res.render('admin/login', { error: 'Por favor ingresa usuario y contraseña.', csrfToken: req.session?.csrfToken || '' });
   }
 
-  const user = auth.verifyCredentials(username, password);
+  const user = auth.verifyCredentials(username, password, req.ip);
+
+  // Cuenta bloqueada por demasiados intentos fallidos
+  if (user && user.locked) {
+    const mins = Math.ceil(user.waitSeconds / 60);
+    const msg = `Cuenta bloqueada temporalmente por múltiples intentos fallidos. Intenta nuevamente en ${mins} minuto${mins !== 1 ? 's' : ''}.`;
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(429).json({ success: false, error: msg });
+    }
+    return res.render('admin/login', { error: msg, csrfToken: req.session?.csrfToken || '' });
+  }
+
   if (user) {
     req.session.userId = user.id;
     req.session.username = user.username;
@@ -98,11 +109,18 @@ router.get('/', auth.requireAuth, async (req, res) => {
 router.post('/api/content', auth.requireAuth, validateCsrf, (req, res) => {
   try {
     const newContent = req.body;
-    if (!newContent || typeof newContent !== 'object') {
+    if (!newContent || typeof newContent !== 'object' || Array.isArray(newContent)) {
       return res.status(400).json({ success: false, error: 'Datos no válidos' });
     }
 
-    const result = contentStore.saveContent(newContent);
+    // Whitelist de claves top-level permitidas en el CMS
+    const ALLOWED_KEYS = ['brand', 'hero', 'features', 'pricing', 'testimonials', 'faq', 'contact', 'seo', 'countdown', 'gallery', 'sponsors', 'footer', 'venue', 'sections'];
+    const filtered = {};
+    for (const key of ALLOWED_KEYS) {
+      if (key in newContent) filtered[key] = newContent[key];
+    }
+
+    const result = contentStore.saveContent(filtered);
     if (result.success) {
       return res.json({
         success: true,

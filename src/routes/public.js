@@ -2,8 +2,64 @@ const express = require('express');
 const router = express.Router();
 const contentStore = require('../services/contentStore');
 const db = require('../services/db');
+const { validateCsrf } = require('../middleware/csrf');
+const { rateLimit } = require('../middleware/rateLimit');
 
-// Página Principal (Landing Page Deportiva con SSR y SEO Dinámico)
+// Rate limiters para endpoints públicos de inscripción y contacto
+const contactLimiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 5,
+  message: 'Has enviado demasiados formularios. Inténtalo nuevamente en 15 minutos.'
+});
+
+const uploadLimiter = rateLimit({
+  windowMs: 10 * 60 * 1000, // 10 minutos
+  max: 5,
+  message: 'Demasiados intentos de subida. Inténtalo nuevamente en 10 minutos.'
+});
+
+// Distancias permitidas (whitelist para evitar datos arbitrarios en BD)
+const ALLOWED_DISTANCES = [
+  '500 Metros (3-5 años)',
+  '1 Kilómetro (6-8 años)',
+  '2 Kilómetros (9-11 años)',
+  '3 Kilómetros (12-14 años)',
+  'Contacto General'
+];
+
+/**
+ * Sanitiza un campo de texto: trunca a maxLen, elimina caracteres de control
+ * y retorna string vacío si el valor no es string.
+ */
+function sanitizeField(value, maxLen = 255) {
+  if (typeof value !== 'string') return '';
+  // Eliminar caracteres de control (excepto tab y salto de línea) y truncar
+  return value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').substring(0, maxLen).trim();
+}
+
+/**
+ * Valida formato de RUT chileno (con o sin puntos, con guión).
+ * Acepta también formatos sin puntos: 12345678-9
+ */
+function isValidRut(rut) {
+  if (!rut || typeof rut !== 'string') return false;
+  const clean = rut.replace(/\./g, '').replace(/-/g, '').trim().toUpperCase();
+  if (!/^\d{7,8}[0-9K]$/.test(clean)) return false;
+  const body = clean.slice(0, -1);
+  let dv = clean.slice(-1);
+  let sum = 0;
+  let mul = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i], 10) * mul;
+    mul = mul === 7 ? 2 : mul + 1;
+  }
+  const expected = 11 - (sum % 11);
+  const expectedDv = expected === 11 ? '0' : expected === 10 ? 'K' : String(expected);
+  return dv === expectedDv;
+}
+
+// ─── Página Principal ────────────────────────────────────────────────────────
+
 router.get('/', (req, res) => {
   const content = contentStore.getContent();
   const theme = contentStore.getTheme(content.brand?.accentColor || 'green_yellow');
@@ -64,11 +120,13 @@ router.get('/', (req, res) => {
     siteUrl,
     activeRace,
     races,
-    jsonLd: JSON.stringify(jsonLd)
+    jsonLd: JSON.stringify(jsonLd),
+    csrfToken: req.session?.csrfToken || ''
   });
 });
 
-// Página Dedicada de Inscripción Mobile-First
+// ─── Página de Inscripción ───────────────────────────────────────────────────
+
 router.get('/inscribir', (req, res) => {
   const content = contentStore.getContent();
   const theme = contentStore.getTheme(content.brand?.accentColor || 'green_yellow');
@@ -81,13 +139,16 @@ router.get('/inscribir', (req, res) => {
     theme,
     themeMode,
     siteUrl,
-    activeRace
+    activeRace,
+    csrfToken: req.session?.csrfToken || ''
   });
 });
 
-// Endpoint público para subir y optimizar captura de comprobante de pago
+// ─── Upload de Comprobante de Pago ──────────────────────────────────────────
+
 const imageService = require('../services/imageService');
-router.post('/api/upload-proof', imageService.upload.single('proof'), async (req, res) => {
+const emailService = require('../services/emailService');
+router.post('/api/upload-proof', uploadLimiter, validateCsrf, imageService.upload.single('proof'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: 'No se ha adjuntado ningún archivo de comprobante.' });
@@ -100,15 +161,16 @@ router.post('/api/upload-proof', imageService.upload.single('proof'), async (req
       data: result
     });
   } catch (err) {
-    console.error('Error procesando comprobante:', err);
+    console.error('[upload-proof] Error procesando comprobante:', err.message);
     return res.status(500).json({
       success: false,
-      error: err.message || 'Error procesando el comprobante.'
+      error: 'Error procesando el comprobante. Verifica que sea una imagen válida.'
     });
   }
 });
 
-// Endpoint Dinámico de Sitemap XML
+// ─── Sitemap y Robots ────────────────────────────────────────────────────────
+
 router.get('/sitemap.xml', (req, res) => {
   const content = contentStore.getContent();
   const siteUrl = content.seo?.canonicalUrl || `${req.protocol}://${req.get('host')}`;
@@ -118,7 +180,6 @@ router.get('/sitemap.xml', (req, res) => {
   res.render('sitemap', { siteUrl, today });
 });
 
-// Endpoint Dinámico de Robots.txt
 router.get('/robots.txt', (req, res) => {
   const content = contentStore.getContent();
   const siteUrl = content.seo?.canonicalUrl || `${req.protocol}://${req.get('host')}`;
@@ -128,9 +189,14 @@ router.get('/robots.txt', (req, res) => {
   res.render('robots', { siteUrl, allowIndex });
 });
 
-// Endpoint para Consultas Generales de Contacto (Sección Contacto Portada)
-router.post('/api/inquiry', async (req, res) => {
-  const { name, email, phone, subject, message } = req.body;
+// ─── Contacto General ────────────────────────────────────────────────────────
+
+router.post('/api/inquiry', contactLimiter, validateCsrf, async (req, res) => {
+  const name    = sanitizeField(req.body.name, 100);
+  const email   = sanitizeField(req.body.email, 254);
+  const phone   = sanitizeField(req.body.phone, 30);
+  const subject = sanitizeField(req.body.subject, 150);
+  const message = sanitizeField(req.body.message, 1000);
 
   if (!name || !email || !message) {
     return res.status(400).json({
@@ -147,16 +213,46 @@ router.post('/api/inquiry', async (req, res) => {
     });
   }
 
-  // Guardar consulta en la base de datos o registro
   await db.saveInscription({
-    name: name.trim(),
-    email: email.trim(),
-    phone: (phone || '').trim(),
+    name,
+    email,
+    phone,
     kidName: 'Consulta General',
-    subject: (subject || 'Consulta Web').trim(),
-    message: message.trim(),
+    subject: subject || 'Consulta Web',
+    message,
     distance: 'Contacto General'
   });
+
+  // Reenvío opcional a FormSubmit.co (100% gratis y externo)
+  try {
+    const content = contentStore.getContent();
+    const destinationEmail = content.contact?.forwardEmail || process.env.CONTACT_DESTINATION_EMAIL;
+    if (destinationEmail && /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(destinationEmail)) {
+      // Disparo asíncrono hacia FormSubmit sin bloquear respuesta al usuario
+      fetch(`https://formsubmit.co/ajax/${encodeURIComponent(destinationEmail)}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          _subject: `[KidsRun Contacto] ${subject || 'Nueva consulta web'}`,
+          Nombre: name,
+          Email: email,
+          Telefono: phone || 'No informado',
+          Asunto: subject || 'Consulta General',
+          Mensaje: message,
+          _template: 'table'
+        })
+      }).then(r => r.json()).then(resData => {
+        console.log('[FormSubmit] Envío de correo completado:', resData);
+      }).catch(err => {
+        console.warn('[FormSubmit] No se pudo enviar notificación externa:', err.message);
+      });
+    }
+  } catch (err) {
+    console.warn('[FormSubmit] Excepción al procesar correo externo:', err.message);
+  }
 
   return res.json({
     success: true,
@@ -164,22 +260,33 @@ router.post('/api/inquiry', async (req, res) => {
   });
 });
 
-// Endpoint para Inscripciones y Contacto Familiar (Cumplimiento de Protección de Datos)
-router.post('/api/contact', async (req, res) => {
-  const {
-    raceId,
-    name,
-    email,
-    phone,
-    kidName,
-    kidAge,
-    distance,
-    emergencyContact,
-    medicalNotes,
-    consentGiven,
-    paymentProof,
-    tutorRut
-  } = req.body;
+// ─── Inscripción Familiar ────────────────────────────────────────────────────
+
+router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
+  // Honeypot: si el campo trampa tiene contenido, es un bot — responder 200 falso
+  if (req.body.website_url) {
+    return res.json({ success: true, message: '¡Inscripción recibida!' });
+  }
+
+  const raceId          = sanitizeField(req.body.raceId, 64);
+  const raceName        = sanitizeField(req.body.raceName, 255);
+  const name            = sanitizeField(req.body.name, 100);
+  const email           = sanitizeField(req.body.email, 254);
+  const phone           = sanitizeField(req.body.phone, 30);
+  const kidName         = sanitizeField(req.body.kidName, 100);
+  const emergencyContact = sanitizeField(req.body.emergencyContact, 30);
+  const medicalNotes    = sanitizeField(req.body.medicalNotes, 500);
+  const tutorRut        = sanitizeField(req.body.tutorRut, 20);
+  const paymentProof    = sanitizeField(req.body.paymentProof, 500);
+  const consentGiven    = req.body.consentGiven;
+
+  // Validar distancia contra whitelist
+  const rawDistance = sanitizeField(req.body.distance, 100);
+  const distance = ALLOWED_DISTANCES.includes(rawDistance) ? rawDistance : null;
+
+  // Validar kidAge como entero en rango
+  const kidAge = parseInt(req.body.kidAge, 10);
+  const validKidAge = (!isNaN(kidAge) && kidAge >= 2 && kidAge <= 15) ? kidAge : null;
 
   if (!name || !email) {
     return res.status(400).json({
@@ -195,7 +302,13 @@ router.post('/api/contact', async (req, res) => {
     });
   }
 
-  // Validación de email
+  if (!distance) {
+    return res.status(400).json({
+      success: false,
+      error: 'Por favor selecciona una distancia válida.'
+    });
+  }
+
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({
@@ -204,9 +317,25 @@ router.post('/api/contact', async (req, res) => {
     });
   }
 
+  // Validar RUT chileno si fue proporcionado
+  if (tutorRut && !isValidRut(tutorRut)) {
+    return res.status(400).json({
+      success: false,
+      error: 'El RUT/DNI ingresado no es válido. Verifica el formato (ej: 12.345.678-9).'
+    });
+  }
+
+  // Validar que paymentProof sea una URL propia del servidor si fue proporcionada
+  if (paymentProof && !paymentProof.startsWith('/uploads/')) {
+    return res.status(400).json({
+      success: false,
+      error: 'El comprobante de pago no es válido. Por favor sube el archivo nuevamente.'
+    });
+  }
+
   const activeRace = contentStore.getActiveRace();
   const targetRaceId = raceId || (activeRace ? activeRace.id : 'race-2026-primavera');
-  const targetRaceName = activeRace ? activeRace.name : 'KidsRun 2026';
+  const targetRaceName = raceName || (activeRace ? activeRace.name : 'KidsRun 2026');
 
   const result = await db.saveInscription({
     raceId: targetRaceId,
@@ -214,18 +343,35 @@ router.post('/api/contact', async (req, res) => {
     name,
     email,
     phone,
-    tutorRut: tutorRut || '',
+    tutorRut,
     kidName,
-    kidAge: parseInt(kidAge, 10) || null,
-    distance: distance || '500m (3-5 años)',
+    kidAge: validKidAge,
+    distance,
     emergencyContact: emergencyContact || phone,
     medicalNotes,
     paymentProof: paymentProof || '',
     consentGiven: Boolean(consentGiven === 'true' || consentGiven === true || consentGiven === 'on'),
-    subject: `Inscripción ${distance || 'General'} - Pupilo: ${kidName}`
+    subject: `Inscripción ${distance} - Pupilo: ${kidName}`
   });
 
   if (result.success) {
+    // Despacho asíncrono de correo de confirmación al usuario (Resend)
+    try {
+      emailService.sendInscriptionConfirmation({
+        raceName: targetRaceName,
+        name,
+        email,
+        kidName,
+        kidAge: validKidAge,
+        distance,
+        tutorRut
+      }).catch(err => {
+        console.warn('[emailService] No se pudo enviar confirmación a ' + email + ':', err.message);
+      });
+    } catch (mailErr) {
+      console.warn('[emailService] Excepción disparando correo:', mailErr.message);
+    }
+
     return res.json({
       success: true,
       message: '¡Inscripción confirmada con éxito! Sus datos están debidamente protegidos y se ha reservado el cupo y kit oficial.',

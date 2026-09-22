@@ -51,10 +51,14 @@
       </a>
 
       <div class="flex items-center gap-2">
+        <% if (content.brand?.logoUrl) { %>
+        <img src="<%= content.brand.logoUrl %>" alt="<%= content.brand?.name || 'KidsRun' %>" class="h-8 w-auto object-contain max-w-[140px]">
+        <% } else { %>
         <div class="w-7 h-7 rounded-xl bg-blue-600 text-white flex items-center justify-center font-black text-xs shadow-sm">
           <i data-lucide="medal" class="w-4 h-4"></i>
         </div>
         <span class="text-xs font-black text-slate-900 dark:text-white tracking-tight uppercase"><%= content.brand?.name || 'KidsRun 2026' %></span>
+        <% } %>
       </div>
     </div>
   </header>
@@ -116,6 +120,13 @@
       <input type="hidden" name="raceName" value="<%= activeRace ? activeRace.name : 'KidsRun 2026' %>">
       <input type="hidden" id="selectedDistance" name="distance" value="500 Metros (3-5 años)">
       <input type="hidden" id="paymentProofUrl" name="paymentProof" value="">
+      <!-- CSRF Token para protección contra ataques de sitios cruzados -->
+      <input type="hidden" id="csrfTokenField" name="csrfToken" value="<%= csrfToken %>">
+      <!-- Honeypot: campo invisible para detectar bots. Los usuarios humanos NO deben completarlo. -->
+      <div style="display:none; visibility:hidden; position:absolute; left:-9999px;" aria-hidden="true">
+        <label for="website_url">Sitio web (no completar)</label>
+        <input type="text" id="website_url" name="website_url" tabindex="-1" autocomplete="off">
+      </div>
 
       <!-- PASO 1: SELECCIÓN DEL CIRCUITO / DISTANCIA (TOUCH UI) -->
       <div class="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-slate-200 dark:border-gray-800 shadow-sm space-y-3">
@@ -180,7 +191,7 @@
         <div class="grid grid-cols-3 gap-3">
           <div class="col-span-2">
             <label for="kidName" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">Nombre o Apodo *</label>
-            <input type="text" id="kidName" name="kidName" required placeholder="Ej: Mateo o Sofi" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
+            <input type="text" id="kidName" name="kidName" required maxlength="60" placeholder="Ej: Mateo o Sofi" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
             <span class="text-[10px] text-slate-400 block mt-1">Se imprimirá en su número oficial de carrera.</span>
           </div>
 
@@ -192,7 +203,7 @@
 
         <div>
           <label for="medicalNotes" class="block text-xs font-semibold text-slate-600 dark:text-gray-400 mb-1">Alergias o notas médicas (Opcional)</label>
-          <input type="text" id="medicalNotes" name="medicalNotes" placeholder="Ej: Asma leve, alergia al maní..." class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
+          <input type="text" id="medicalNotes" name="medicalNotes" maxlength="500" placeholder="Ej: Asma leve, alergia al maní..." class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
         </div>
       </div>
 
@@ -207,24 +218,25 @@
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label for="name" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">Nombre Completo *</label>
-              <input type="text" id="name" name="name" required placeholder="Tu Nombre y Apellido" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
+              <input type="text" id="name" name="name" required maxlength="100" placeholder="Tu Nombre y Apellido" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
             </div>
 
             <div>
               <label for="tutorRut" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">RUT o DNI del Padre/Tutor *</label>
-              <input type="text" id="tutorRut" name="tutorRut" required placeholder="Ej: 12.345.678-9" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
+              <input type="text" id="tutorRut" name="tutorRut" required maxlength="15" autocomplete="off" placeholder="Ej: 12.345.678-9" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
+              <span id="rutError" class="text-[10px] text-red-500 hidden mt-1 block">RUT inválido. Verifica el formato (ej: 12.345.678-9).</span>
             </div>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label for="email" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">Correo Electrónico *</label>
-              <input type="email" id="email" name="email" required placeholder="tu@correo.com" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
+              <input type="email" id="email" name="email" required maxlength="254" placeholder="tu@correo.com" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
             </div>
 
             <div>
               <label for="phone" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">WhatsApp / Teléfono *</label>
-              <input type="tel" id="phone" name="phone" required placeholder="+56 9 1234 5678" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
+              <input type="tel" id="phone" name="phone" required maxlength="30" placeholder="+56 9 1234 5678" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-blue-600 transition-colors">
             </div>
           </div>
         </div>
@@ -377,11 +389,15 @@
         loadingState.classList.remove('hidden');
 
         try {
+          const csrfToken = document.getElementById('csrfTokenField')?.value || '';
           const formData = new FormData();
           formData.append('proof', file);
 
           const res = await fetch('/api/upload-proof', {
             method: 'POST',
+            headers: {
+              'X-CSRF-Token': csrfToken
+            },
             body: formData
           });
 
@@ -413,6 +429,39 @@
         idleState.classList.remove('hidden');
       });
 
+      // --- Validación de RUT chileno en cliente ---
+      function validateRutClient(rut) {
+        if (!rut) return false;
+        const clean = rut.replace(/\./g, '').replace(/-/g, '').trim().toUpperCase();
+        if (!/^\d{7,8}[0-9K]$/.test(clean)) return false;
+        const body = clean.slice(0, -1);
+        let dv = clean.slice(-1);
+        let sum = 0;
+        let mul = 2;
+        for (let i = body.length - 1; i >= 0; i--) {
+          sum += parseInt(body[i], 10) * mul;
+          mul = mul === 7 ? 2 : mul + 1;
+        }
+        const expected = 11 - (sum % 11);
+        const expectedDv = expected === 11 ? '0' : expected === 10 ? 'K' : String(expected);
+        return dv === expectedDv;
+      }
+
+      // Validación de RUT en tiempo real (al salir del campo)
+      const rutInput = document.getElementById('tutorRut');
+      const rutError = document.getElementById('rutError');
+      if (rutInput && rutError) {
+        rutInput.addEventListener('blur', () => {
+          if (rutInput.value && !validateRutClient(rutInput.value)) {
+            rutError.classList.remove('hidden');
+            rutInput.classList.add('border-red-500');
+          } else {
+            rutError.classList.add('hidden');
+            rutInput.classList.remove('border-red-500');
+          }
+        });
+      }
+
       // 3. Envío del Formulario
       const form = document.getElementById('registration-form');
       const submitBtn = document.getElementById('submit-btn');
@@ -421,19 +470,47 @@
       form.addEventListener('submit', async (e) => {
         e.preventDefault();
 
+        // Honeypot: si el campo oculto fue rellenado, es un bot — ignorar silenciosamente
+        const honeypot = document.getElementById('website_url');
+        if (honeypot && honeypot.value) {
+          // Simular éxito sin enviar datos
+          submitBtn.disabled = true;
+          return;
+        }
+
         const formData = new FormData(form);
         const data = Object.fromEntries(formData.entries());
+
+        // Validación de RUT en cliente antes de enviar
+        if (data.tutorRut && !validateRutClient(data.tutorRut)) {
+          alert('El RUT/DNI ingresado no es válido. Verifica el formato (ej: 12.345.678-9).');
+          if (rutError) rutError.classList.remove('hidden');
+          if (rutInput) rutInput.focus();
+          return;
+        }
+
+        // Validar edad en rango
+        const age = parseInt(data.kidAge, 10);
+        if (isNaN(age) || age < 2 || age > 15) {
+          alert('La edad del pequeño/a debe estar entre 2 y 15 años.');
+          document.getElementById('kidAge')?.focus();
+          return;
+        }
 
         const originalText = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = `<span class="inline-block animate-spin mr-2">⟳</span> Guardando Inscripción...`;
+
+        // Obtener CSRF token desde el campo hidden
+        const csrfToken = document.getElementById('csrfTokenField')?.value || '';
 
         try {
           const res = await fetch('/api/contact', {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Accept': 'application/json'
+              'Accept': 'application/json',
+              'X-CSRF-Token': csrfToken
             },
             body: JSON.stringify(data)
           });
@@ -458,3 +535,4 @@
   </script>
 </body>
 </html>
+

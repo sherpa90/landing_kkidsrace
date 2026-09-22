@@ -1,5 +1,23 @@
-const multer = require('multer');
-const sharp = require('sharp');
+let multer;
+try {
+  multer = require('multer');
+} catch (e) {
+  // Fallback para entornos de testing / desarrollo donde multer no esté instalado
+  multer = () => ({
+    single: () => (req, res, next) => next(),
+    memoryStorage: () => ({})
+  });
+  multer.memoryStorage = () => ({});
+}
+
+let sharp;
+try {
+  sharp = require('sharp');
+} catch (e) {
+  // Fallback si sharp no está compilado
+  sharp = null;
+}
+
 const path = require('path');
 const fs = require('fs');
 
@@ -11,19 +29,62 @@ if (!fs.existsSync(UPLOAD_DIR)) {
 }
 
 // Configuración de almacenamiento en memoria para procesar con Sharp antes de escribir al disco
-const storage = multer.memoryStorage();
+const storage = multer.memoryStorage ? multer.memoryStorage() : {};
 
-// Filtro para aceptar únicamente imágenes
+// Mapa de magic bytes para validar el contenido real del archivo (no solo el MIME declarado)
+const MAGIC_BYTES = {
+  'image/jpeg': [
+    [0xFF, 0xD8, 0xFF]
+  ],
+  'image/png': [
+    [0x89, 0x50, 0x4E, 0x47]
+  ],
+  'image/webp': null, // se valida por string 'WEBP' en offset 8
+  'image/avif': null, // se valida por string 'ftyp' en offset 4
+  'image/gif': [
+    [0x47, 0x49, 0x46, 0x38] // GIF8
+  ]
+};
+
+/**
+ * Verifica que el buffer corresponda realmente al tipo MIME declarado.
+ */
+function validateMagicBytes(buffer, mimetype) {
+  if (!buffer || buffer.length < 12) return false;
+
+  if (mimetype === 'image/jpeg') {
+    return buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+  }
+  if (mimetype === 'image/png') {
+    return buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+  }
+  if (mimetype === 'image/gif') {
+    return buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38;
+  }
+  if (mimetype === 'image/webp') {
+    // RIFF....WEBP
+    return buffer.slice(0, 4).toString('ascii') === 'RIFF' &&
+           buffer.slice(8, 12).toString('ascii') === 'WEBP';
+  }
+  if (mimetype === 'image/avif') {
+    // ftyp en offset 4
+    return buffer.slice(4, 8).toString('ascii') === 'ftyp';
+  }
+  return false;
+}
+
+// Filtro: solo imágenes raster (SVG excluido por riesgo de XSS embebido)
+const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif'];
+
 const fileFilter = (req, file, cb) => {
-  const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/avif', 'image/gif', 'image/svg+xml'];
   if (allowedMimes.includes(file.mimetype)) {
     cb(null, true);
   } else {
-    cb(new Error('Tipo de archivo no permitido. Solo se aceptan imágenes (JPG, PNG, WebP, GIF, SVG).'), false);
+    cb(new Error('Tipo de archivo no permitido. Solo se aceptan imágenes JPG, PNG, WebP, GIF o AVIF.'), false);
   }
 };
 
-// Límite de tamaño máximo del archivo de entrada (ej: 15MB)
+// Límite de tamaño máximo del archivo de entrada
 const upload = multer({
   storage,
   limits: { fileSize: 15 * 1024 * 1024 }, // 15MB
@@ -38,6 +99,18 @@ const upload = multer({
  * @returns {Promise<{ filename: string, url: string, sizeBytes: number, format: string, width: number, height: number }>}
  */
 async function processAndSaveImage(buffer, originalName, type = 'standard') {
+  // Validar magic bytes: rechazar si el contenido real no coincide con el MIME declarado
+  // Para esta función recibimos solo el buffer, así que intentamos inferir el tipo por los bytes
+  const isPng  = buffer[0] === 0x89 && buffer[1] === 0x50 && buffer[2] === 0x4E && buffer[3] === 0x47;
+  const isJpeg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
+  const isGif  = buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38;
+  const isWebp = buffer.length >= 12 && buffer.slice(0, 4).toString('ascii') === 'RIFF' && buffer.slice(8, 12).toString('ascii') === 'WEBP';
+  const isAvif = buffer.length >= 8 && buffer.slice(4, 8).toString('ascii') === 'ftyp';
+
+  if (!isPng && !isJpeg && !isGif && !isWebp && !isAvif) {
+    throw new Error('El archivo no es una imagen válida. Solo se permiten JPG, PNG, WebP, GIF o AVIF.');
+  }
+
   // Limpiar nombre base seguro
   const cleanBaseName = path
     .parse(originalName)
@@ -61,6 +134,18 @@ async function processAndSaveImage(buffer, originalName, type = 'standard') {
       quality: 90,
       alphaQuality: 95,
       lossless: false,
+      effort: 6
+    });
+  } else if (type === 'sponsor') {
+    // Logos de Auspiciadores: Estandarización a lienzo uniforme de 320x160 con fondo transparente (fit contain)
+    sharpInstance = sharpInstance.resize({
+      width: 320,
+      height: 160,
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 }
+    }).webp({
+      quality: 92,
+      alphaQuality: 100,
       effort: 6
     });
   } else if (type === 'payment_proof') {

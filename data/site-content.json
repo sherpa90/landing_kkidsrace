@@ -9,11 +9,11 @@
     "themeMode": "light"
   },
   "countdown": {
-    "targetDate": "2026-11-15T09:00:00",
+    "targetDate": "2026-10-18T09:00:00",
     "eventDateDisplay": "Domingo 15 de Noviembre, 2026",
     "eventTime": "09:00 AM",
-    "locationName": "Parque Bicentenario • Circuito Deportivo Cerrado",
-    "locationCity": "Sector Explanada Central",
+    "locationName": "Parque Bicentenario",
+    "locationCity": "Santiago",
     "badge": "⏰ ¡FALTAN SÓLO!"
   },
   "seo": {
@@ -181,7 +181,7 @@
         "badge": "Esencial",
         "priceMonthly": 12,
         "priceYearly": 10,
-        "description": "Ideal para una experiencia deportiva completa y divertida.",
+        "description": "",
         "features": [
           "Polera oficial KidsRun Dry-Fit",
           "Hermosa Medalla Finisher de metal",
@@ -199,7 +199,7 @@
         "badge": "MÁS ELEGIDO",
         "priceMonthly": 22,
         "priceYearly": 18,
-        "description": "El favorito de las familias: incluye cronometraje por chip y fotos de recuerdo.",
+        "description": "",
         "features": [
           "Todo lo del Kit Básico",
           "Chip de cronometraje electrónico oficial",
@@ -217,7 +217,7 @@
         "badge": "Promo Hermanitos",
         "priceMonthly": 35,
         "priceYearly": 30,
-        "description": "Tarifa especial para inscribir a dos niños o un niño y un adulto.",
+        "description": "",
         "features": [
           "2 Kits Completos con poleras y medallas",
           "2 Chips de cronometraje incluidos",
@@ -236,22 +236,22 @@
       "name": "Mariana y Tomás (7 años)",
       "role": "Mamá de corredor 1K",
       "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80",
-      "quote": "¡Fue la mejor mañana del año! Tomás estaba tan emocionado con su medalla que durmió con ella puesta. La organización y la seguridad con las pulseras para padres nos dio una tranquilidad total.",
-      "stars": 5
+      "stars": 5,
+      "quote": "¡Fue la mejor mañana del año! Tomás estaba tan emocionado con su medalla que durmió con ella puesta. La organización y la seguridad con las pulseras para padres nos dio una tranquilidad total."
     },
     {
       "name": "Rodrigo Valenzuela",
       "role": "Papá de Martina (4 años) y Sofía (10 años)",
       "avatar": "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&w=150&q=80",
-      "quote": "Poder correr los 500 metros con mi hija menor y luego ver a la mayor correr sus 2K con chip fue una experiencia familiar maravillosa. 100% recomendada.",
-      "stars": 5
+      "stars": 5,
+      "quote": "Poder correr los 500 metros con mi hija menor y luego ver a la mayor correr sus 2K con chip fue una experiencia familiar maravillosa. 100% recomendada."
     },
     {
       "name": "Camila Soto",
       "role": "Profesora de Educación Física y Mamá",
       "avatar": "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?auto=format&fit=crop&w=150&q=80",
-      "quote": "El ambiente positivo, la música y la hidratación impecable. Fomenta el deporte sano sin presiones, celebrando el esfuerzo de cada niño por igual.",
-      "stars": 5
+      "stars": 5,
+      "quote": "El ambiente positivo, la música y la hidratación impecable. Fomenta el deporte sano sin presiones, celebrando el esfuerzo de cada niño por igual."
     }
   ],
   "faqs": [
@@ -276,13 +276,51 @@
       "answer": "Incluye la polera técnica oficial con tejido respirable, número de corredor, chip electrónico (en distancias 2K y 3K), pulseras de seguridad, medalla de metal finisher, morral y snacks saludables de hidratación."
     }
   ],
+  "sponsors": {
+    "badge": "COMPAÑÍAS QUE IMPULSAN EL DEPORTE INFANTIL",
+    "title": "Nuestros Auspiciadores Oficiales",
+    "description": "Marcas comprometidas con la salud, la vida sana y el futuro de nuestros pequeños campeones.",
+    "list": [
+      {
+        "id": "sp-1",
+        "name": "Banco Santander",
+        "tier": "gold",
+        "website": "https://santander.cl",
+        "logoUrl": "https://images.unsplash.com/photo-1599305445671-ac291c95aaa9?w=320&auto=format&fit=crop&q=80"
+      },
+      {
+        "id": "sp-2",
+        "name": "Gatorade Hidratación",
+        "tier": "gold",
+        "website": "https://gatorade.com",
+        "logoUrl": "https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=320&auto=format&fit=crop&q=80"
+      },
+      {
+        "id": "sp-3",
+        "name": "Clínica Alemana",
+        "tier": "gold",
+        "website": "https://alemana.cl",
+        "logoUrl": "https://images.unsplash.com/photo-1516549655169-df83a0774514?w=320&auto=format&fit=crop&q=80"
+      },
+      {
+        "id": "sp-4",
+        "name": "Cereales Nestlé",
+        "tier": "gold",
+        "website": "https://nestle.cl",
+        "logoUrl": "https://images.unsplash.com/photo-1527864550417-7fd91fc51a46?w=320&auto=format&fit=crop&q=80"
+      }
+    ]
+  },
   "contact": {
     "title": "Inscribe a tu Pequeño Corredor",
     "subtitle": "Completa el formulario y te enviaremos la confirmación oficial y guía del evento a tu correo electrónico.",
     "email": "contacto@kidsrun2026.com",
     "phone": "+56 9 8765 4321",
     "location": "Parque Bicentenario • Explanada Central",
-    "formButtonText": "Completar Pre-Inscripción Oficial"
+    "formButtonText": "Completar Pre-Inscripción Oficial",
+    "forwardEmail": "",
+    "resendApiKey": "",
+    "resendFromEmail": "KidsRun <onboarding@resend.dev>"
   },
   "footer": {
     "description": "La corrida infantil más alegre, segura e inspiradora. Fomentando hábitos saludables y unión familiar a través del running.",
@@ -291,10 +329,297 @@
       "twitter": "https://twitter.com",
       "github": "https://instagram.com",
       "linkedin": "https://facebook.com",
-      "youtube": "https://youtube.com"
+      "youtube": "https://youtube.com",
+      "instagram": "",
+      "facebook": ""
     }
   },
   "races": [
+    {
+      "id": "race-1790120503455-7hg0",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "active",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T23:41:43.456Z"
+    },
+    {
+      "id": "race-1790120230857-zull",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T23:37:10.857Z"
+    },
+    {
+      "id": "race-1790119638220-or6b",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T23:27:18.220Z"
+    },
+    {
+      "id": "race-1790119627867-qb61",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T23:27:07.867Z"
+    },
+    {
+      "id": "race-1790119173866-f2t5",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T23:19:33.867Z"
+    },
+    {
+      "id": "race-1790118765458-ov44",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T23:12:45.458Z"
+    },
+    {
+      "id": "race-1790118724111-klb9",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T23:12:04.111Z"
+    },
+    {
+      "id": "race-1790116738404-axn0",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T22:38:58.404Z"
+    },
+    {
+      "id": "race-1790115901285-pep4",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T22:25:01.286Z"
+    },
+    {
+      "id": "race-1790115868662-8n6l",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T22:24:28.662Z"
+    },
+    {
+      "id": "race-1790114863619-fsgt",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T22:07:43.620Z"
+    },
+    {
+      "id": "race-1790114815532-9tpa",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T22:06:55.532Z"
+    },
+    {
+      "id": "race-1790113988362-hlzi",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T21:53:08.362Z"
+    },
+    {
+      "id": "race-1790113954759-a6tc",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T21:52:34.759Z"
+    },
+    {
+      "id": "race-1790113940725-k3ua",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-22T21:52:20.726Z"
+    },
     {
       "id": "race-2026-primavera",
       "name": "KidsRun 2026 - Edición Primavera",
@@ -332,5 +657,46 @@
       "maxParticipants": 350,
       "createdAt": "2026-01-15T12:00:00Z"
     }
-  ]
+  ],
+  "venue": {
+    "badge": "Punto de Largada",
+    "title": "¿Dónde es la corrida?",
+    "description": "Encuéntranos en el lugar del evento. ¡Llega con tiempo para disfrutar la previa!",
+    "name": "Parque Bicentenario",
+    "address": "Av. Bicentenario 3800, Vitacura, Santiago",
+    "lat": -33.3975,
+    "lng": -70.5787,
+    "zoom": 15,
+    "doorsOpen": "08:00 AM",
+    "parking": "Estacionamiento disponible en los alrededores del parque.",
+    "transit": "Acceso en Metro (L1, estación Tobalaba) y buses del Transantiago."
+  },
+  "sections": {
+    "order": [
+      "hero",
+      "countdown",
+      "circuits",
+      "schedule",
+      "gallery",
+      "kits",
+      "testimonials",
+      "faq",
+      "sponsors",
+      "venue",
+      "contact"
+    ],
+    "visibility": {
+      "hero": true,
+      "countdown": true,
+      "circuits": true,
+      "schedule": true,
+      "gallery": true,
+      "kits": true,
+      "testimonials": true,
+      "faq": true,
+      "sponsors": true,
+      "venue": true,
+      "contact": true
+    }
+  }
 }

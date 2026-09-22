@@ -336,11 +336,13 @@ function initContactForm() {
     `;
 
     try {
+      const csrfToken = form.querySelector('input[name="csrfToken"]')?.value || '';
       const res = await fetch('/api/inquiry', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Accept': 'application/json'
+          'Accept': 'application/json',
+          'X-CSRF-Token': csrfToken
         },
         body: JSON.stringify(data)
       });

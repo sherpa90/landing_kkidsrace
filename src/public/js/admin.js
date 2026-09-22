@@ -349,6 +349,52 @@ function collectCmsFormData() {
     }
   };
 
+  // 11. Auspiciadores
+  const sponsorsList = [];
+  document.querySelectorAll('.sponsor-admin-item').forEach((item, idx) => {
+    sponsorsList.push({
+      id: 'sp-' + (idx + 1),
+      name: item.querySelector('input[name*="[name]"]')?.value || '',
+      tier: item.querySelector('select[name*="[tier]"]')?.value || 'bronze',
+      website: item.querySelector('input[name*="[website]"]')?.value || '',
+      logoUrl: item.querySelector('.sponsor-logo-url-input')?.value || ''
+    });
+  });
+  const sponsors = {
+    badge: getVal('input-sponsorsBadge'),
+    title: getVal('input-sponsorsTitle'),
+    description: getVal('input-sponsorsDescription'),
+    list: sponsorsList
+  };
+
+  // 12. Lugar del evento
+  const venue = {
+    badge: getVal('input-venueBadge'),
+    title: getVal('input-venueTitle'),
+    description: getVal('input-venueDescription'),
+    name: getVal('input-venueName'),
+    address: getVal('input-venueAddress'),
+    lat: parseFloat(getVal('input-venueLat') || '-33.3975'),
+    lng: parseFloat(getVal('input-venueLng') || '-70.5787'),
+    zoom: parseInt(getVal('input-venueZoom') || '15', 10),
+    doorsOpen: getVal('input-venueDoorsOpen'),
+    parking: getVal('input-venueParking'),
+    transit: getVal('input-venueTransit')
+  };
+
+  // 13. Secciones (orden y visibilidad)
+  const sectionsOrder = [];
+  const sectionsVisibility = {};
+  document.querySelectorAll('.section-sortable-item').forEach(item => {
+    const sid = item.getAttribute('data-section-id');
+    if (sid) {
+      sectionsOrder.push(sid);
+      const toggle = item.querySelector('.section-visibility-toggle');
+      sectionsVisibility[sid] = toggle ? toggle.checked : true;
+    }
+  });
+  const sections = { order: sectionsOrder, visibility: sectionsVisibility };
+
   return {
     brand,
     countdown,
@@ -359,7 +405,18 @@ function collectCmsFormData() {
     pricing: { plans },
     testimonials,
     faqs,
-    footer
+    footer,
+    sponsors,
+    venue,
+    sections,
+    contact: {
+      forwardEmail: getVal('input-contactForwardEmail'),
+      email: getVal('input-contactEmail'),
+      phone: getVal('input-contactPhone'),
+      location: getVal('input-contactLocation'),
+      resendApiKey: getVal('input-contactResendApiKey'),
+      resendFromEmail: getVal('input-contactResendFromEmail')
+    }
   };
 }
 
@@ -648,9 +705,16 @@ function initImageUploadHandlers() {
     const previewImgSelector = input.getAttribute('data-preview-img');
     const uploadType = input.getAttribute('data-upload-type') || 'standard';
 
-    const targetInput = targetInputSelector ? document.querySelector(targetInputSelector) : null;
-    const previewBox = previewBoxSelector ? document.querySelector(previewBoxSelector) : null;
-    const parentContainer = input.closest('.gallery-admin-item');
+    // Para sponsor items: buscar relativo al contenedor del item padre
+    const sponsorItem = input.closest('.sponsor-admin-item');
+    const galleryItem = input.closest('.gallery-admin-item');
+    const parentContainer = sponsorItem || galleryItem;
+    const targetInput = targetInputSelector
+      ? (sponsorItem ? sponsorItem.querySelector(targetInputSelector) : document.querySelector(targetInputSelector))
+      : null;
+    const previewBox = previewBoxSelector
+      ? (sponsorItem ? sponsorItem.querySelector(previewBoxSelector) : document.querySelector(previewBoxSelector))
+      : null;
     const previewImg = previewImgSelector && parentContainer ? parentContainer.querySelector(previewImgSelector) : null;
 
     const labelEl = input.parentElement;
@@ -688,7 +752,7 @@ function initImageUploadHandlers() {
 
       // Actualizar preview de logo si aplica
       if (previewBox) {
-        previewBox.innerHTML = `<img src="${imageUrl}?t=${Date.now()}" alt="Logo" class="max-w-full max-h-full object-contain">`;
+        previewBox.innerHTML = `<img src="${imageUrl}?t=${Date.now()}" alt="Logo" class="max-w-full max-h-full object-contain rounded-xl">`;
       }
 
       // Actualizar preview de foto en galería si aplica
@@ -696,7 +760,23 @@ function initImageUploadHandlers() {
         previewImg.src = `${imageUrl}?t=${Date.now()}`;
       }
 
-      showAdminToast(`¡Imagen optimizada a WebP permanentemente! (${sizeKb} KB)`, 'success');
+      // Si es un logo, auto-guardar inmediatamente para reemplazar el logo por defecto en la web
+      if (uploadType === 'logo') {
+        try {
+          const payload = collectCmsFormData();
+          payload.brand.logoUrl = imageUrl;
+          await cmsFetch('/admin/api/content', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          showAdminToast(`¡Logo oficial actualizado y publicado con éxito! Reemplazó el logo por defecto (${sizeKb} KB)`, 'success');
+        } catch (saveErr) {
+          console.warn('Error al auto-guardar logo:', saveErr);
+          showAdminToast(`Imagen subida (${sizeKb} KB). Recuerda presionar "Guardar" para publicar el cambio.`, 'info');
+        }
+      } else {
+        showAdminToast(`¡Imagen optimizada a WebP permanentemente! (${sizeKb} KB)`, 'success');
+      }
     } catch (err) {
       console.error('Error subiendo imagen:', err);
       showAdminToast(err.message || 'No se pudo subir la imagen', 'error');
@@ -705,5 +785,171 @@ function initImageUploadHandlers() {
       if (window.lucide) window.lucide.createIcons();
     }
   });
+
+  // Botón para restablecer y volver al logo/icono por defecto
+  const removeLogoBtn = document.getElementById('btn-remove-logo');
+  if (removeLogoBtn) {
+    removeLogoBtn.addEventListener('click', async () => {
+      const logoInput = document.getElementById('input-logoUrl');
+      const previewBox = document.getElementById('preview-logo-box');
+      if (logoInput) logoInput.value = '';
+      if (previewBox) {
+        previewBox.innerHTML = `<i data-lucide="trophy" class="w-6 h-6 text-yellow-400"></i>`;
+        if (window.lucide) window.lucide.createIcons();
+      }
+      try {
+        const payload = collectCmsFormData();
+        payload.brand.logoUrl = '';
+        await cmsFetch('/admin/api/content', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        showAdminToast('¡Se restableció el logo e icono por defecto!', 'success');
+      } catch (err) {
+        showAdminToast('Logo limpiado. Presiona "Guardar" para confirmar.', 'info');
+      }
+    });
+  }
 }
+
+// 9. Gestor de Auspiciadores en el CMS
+function initSponsorsManager() {
+  const container = document.getElementById('sponsors-admin-container');
+  if (!container) return;
+
+  let sponsorCount = container.querySelectorAll('.sponsor-admin-item').length;
+
+  // Crear un nuevo item de auspiciador vacío
+  function createSponsorItem(idx) {
+    const div = document.createElement('div');
+    div.className = 'sponsor-admin-item flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4 rounded-2xl bg-gray-900/60 border border-gray-800 group';
+    div.style.animation = 'fadeInUp 0.3s ease forwards';
+    div.innerHTML = `
+      <div class="relative shrink-0">
+        <div class="sponsor-preview-box w-32 h-16 rounded-xl bg-white/5 border border-gray-700 flex items-center justify-center overflow-hidden">
+          <i data-lucide="image" class="w-6 h-6 text-gray-600"></i>
+        </div>
+        <input type="hidden" name="sponsors[${idx}][logoUrl]" value="" class="sponsor-logo-url-input">
+      </div>
+      <div class="flex-1 grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Nombre</label>
+          <input type="text" name="sponsors[${idx}][name]" value="" placeholder="Empresa..." class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Nivel</label>
+          <select name="sponsors[${idx}][tier]" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+            <option value="gold">Gold</option>
+            <option value="silver">Silver</option>
+            <option value="bronze" selected>Bronze</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Sitio Web</label>
+          <input type="text" name="sponsors[${idx}][website]" value="" placeholder="https://..." class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+        </div>
+      </div>
+      <div class="flex flex-col gap-2 shrink-0">
+        <label class="cursor-pointer bg-blue-600/80 hover:bg-blue-600 text-white text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all">
+          <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+          <span>Logo</span>
+          <input type="file" class="hidden file-uploader-input" data-target-input=".sponsor-logo-url-input" data-preview-box=".sponsor-preview-box" data-upload-type="sponsor" accept="image/*">
+        </label>
+        <button type="button" class="btn-remove-sponsor bg-red-900/50 hover:bg-red-800/60 text-red-400 text-xs font-bold px-3 py-2 rounded-xl flex items-center gap-1.5 transition-all">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          <span>Quitar</span>
+        </button>
+      </div>`;
+    return div;
+  }
+
+  // Botón agregar auspiciador
+  const addBtn = document.getElementById('btn-add-sponsor');
+  if (addBtn) {
+    addBtn.addEventListener('click', () => {
+      const item = createSponsorItem(sponsorCount++);
+      container.appendChild(item);
+      if (window.lucide) window.lucide.createIcons();
+    });
+  }
+
+  // Delegación para botón quitar auspiciador
+  container.addEventListener('click', (e) => {
+    const removeBtn = e.target.closest('.btn-remove-sponsor');
+    if (!removeBtn) return;
+    const item = removeBtn.closest('.sponsor-admin-item');
+    if (item) {
+      item.style.animation = 'fadeOut 0.25s ease forwards';
+      setTimeout(() => item.remove(), 250);
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSponsorsManager();
+});
+
+// 10. Gestor de Orden y Visibilidad de Secciones (Drag and Drop nativo)
+function initSectionsManager() {
+  const list = document.getElementById('sections-sortable-list');
+  if (!list) return;
+
+  let draggedItem = null;
+
+  list.addEventListener('dragstart', (e) => {
+    const item = e.target.closest('.section-sortable-item');
+    if (!item) return;
+    draggedItem = item;
+    item.classList.add('dragging');
+    e.dataTransfer.effectAllowed = 'move';
+    try {
+      e.dataTransfer.setData('text/plain', item.getAttribute('data-section-id') || '');
+    } catch (_) {}
+  });
+
+  list.addEventListener('dragend', () => {
+    if (draggedItem) {
+      draggedItem.classList.remove('dragging');
+      draggedItem = null;
+    }
+    list.querySelectorAll('.section-sortable-item').forEach(el => el.classList.remove('drag-over'));
+  });
+
+  list.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    const target = e.target.closest('.section-sortable-item');
+    if (!target || target === draggedItem) return;
+
+    list.querySelectorAll('.section-sortable-item').forEach(el => {
+      if (el !== target) el.classList.remove('drag-over');
+    });
+    target.classList.add('drag-over');
+  });
+
+  list.addEventListener('dragleave', (e) => {
+    const target = e.target.closest('.section-sortable-item');
+    if (target) target.classList.remove('drag-over');
+  });
+
+  list.addEventListener('drop', (e) => {
+    e.preventDefault();
+    const target = e.target.closest('.section-sortable-item');
+    if (!target || !draggedItem || target === draggedItem) return;
+
+    target.classList.remove('drag-over');
+
+    const rect = target.getBoundingClientRect();
+    const offset = e.clientY - rect.top;
+    if (offset > rect.height / 2) {
+      target.after(draggedItem);
+    } else {
+      target.before(draggedItem);
+    }
+  });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initSectionsManager();
+});
 

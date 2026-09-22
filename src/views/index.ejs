@@ -82,6 +82,8 @@
 
   <!-- Estilos Personalizados y Animaciones -->
   <link rel="stylesheet" href="/css/custom.css">
+  <!-- Leaflet.js CSS (mapa interactivo) -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 </head>
 <body class="bg-white text-slate-800 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300 selection:bg-blue-600 selection:text-white antialiased relative overflow-x-hidden">
 
@@ -104,8 +106,6 @@
             <i data-lucide="<%= content.brand?.logoIcon || 'trophy' %>" class="w-5 h-5 text-blue-600 dark:text-yellow-400"></i>
           </div>
         </div>
-        <% } %>
-
         <div class="flex flex-col">
           <span class="text-xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-yellow-400 transition-colors">
             <%= content.brand?.logoText || 'KidsRun 2026' %>
@@ -114,22 +114,28 @@
             <%= content.brand?.tagline || 'Corrida Infantil & Familiar' %>
           </span>
         </div>
+        <% } %>
       </a>
 
       <!-- Menú de Navegación Escritorio -->
+      <% const isSecVis = (id) => !(content.sections && content.sections.visibility && content.sections.visibility[id] === false); %>
       <nav class="hidden lg:flex items-center gap-7 text-sm font-bold text-slate-600 dark:text-gray-300">
+        <% if (isSecVis('countdown')) { %>
         <a href="#countdown" class="hover:text-blue-600 dark:hover:text-yellow-400 transition-colors flex items-center gap-1.5">
           <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-600 dark:text-yellow-400"></i> Cuenta Regresiva
         </a>
-        <a href="#circuits" class="hover:text-blue-600 dark:hover:text-white transition-colors">Circuitos</a>
-        <a href="#schedule" class="hover:text-blue-600 dark:hover:text-white transition-colors">Cronograma</a>
-        <a href="#gallery" class="hover:text-blue-600 dark:hover:text-white transition-colors">Galería</a>
-        <a href="#kits" class="hover:text-blue-600 dark:hover:text-white transition-colors">Kits & Precios</a>
-        <a href="#faq" class="hover:text-blue-600 dark:hover:text-white transition-colors">Preguntas</a>
-        <a href="#contact" class="hover:text-blue-600 dark:hover:text-white transition-colors">Contacto</a>
+        <% } %>
+        <% if (isSecVis('circuits')) { %><a href="#circuits" class="hover:text-blue-600 dark:hover:text-white transition-colors">Circuitos</a><% } %>
+        <% if (isSecVis('schedule')) { %><a href="#schedule" class="hover:text-blue-600 dark:hover:text-white transition-colors">Cronograma</a><% } %>
+        <% if (isSecVis('gallery')) { %><a href="#gallery" class="hover:text-blue-600 dark:hover:text-white transition-colors">Galería</a><% } %>
+        <% if (isSecVis('kits')) { %><a href="#kits" class="hover:text-blue-600 dark:hover:text-white transition-colors">Kits & Precios</a><% } %>
+        <% if (isSecVis('faq')) { %><a href="#faq" class="hover:text-blue-600 dark:hover:text-white transition-colors">Preguntas</a><% } %>
+        <% if (isSecVis('sponsors')) { %><a href="#sponsors" class="hover:text-blue-600 dark:hover:text-white transition-colors">Auspiciadores</a><% } %>
+        <% if (isSecVis('venue')) { %><a href="#venue" class="hover:text-blue-600 dark:hover:text-white transition-colors">Lugar</a><% } %>
+        <% if (isSecVis('contact')) { %><a href="#contact" class="hover:text-blue-600 dark:hover:text-white transition-colors">Contacto</a><% } %>
       </nav>
 
-      <!-- Acciones de Cabecera: Conmutador Modo Claro/Oscuro + CMS + Inscripción -->
+      <!-- Acciones de Cabecera: Conmutador Modo Claro/Oscuro + Inscripción -->
       <div class="hidden md:flex items-center gap-3">
         
         <!-- Botón de Alternar Modo Claro (White Mode) / Modo Oscuro -->
@@ -137,11 +143,6 @@
           <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
           <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
         </button>
-
-        <a href="/admin" class="text-xs font-semibold px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-gray-800 text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 transition-all flex items-center gap-1.5" title="Panel CMS">
-          <i data-lucide="lock" class="w-3.5 h-3.5"></i>
-          CMS Admin
-        </a>
 
         <a href="/inscribir" class="px-5 py-2.5 rounded-2xl text-sm font-bold <%= theme.solidBtn %> hover:scale-105 transition-all shadow-md shadow-blue-600/30 transform hover:-translate-y-0.5 flex items-center gap-1.5">
           <i data-lucide="user-plus" class="w-4 h-4"></i>
@@ -163,17 +164,16 @@
 
     <!-- Menú Desplegable Móvil -->
     <div id="mobile-menu" class="hidden lg:hidden bg-white/95 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-6 py-6 space-y-4 shadow-xl">
-      <a href="#countdown" class="block text-blue-600 dark:text-yellow-400 font-bold">⏰ Cuenta Regresiva</a>
-      <a href="#circuits" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Circuitos por Edades</a>
-      <a href="#schedule" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Cronograma del Día</a>
-      <a href="#gallery" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Galería de Fotos</a>
-      <a href="#kits" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Kits y Valores</a>
-      <a href="#faq" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Preguntas Frecuentes</a>
-      <a href="#contact" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Contacto & Ayuda</a>
+      <% if (isSecVis('countdown')) { %><a href="#countdown" class="block text-blue-600 dark:text-yellow-400 font-bold">⏰ Cuenta Regresiva</a><% } %>
+      <% if (isSecVis('circuits')) { %><a href="#circuits" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Circuitos por Edades</a><% } %>
+      <% if (isSecVis('schedule')) { %><a href="#schedule" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Cronograma del Día</a><% } %>
+      <% if (isSecVis('gallery')) { %><a href="#gallery" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Galería de Fotos</a><% } %>
+      <% if (isSecVis('kits')) { %><a href="#kits" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Kits y Valores</a><% } %>
+      <% if (isSecVis('faq')) { %><a href="#faq" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Preguntas Frecuentes</a><% } %>
+      <% if (isSecVis('sponsors')) { %><a href="#sponsors" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Auspiciadores Oficiales</a><% } %>
+      <% if (isSecVis('venue')) { %><a href="#venue" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600 dark:hover:text-yellow-400 transition-colors py-1">📍 Lugar del Evento</a><% } %>
+      <% if (isSecVis('contact')) { %><a href="#contact" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Contacto & Ayuda</a><% } %>
       <div class="pt-4 border-t border-slate-200 dark:border-gray-800 flex flex-col gap-3">
-        <a href="/admin" class="text-center text-sm font-semibold py-2 px-4 rounded-xl border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-gray-300">
-          CMS Admin
-        </a>
         <a href="/inscribir" class="text-center py-2.5 px-4 rounded-2xl text-sm font-bold <%= theme.solidBtn %>">
           Inscribir Niño/a
         </a>
@@ -181,9 +181,18 @@
     </div>
   </header>
 
-  <main>
+  <main class="sections-wrapper">
+    <%
+      const _sOrder = content.sections?.order || ["hero","countdown","circuits","schedule","gallery","kits","testimonials","faq","sponsors","venue","contact"];
+      const _sVis   = content.sections?.visibility || {};
+      function sStyle(id) {
+        const ord = _sOrder.indexOf(id);
+        const vis = _sVis[id] !== false;
+        return 'order:' + (ord >= 0 ? ord : 99) + (vis ? '' : ';display:none');
+      }
+    %>
     <!-- SECCIÓN HERO -->
-    <section class="relative min-h-[92vh] flex items-center justify-center pt-32 pb-20 overflow-hidden bg-gradient-to-b from-blue-50/50 via-white to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
+    <section id="hero" style="<%= sStyle('hero') %>" class="relative min-h-[92vh] flex items-center justify-center pt-32 pb-20 overflow-hidden bg-gradient-to-b from-blue-50/50 via-white to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       <canvas id="hero-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
       <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
@@ -232,7 +241,7 @@
     </section>
 
     <!-- SECCIÓN CONTADOR REGRESIVO (COUNTDOWN TIMER) -->
-    <section id="countdown" class="py-14 relative z-10 -mt-6">
+    <section id="countdown" style="<%- sStyle('countdown') %>" class="py-14 relative z-10 -mt-6">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="bg-white dark:bg-gray-900 p-8 sm:p-10 rounded-3xl border border-blue-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative overflow-hidden">
           
@@ -326,7 +335,7 @@
     </section>
 
     <!-- SECCIÓN DE CIRCUITOS Y CATEGORÍAS -->
-    <section id="circuits" class="py-24 relative z-10 bg-white dark:bg-gray-950">
+    <section id="circuits" style="<%- sStyle('circuits') %>" class="py-24 relative z-10 bg-white dark:bg-gray-950">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-16">
           <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">CIRCUITOS ADAPTADOS</span>
@@ -369,7 +378,7 @@
     </section>
 
     <!-- SECCIÓN CRONOGRAMA DEL DÍA -->
-    <section id="schedule" class="py-20 bg-slate-50/70 dark:bg-gray-900/40 relative z-10 border-t border-slate-100 dark:border-white/5">
+    <section id="schedule" style="<%- sStyle('schedule') %>" class="py-20 bg-slate-50/70 dark:bg-gray-900/40 relative z-10 border-t border-slate-100 dark:border-white/5">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">HORARIOS Y ACTIVIDADES</span>
@@ -396,7 +405,7 @@
     </section>
 
     <!-- SECCIÓN GALERÍA DE IMÁGENES INTERACTIVA (CON LIGHTBOX) -->
-    <section id="gallery" class="py-24 relative z-10 bg-white dark:bg-gray-950">
+    <section id="gallery" style="<%- sStyle('gallery') %>" class="py-24 relative z-10 bg-white dark:bg-gray-950">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-3xl mx-auto mb-12">
@@ -458,7 +467,7 @@
     </div>
 
     <!-- SECCIÓN DE KITS Y PRECIOS -->
-    <section id="kits" class="py-24 bg-slate-50/70 dark:bg-gray-900/40 relative z-10 border-t border-slate-100 dark:border-white/5">
+    <section id="kits" style="<%- sStyle('kits') %>" class="py-24 bg-slate-50/70 dark:bg-gray-900/40 relative z-10 border-t border-slate-100 dark:border-white/5">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-3xl mx-auto mb-16">
@@ -523,7 +532,7 @@
     </section>
 
     <!-- SECCIÓN DE TESTIMONIOS -->
-    <section id="testimonials" class="py-24 relative z-10 bg-white dark:bg-gray-950">
+    <section id="testimonials" style="<%- sStyle('testimonials') %>" class="py-24 relative z-10 bg-white dark:bg-gray-950">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-16">
           <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">EXPERIENCIA FAMILIAR</span>
@@ -559,7 +568,7 @@
     </section>
 
     <!-- SECCIÓN DE PREGUNTAS FRECUENTES (FAQ) -->
-    <section id="faq" class="py-24 relative z-10 bg-slate-50/70 dark:bg-gray-900/30 border-t border-slate-100 dark:border-white/5">
+    <section id="faq" style="<%- sStyle('faq') %>" class="py-24 relative z-10 bg-slate-50/70 dark:bg-gray-900/30 border-t border-slate-100 dark:border-white/5">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
           <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">RESOLVEMOS TUS DUDAS</span>
@@ -584,8 +593,121 @@
       </div>
     </section>
 
+    <!-- SECCIÓN DE AUSPICIADORES & MARCAS OFICIALES (CON TRANSICIONES Y TAMAÑO UNIFORME) -->
+    <% if (content.sponsors && content.sponsors.list && content.sponsors.list.length > 0) { %>
+    <section id="sponsors" style="<%- sStyle('sponsors') %>" class="py-20 relative z-10 bg-slate-50/50 dark:bg-gray-900/40 border-t border-slate-100 dark:border-white/5 overflow-hidden">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-10 text-center">
+        <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">
+          <%= content.sponsors.badge || 'COMPAÑÍAS QUE IMPULSAN EL DEPORTE INFANTIL' %>
+        </span>
+        <h2 class="text-2xl sm:text-3xl lg:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+          <%= content.sponsors.title || 'Nuestros Auspiciadores Oficiales' %>
+        </h2>
+        <% if (content.sponsors.description) { %>
+        <p class="text-slate-600 dark:text-gray-400 text-xs sm:text-sm mt-2 max-w-2xl mx-auto">
+          <%= content.sponsors.description %>
+        </p>
+        <% } %>
+      </div>
+
+      <!-- Carrusel Continuo con Transiciones Interactivas -->
+      <div class="relative w-full overflow-hidden py-4">
+        <!-- Máscaras de degradado lateral para efecto de desvanecimiento suave -->
+        <div class="pointer-events-none absolute left-0 top-0 bottom-0 w-20 sm:w-32 bg-gradient-to-r from-slate-50 dark:from-gray-950 to-transparent z-20"></div>
+        <div class="pointer-events-none absolute right-0 top-0 bottom-0 w-20 sm:w-32 bg-gradient-to-l from-slate-50 dark:from-gray-950 to-transparent z-20"></div>
+
+        <div class="sponsors-track flex items-center gap-6 sm:gap-8 px-4">
+          <!-- Duplicamos la lista para crear bucle infinito sin saltos -->
+          <% const sponsorItems = [...content.sponsors.list, ...content.sponsors.list]; %>
+          <% sponsorItems.forEach((sp, idx) => { %>
+          <a href="<%= sp.website || '#' %>" 
+             target="<%= sp.website ? '_blank' : '_self' %>" 
+             rel="noopener"
+             class="sponsor-card flex-shrink-0 group block p-4 sm:p-5 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-500/50"
+             title="<%= sp.name %> - <%= sp.tier || 'Auspiciador' %>">
+            <!-- Contenedor con tamaño uniforme estricto (200px ancho x 90px alto) -->
+            <div class="w-48 sm:w-56 h-20 sm:h-24 flex items-center justify-center p-2 rounded-2xl bg-slate-50/70 dark:bg-gray-950/60 overflow-hidden">
+              <img src="<%= sp.logoUrl %>" 
+                   alt="<%= sp.name %>" 
+                   class="max-w-full max-h-full object-contain transition-transform duration-300 group-hover:scale-105"
+                   loading="lazy">
+            </div>
+            <div class="mt-2.5 text-center">
+              <p class="text-xs font-bold text-slate-800 dark:text-gray-200 truncate group-hover:text-blue-600 dark:group-hover:text-yellow-400 transition-colors"><%= sp.name %></p>
+              <% if (sp.tier) { %>
+              <span class="text-[10px] font-semibold text-slate-400 dark:text-gray-500 uppercase tracking-wider block truncate"><%= sp.tier %></span>
+              <% } %>
+            </div>
+          </a>
+          <% }); %>
+        </div>
+      </div>
+    </section>
+    <% } %>
+
+    <!-- SECCIÓN: LUGAR DEL EVENTO (MAPA INTERACTIVO) -->
+    <% if (content.venue !== false) { %>
+    <section id="venue" style="<%- sStyle('venue') %>" class="py-20 relative z-10 bg-white dark:bg-gray-950 border-t border-slate-100 dark:border-white/5">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <!-- Header -->
+        <div class="text-center mb-10">
+          <span class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 text-xs font-bold uppercase tracking-widest mb-4">
+            <i data-lucide="map-pin" class="w-3.5 h-3.5"></i>
+            <%= content.venue?.badge || 'Punto de Largada' %>
+          </span>
+          <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white mb-3">
+            <%= content.venue?.title || '¿Dónde es la corrida?' %>
+          </h2>
+          <p class="text-slate-500 dark:text-gray-400 text-base max-w-xl mx-auto">
+            <%= content.venue?.description || 'Encuéntranos en el lugar del evento. ¡Llega con tiempo para disfrutar la previa!' %>
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+          <!-- Info del lugar -->
+          <div class="space-y-4 lg:col-span-1">
+            <div class="bg-slate-50 dark:bg-gray-900 rounded-3xl p-6 border border-slate-100 dark:border-gray-800">
+              <h3 class="font-black text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2">
+                <i data-lucide="flag" class="w-5 h-5 text-blue-600 dark:text-yellow-400"></i>
+                <%= content.venue?.name || content.countdown?.locationName || 'Parque Bicentenario' %>
+              </h3>
+              <ul class="space-y-3 text-sm text-slate-600 dark:text-gray-400">
+                <li class="flex items-start gap-2.5">
+                  <i data-lucide="map-pin" class="w-4 h-4 text-blue-600 dark:text-yellow-400 mt-0.5 shrink-0"></i>
+                  <span><%= content.venue?.address || (content.countdown?.locationName + ', ' + content.countdown?.locationCity) || 'Parque Bicentenario, Santiago' %></span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                  <i data-lucide="clock" class="w-4 h-4 text-blue-600 dark:text-yellow-400 mt-0.5 shrink-0"></i>
+                  <span>Apertura de puertas: <%= content.venue?.doorsOpen || '08:00 AM' %> — Largada: <%= content.countdown?.eventTime || '09:00 AM' %></span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                  <i data-lucide="car" class="w-4 h-4 text-blue-600 dark:text-yellow-400 mt-0.5 shrink-0"></i>
+                  <span><%= content.venue?.parking || 'Estacionamiento disponible en los alrededores del parque.' %></span>
+                </li>
+                <li class="flex items-start gap-2.5">
+                  <i data-lucide="bus" class="w-4 h-4 text-blue-600 dark:text-yellow-400 mt-0.5 shrink-0"></i>
+                  <span><%= content.venue?.transit || 'Acceso en Metro y buses del Transantiago.' %></span>
+                </li>
+              </ul>
+              <a href="https://www.google.com/maps/search/<%= encodeURIComponent(content.venue?.address || content.countdown?.locationName || 'Parque Bicentenario Santiago') %>" target="_blank" rel="noopener noreferrer" class="mt-5 flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-2xl text-sm font-bold bg-blue-600 hover:bg-blue-700 dark:bg-yellow-400 dark:hover:bg-yellow-300 text-white dark:text-gray-900 transition-all shadow-md shadow-blue-600/20 dark:shadow-yellow-400/10">
+                <i data-lucide="navigation" class="w-4 h-4"></i>
+                Abrir en Google Maps
+              </a>
+            </div>
+          </div>
+
+          <!-- Mapa Leaflet -->
+          <div class="lg:col-span-2">
+            <div id="venue-map" class="w-full h-80 sm:h-96 rounded-3xl overflow-hidden shadow-xl border border-slate-200 dark:border-gray-800 z-0 relative"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+    <% } %>
+
+
     <!-- SECCIÓN DE CONTACTO & ATENCIÓN A FAMILIAS -->
-    <section id="contact" class="py-24 bg-white dark:bg-gray-950 relative z-10 border-t border-slate-100 dark:border-white/5">
+    <section id="contact" style="<%- sStyle('contact') %>" class="py-24 bg-white dark:bg-gray-950 relative z-10 border-t border-slate-100 dark:border-white/5">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           
@@ -654,30 +776,31 @@
             </p>
 
             <form id="contact-form" class="space-y-4">
+              <input type="hidden" id="contactCsrfToken" name="csrfToken" value="<%= csrfToken %>">
               <div>
                 <label for="contact-name" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Nombre Completo *</label>
-                <input type="text" id="contact-name" name="name" required placeholder="Tu nombre y apellido" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
+                <input type="text" id="contact-name" name="name" required maxlength="100" placeholder="Tu nombre y apellido" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label for="contact-email" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Correo Electrónico *</label>
-                  <input type="email" id="contact-email" name="email" required placeholder="ejemplo@correo.com" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
+                  <input type="email" id="contact-email" name="email" required maxlength="254" placeholder="ejemplo@correo.com" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
                 </div>
                 <div>
                   <label for="contact-phone" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Teléfono / WhatsApp</label>
-                  <input type="tel" id="contact-phone" name="phone" placeholder="+56 9 1234 5678" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
+                  <input type="tel" id="contact-phone" name="phone" maxlength="30" placeholder="+56 9 1234 5678" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
                 </div>
               </div>
 
               <div>
                 <label for="contact-subject" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Asunto de la Consulta</label>
-                <input type="text" id="contact-subject" name="subject" placeholder="Consulta sobre distancias, kits, retiro de poleras..." class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
+                <input type="text" id="contact-subject" name="subject" maxlength="150" placeholder="Consulta sobre distancias, kits, retiro de poleras..." class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
               </div>
 
               <div>
                 <label for="contact-message" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Mensaje *</label>
-                <textarea id="contact-message" name="message" required rows="4" placeholder="Escribe tu consulta aquí..." class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors"></textarea>
+                <textarea id="contact-message" name="message" required maxlength="1000" rows="4" placeholder="Escribe tu consulta aquí..." class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors"></textarea>
               </div>
 
               <button type="submit" class="w-full py-3.5 rounded-2xl text-sm font-black <%= theme.solidBtn %> hover:scale-[1.01] shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
@@ -740,5 +863,47 @@
 
   <!-- Scripts de la Landing Page -->
   <script src="/js/landing.js"></script>
+  <!-- Leaflet.js + inicialización del mapa del evento -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    (function() {
+      const lat  = <%- JSON.stringify(content.venue?.lat  ?? -33.4489) %>;
+      const lng  = <%- JSON.stringify(content.venue?.lng  ?? -70.6693) %>;
+      const zoom = <%- JSON.stringify(content.venue?.zoom ?? 15) %>;
+      const name = <%- JSON.stringify(content.venue?.name || content.countdown?.locationName || 'Lugar del Evento') %>;
+      const addr = <%- JSON.stringify(content.venue?.address || '') %>;
+
+      const mapEl = document.getElementById('venue-map');
+      if (!mapEl) return;
+
+      const map = L.map('venue-map', { zoomControl: true, scrollWheelZoom: false }).setView([lat, lng], zoom);
+
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+        maxZoom: 19
+      }).addTo(map);
+
+      // Ícono personalizado
+      const icon = L.divIcon({
+        className: '',
+        html: '<div style="background:#2563eb;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 4px 12px rgba(37,99,235,0.5)"></div>',
+        iconSize: [36, 36],
+        iconAnchor: [18, 36],
+        popupAnchor: [0, -38]
+      });
+
+      L.marker([lat, lng], { icon })
+        .addTo(map)
+        .bindPopup(`<div style="font-family:sans-serif;min-width:160px"><strong style="font-size:14px">📍 ${name}</strong>${addr ? '<br><span style="font-size:12px;color:#64748b">' + addr + '</span>' : ''}</div>`, { maxWidth: 220 })
+        .openPopup();
+
+      // Dark mode tile layer swap
+      const isDark = document.documentElement.classList.contains('dark');
+      if (isDark) {
+        map.eachLayer(l => { if (l.setUrl) l.setUrl('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'); });
+      }
+    })();
+  </script>
+
 </body>
 </html>

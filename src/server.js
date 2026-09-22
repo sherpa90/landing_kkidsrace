@@ -18,7 +18,7 @@ const PORT = process.env.PORT || 3000;
 // Configuración de compresión para máxima velocidad y SEO
 app.use(compression());
 
-// Headers de seguridad con Helmet (con CSP permisivo para Tailwind, Google Fonts e imágenes Unsplash)
+// Headers de seguridad con Helmet
 app.use(
   helmet({
     contentSecurityPolicy: {
@@ -27,40 +27,55 @@ app.use(
         scriptSrc: [
           "'self'",
           "'unsafe-inline'",
-          "'unsafe-eval'",
           "https://cdn.tailwindcss.com",
           "https://unpkg.com"
         ],
         styleSrc: [
           "'self'",
-          "'unsafe-inline'",
+          "'unsafe-inline'", // Necesario para Tailwind CDN — eliminar al migrar a build local
           "https://fonts.googleapis.com",
           "https://cdn.tailwindcss.com"
         ],
         fontSrc: ["'self'", "https://fonts.gstatic.com"],
-        imgSrc: ["'self'", "data:", "https:", "http:"],
+        imgSrc: [
+          "'self'",
+          "data:",
+          "https://images.unsplash.com",
+          "https://fonts.gstatic.com"
+        ],
         connectSrc: ["'self'"]
       }
     },
-    crossOriginEmbedderPolicy: false
+    crossOriginEmbedderPolicy: false, // Mantener false para compatibilidad con Tailwind CDN
+    // Deshabilitar features del navegador no usadas
   })
 );
 
-// Logging de peticiones en entorno de desarrollo
-if (process.env.NODE_ENV !== 'production') {
+// Permissions-Policy: deshabilitar APIs sensibles no requeridas
+app.use((req, res, next) => {
+  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+  next();
+});
+
+// Logging de peticiones — siempre activo (formato compacto en dev, combinado en producción)
+if (process.env.NODE_ENV === 'production') {
+  app.use(morgan('combined'));
+} else {
   app.use(morgan('dev'));
 }
 
 // Procesamiento de datos de formularios y JSON
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
-// Gestión de sesiones con cookie-session
+// Gestión de sesiones — 8 horas de vida, no 7 días
 app.use(
   cookieSession({
     name: 'landing_cms_session',
     keys: [process.env.SESSION_SECRET || 'modern_cms_default_secret_key_change_me'],
-    maxAge: 7 * 24 * 60 * 60 * 1000 // 7 días
+    maxAge: 8 * 60 * 60 * 1000, // 8 horas
+    httpOnly: true,
+    sameSite: 'lax'
   })
 );
 
@@ -93,10 +108,15 @@ app.use((req, res) => {
   });
 });
 
-// Manejo de Errores Globales
+// Manejo de Errores Globales — no exponer stack traces en producción
 app.use((err, req, res, next) => {
-  console.error('Error interno del servidor:', err);
-  res.status(500).send('Error interno del servidor');
+  const errorId = Date.now().toString(36);
+  if (process.env.NODE_ENV !== 'production') {
+    console.error(`[error:${errorId}]`, err);
+  } else {
+    console.error(`[error:${errorId}] ${err.message}`);
+  }
+  res.status(500).json({ success: false, error: `Error interno del servidor. Referencia: ${errorId}` });
 });
 
 // Iniciar servidor solo si se ejecuta directamente

@@ -251,3 +251,71 @@ html.dark .ambient-red {
   -webkit-backdrop-filter: blur(8px);
 }
 
+/* ==============================================================================
+   SECCIÓN DE AUSPICIADORES & CARRUSEL INTERACTIVO / INFINITO
+   ============================================================================== */
+@keyframes sponsorMarquee {
+  0% {
+    transform: translateX(0%);
+  }
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.sponsors-track {
+  display: flex;
+  width: max-content;
+  animation: sponsorMarquee 35s linear infinite;
+}
+
+.sponsors-track:hover {
+  animation-play-state: paused;
+}
+
+.sponsor-card {
+  transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  filter: grayscale(85%) opacity(0.75);
+}
+
+.sponsor-card:hover {
+  filter: grayscale(0%) opacity(1);
+  transform: translateY(-6px) scale(1.04);
+}
+
+html.dark .sponsor-card {
+  filter: grayscale(80%) brightness(1.2) opacity(0.8);
+}
+
+html.dark .sponsor-card:hover {
+  filter: grayscale(0%) brightness(1) opacity(1);
+}
+
+/* ─── Sponsors Admin Animations ─── */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeOut {
+  from { opacity: 1; transform: scale(1); }
+  to   { opacity: 0; transform: scale(0.95); }
+}
+
+/* ─── Page Builder: secciones reordenables ─── */
+.sections-wrapper {
+  display: flex;
+  flex-direction: column;
+}
+.sections-wrapper > section {
+  width: 100%;
+}
+
+/* ─── Toggle switch (sections visibility) ─── */
+.section-visibility-toggle:checked + .toggle-track { background-color: #2563eb; }
+.section-visibility-toggle:checked + .toggle-track .toggle-thumb { transform: translateX(20px); }
+
+/* ─── Drag-and-drop sortable items ─── */
+.section-sortable-item.drag-over  { border-color: #60a5fa !important; background: rgba(37,99,235,0.12) !important; }
+.section-sortable-item.dragging   { opacity: 0.35; }
+

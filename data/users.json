@@ -1,18 +1,10 @@
 [
   {
-    "id": "usr_root",
-    "username": "root",
-    "name": "Super Administrador Root",
-    "role": "admin",
-    "passwordHash": "$2a$10$OZDUYQhwFybq/VxQlEBze.dhPEF.Rmdb2LrbcJQH9DDwYj1ef0h3a",
-    "createdAt": "2026-09-21T02:30:31.179Z"
-  },
-  {
     "id": "usr_admin",
     "username": "admin",
     "name": "Administrador Principal",
     "role": "admin",
-    "passwordHash": "$2a$10$icxmTqYFxFgLu5y1zztXAOLx507v6mparVnNU8qZzX3qwHCU7EyjK",
+    "passwordHash": "$2a$12$frAxYjtoB9K08k0z.FTEdO1JeBcmQu.uPZIU7sA201fM5BgFlV772",
     "createdAt": "2026-09-21T02:30:31.246Z"
   },
   {

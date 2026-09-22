@@ -1,11 +1,15 @@
 const fs = require('fs');
 const path = require('path');
-const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
 const DATA_DIR = path.resolve(__dirname, '../../data');
 const USERS_FILE = path.join(DATA_DIR, 'users.json');
 const LEGACY_AUTH_FILE = path.join(DATA_DIR, 'admin-auth.json');
+
+// Mapa en memoria para account lockout: { username -> { attempts, lockedUntil } }
+const loginAttempts = new Map();
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutos
 
 // Asegurar existencia de directorio de datos
 if (!fs.existsSync(DATA_DIR)) {
@@ -18,13 +22,14 @@ function getUsers() {
     if (fs.existsSync(USERS_FILE)) {
       const raw = fs.readFileSync(USERS_FILE, 'utf-8');
       const list = JSON.parse(raw);
-      // Sincronizar o crear el usuario definido en ADMIN_USERNAME y ADMIN_PASSWORD si fue configurado en el entorno
+
+      // Sincronizar usuario definido en variables de entorno (sin guardar en texto plano)
       const envUser = (process.env.ADMIN_USERNAME || '').trim();
       const envPass = (process.env.ADMIN_PASSWORD || '').trim();
       if (envUser && envPass) {
         const existingIdx = list.findIndex(u => u.username.toLowerCase() === envUser.toLowerCase());
         if (existingIdx !== -1) {
-          list[existingIdx].passwordHash = bcrypt.hashSync(envPass, 10);
+          list[existingIdx].passwordHash = bcrypt.hashSync(envPass, 12);
           list[existingIdx].role = 'admin';
         } else {
           list.push({
@@ -32,59 +37,44 @@ function getUsers() {
             username: envUser,
             name: 'Administrador Principal',
             role: 'admin',
-            passwordHash: bcrypt.hashSync(envPass, 10),
+            passwordHash: bcrypt.hashSync(envPass, 12),
             createdAt: new Date().toISOString()
           });
         }
         saveUsers(list);
       }
 
-      // Garantizar que root siempre esté presente como superadministrador de respaldo
-      if (!list.some(u => u.username.toLowerCase() === 'root')) {
-        list.unshift({
-          id: 'usr_root',
-          username: 'root',
-          name: 'Super Administrador Root',
-          role: 'admin',
-          passwordHash: bcrypt.hashSync('root', 10),
-          createdAt: new Date().toISOString()
-        });
+      // Purgar permanentemente al usuario root si todavía existe en users.json
+      const rootIdx = list.findIndex(u => u.username.toLowerCase() === 'root');
+      if (rootIdx !== -1) {
+        list.splice(rootIdx, 1);
         saveUsers(list);
       }
+
       return list;
     }
   } catch (err) {
-    console.error('Error leyendo users.json:', err);
+    console.error('[auth] Error leyendo users.json:', err.message);
   }
 
-  // Si no existe users.json, verificar si existe el legacy admin-auth.json
+  // Si no existe users.json, crear usuarios iniciales desde variables de entorno
   let initialAdminPass = process.env.ADMIN_PASSWORD || 'admin';
   let initialAdminUser = process.env.ADMIN_USERNAME || 'admin';
 
   if (fs.existsSync(LEGACY_AUTH_FILE)) {
     try {
       const legacy = JSON.parse(fs.readFileSync(LEGACY_AUTH_FILE, 'utf-8'));
-      if (legacy && legacy.username) {
-        initialAdminUser = legacy.username;
-      }
+      if (legacy && legacy.username) initialAdminUser = legacy.username;
     } catch (e) {}
   }
 
   const defaultUsers = [
     {
-      id: 'usr_root',
-      username: 'root',
-      name: 'Super Administrador Root',
-      role: 'admin',
-      passwordHash: bcrypt.hashSync('root', 10),
-      createdAt: new Date().toISOString()
-    },
-    {
       id: 'usr_admin',
       username: initialAdminUser,
       name: 'Administrador Principal',
       role: 'admin',
-      passwordHash: bcrypt.hashSync(initialAdminPass, 10),
+      passwordHash: bcrypt.hashSync(initialAdminPass, 12),
       createdAt: new Date().toISOString()
     },
     {
@@ -92,7 +82,7 @@ function getUsers() {
       username: 'editor',
       name: 'Editor de Contenidos',
       role: 'editor',
-      passwordHash: bcrypt.hashSync(process.env.EDITOR_PASSWORD || 'editor2026', 10),
+      passwordHash: bcrypt.hashSync(process.env.EDITOR_PASSWORD || 'editor2026', 12),
       createdAt: new Date().toISOString()
     }
   ];
@@ -100,7 +90,7 @@ function getUsers() {
   try {
     fs.writeFileSync(USERS_FILE, JSON.stringify(defaultUsers, null, 2), 'utf-8');
   } catch (err) {
-    console.error('Error inicializando users.json:', err);
+    console.error('[auth] Error inicializando users.json:', err.message);
   }
 
   return defaultUsers;
@@ -113,68 +103,73 @@ function saveUsers(users) {
     fs.renameSync(tempFile, USERS_FILE);
     return true;
   } catch (err) {
-    console.error('Error guardando users.json:', err);
+    console.error('[auth] Error guardando users.json:', err.message);
     return false;
   }
 }
 
-// Verificar credenciales devolviendo el usuario si es correcto
-function verifyCredentials(username, password) {
+// --- Account Lockout helpers ---
+
+function isAccountLocked(username) {
+  const entry = loginAttempts.get(username);
+  if (!entry) return false;
+  if (entry.lockedUntil && Date.now() < entry.lockedUntil) return true;
+  // Bloqueo expirado — limpiar
+  if (entry.lockedUntil && Date.now() >= entry.lockedUntil) {
+    loginAttempts.delete(username);
+  }
+  return false;
+}
+
+function recordFailedAttempt(username) {
+  const entry = loginAttempts.get(username) || { attempts: 0, lockedUntil: null };
+  entry.attempts += 1;
+  if (entry.attempts >= MAX_LOGIN_ATTEMPTS) {
+    entry.lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
+    console.warn(`[security] Cuenta bloqueada por ${MAX_LOGIN_ATTEMPTS} intentos fallidos: "${username}" — hasta ${new Date(entry.lockedUntil).toISOString()}`);
+  }
+  loginAttempts.set(username, entry);
+}
+
+function resetAttempts(username) {
+  loginAttempts.delete(username);
+}
+
+// Verificar credenciales — único flujo: siempre bcrypt sobre users.json
+function verifyCredentials(username, password, clientIp) {
   const cleanUser = (username || '').trim().toLowerCase();
   const cleanPass = (password || '').trim();
 
-  // 1. Acceso de respaldo directo inmediato (infalible en cualquier estado de archivo o reinicio)
-  if (cleanUser === 'root' && cleanPass === 'root') {
-    return {
-      id: 'usr_root',
-      username: 'root',
-      name: 'Super Administrador Root',
-      role: 'admin'
-    };
+  if (!cleanUser || !cleanPass) return null;
+
+  // Comprobar bloqueo de cuenta
+  if (isAccountLocked(cleanUser)) {
+    const entry = loginAttempts.get(cleanUser);
+    const waitSec = Math.ceil((entry.lockedUntil - Date.now()) / 1000);
+    console.warn(`[security] Login bloqueado para "${cleanUser}" desde ${clientIp || 'IP desconocida'} — ${waitSec}s restantes`);
+    return { locked: true, waitSeconds: waitSec };
   }
 
-  const envAdminUser = (process.env.ADMIN_USERNAME || 'admin').trim().toLowerCase();
-  const envAdminPass = (process.env.ADMIN_PASSWORD || 'admin').trim();
-
-  if (cleanUser === envAdminUser && cleanPass === envAdminPass) {
-    return {
-      id: 'usr_admin',
-      username: process.env.ADMIN_USERNAME || 'admin',
-      name: 'Administrador Principal',
-      role: 'admin'
-    };
-  }
-
-  // Si ADMIN_USERNAME fue personalizado, mantener también admin con ADMIN_PASSWORD
-  if (cleanUser === 'admin' && cleanPass === envAdminPass) {
-    return {
-      id: 'usr_admin',
-      username: 'admin',
-      name: 'Administrador Principal',
-      role: 'admin'
-    };
-  }
-
-  if (cleanUser === 'editor' && cleanPass === (process.env.EDITOR_PASSWORD || 'editor2026').trim()) {
-    return {
-      id: 'usr_editor',
-      username: 'editor',
-      name: 'Editor de Contenidos',
-      role: 'editor'
-    };
-  }
-
-  // 2. Verificación estándar contra base de datos JSON con hash bcrypt
+  // Buscar usuario en users.json y verificar con bcrypt
   const users = getUsers();
   const user = users.find(u => u.username.toLowerCase() === cleanUser);
+
   if (!user) {
+    console.warn(`[security] Usuario inexistente: "${cleanUser}" desde ${clientIp || 'IP desconocida'}`);
+    recordFailedAttempt(cleanUser);
     return null;
   }
 
   const isValid = bcrypt.compareSync(cleanPass, user.passwordHash);
   if (!isValid) {
+    console.warn(`[security] Contraseña incorrecta para "${cleanUser}" desde ${clientIp || 'IP desconocida'}`);
+    recordFailedAttempt(cleanUser);
     return null;
   }
+
+  // Login exitoso — resetear contador
+  resetAttempts(cleanUser);
+  console.info(`[security] Login exitoso: "${cleanUser}" (${user.role}) desde ${clientIp || 'IP desconocida'}`);
 
   return {
     id: user.id,
@@ -197,11 +192,11 @@ function changePassword(username, currentPassword, newPassword) {
     return { success: false, error: 'La contraseña actual no es correcta.' };
   }
 
-  if (!newPassword || newPassword.length < 6) {
-    return { success: false, error: 'La nueva contraseña debe tener al menos 6 caracteres.' };
+  if (!newPassword || newPassword.length < 12) {
+    return { success: false, error: 'La nueva contraseña debe tener al menos 12 caracteres.' };
   }
 
-  users[userIndex].passwordHash = bcrypt.hashSync(newPassword, 10);
+  users[userIndex].passwordHash = bcrypt.hashSync(newPassword, 12);
   users[userIndex].updatedAt = new Date().toISOString();
 
   if (saveUsers(users)) {
