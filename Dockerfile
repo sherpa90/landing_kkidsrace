@@ -6,7 +6,7 @@
 FROM node:20-alpine AS dependencies
 WORKDIR /app
 COPY package*.json ./
-RUN npm ci --omit=dev --no-audit --no-fund
+RUN npm install --omit=dev --no-audit --no-fund
 
 # Etapa 2: Imagen Final de Producción (< 90MB)
 FROM node:20-alpine AS runner
@@ -15,8 +15,8 @@ WORKDIR /app
 ENV NODE_ENV=production
 ENV PORT=3000
 
-# Crear directorio de datos con permisos para el usuario sin privilegios 'node'
-RUN mkdir -p /app/data && chown -R node:node /app
+# Crear directorio de datos y uploads con permisos para el usuario sin privilegios 'node'
+RUN mkdir -p /app/data/uploads && chown -R node:node /app
 
 # Copiar dependencias y código fuente
 COPY --chown=node:node --from=dependencies /app/node_modules ./node_modules

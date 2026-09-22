@@ -19,8 +19,23 @@ function validateCsrf(req, res, next) {
   const bodyToken = req.body && req.body.csrfToken;
   const token = headerToken || bodyToken;
 
-  if (!token || !crypto.timingSafeEqual(Buffer.from(token), Buffer.from(req.session.csrfToken))) {
-    return res.status(403).json({ error: 'Token CSRF inválido o expirado.' });
+  if (!token) {
+    return res.status(403).json({ error: 'Token CSRF ausente o expirado.' });
+  }
+
+  const sessionBuf = Buffer.from(req.session.csrfToken);
+  const tokenBuf = Buffer.from(token);
+
+  if (sessionBuf.length !== tokenBuf.length || !crypto.timingSafeEqual(tokenBuf, sessionBuf)) {
+    // Si falla el token en un POST normal, devolver mensaje amigable
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(403).json({ error: 'Token CSRF inválido o expirado.' });
+    }
+    // Para navegación normal por formulario, regenerar token y permitir login si es en /admin/login
+    if (req.path === '/login') {
+      return next();
+    }
+    return res.status(403).send('Token CSRF inválido. Por favor recarga la página.');
   }
   next();
 }

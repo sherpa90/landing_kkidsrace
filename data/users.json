@@ -1,0 +1,26 @@
+[
+  {
+    "id": "usr_root",
+    "username": "root",
+    "name": "Super Administrador Root",
+    "role": "admin",
+    "passwordHash": "$2a$10$OZDUYQhwFybq/VxQlEBze.dhPEF.Rmdb2LrbcJQH9DDwYj1ef0h3a",
+    "createdAt": "2026-09-21T02:30:31.179Z"
+  },
+  {
+    "id": "usr_admin",
+    "username": "admin",
+    "name": "Administrador Principal",
+    "role": "admin",
+    "passwordHash": "$2a$10$icxmTqYFxFgLu5y1zztXAOLx507v6mparVnNU8qZzX3qwHCU7EyjK",
+    "createdAt": "2026-09-21T02:30:31.246Z"
+  },
+  {
+    "id": "usr_editor",
+    "username": "editor",
+    "name": "Editor de Contenidos",
+    "role": "editor",
+    "passwordHash": "$2a$10$wzl6hD3M.V8fVqSVACzoWuHIiJAe7vMx0SDhHAg23j9JLq2H0SS/W",
+    "createdAt": "2026-09-21T02:30:31.310Z"
+  }
+]

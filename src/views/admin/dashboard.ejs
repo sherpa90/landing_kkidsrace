@@ -12,116 +12,155 @@
   <script src="https://unpkg.com/lucide@1.47.0"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-gray-950 text-gray-100 min-h-screen flex flex-col antialiased">
+<body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
   <!-- BARRA SUPERIOR DEL DASHBOARD -->
-  <header class="h-16 border-b border-gray-800 bg-gray-950/90 backdrop-blur-md sticky top-0 z-40 px-4 sm:px-8 flex items-center justify-between">
-    <div class="flex items-center gap-4">
+  <header class="h-16 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-6 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <!-- Botón Hamburguesa / Menú Móvil -->
+      <button type="button" id="btn-toggle-mobile-menu" class="md:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors" title="Abrir Menú">
+        <i data-lucide="menu" class="w-5 h-5"></i>
+      </button>
+
       <div class="flex items-center gap-2.5">
-        <div class="w-8 h-8 rounded-xl bg-yellow-400 flex items-center justify-center text-gray-950 font-black shadow-md">
+        <div class="w-8 h-8 rounded-xl bg-amber-400 flex items-center justify-center text-slate-950 font-black shadow-md">
           <i data-lucide="trophy" class="w-4 h-4"></i>
         </div>
-        <div>
-          <span class="font-black text-sm text-white tracking-tight"><%= content.brand?.name || 'KidsRun 2026' %></span>
-          <span class="text-[10px] bg-emerald-500 text-white font-bold px-1.5 py-0.5 rounded-full ml-1.5 border border-emerald-500">CMS Evento</span>
+        <div class="flex items-center gap-2">
+          <span class="font-black text-sm text-white tracking-tight truncate max-w-[140px] sm:max-w-none"><%= content.brand?.name || 'KidsRun 2026' %></span>
+          <span class="text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full border border-blue-400">CMS</span>
         </div>
       </div>
     </div>
 
+    <!-- Identificación de Usuario & Rol en Cabecera -->
+    <div class="hidden sm:flex items-center gap-2">
+      <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl <%= role === 'admin' ? 'bg-blue-950/90 border border-blue-500/50 text-blue-300' : 'bg-amber-950/90 border border-amber-500/50 text-amber-300' %>">
+        <span class="w-2 h-2 rounded-full <%= role === 'admin' ? 'bg-blue-400 animate-pulse' : 'bg-amber-400' %>"></span>
+        <span class="text-xs font-black uppercase tracking-wider">
+          <%= role === 'admin' ? 'Administrador' : 'Editor' %>
+        </span>
+        <span class="text-xs text-slate-400 font-mono">(<%= username %>)</span>
+      </div>
+    </div>
+
     <!-- Acciones Rápidas -->
-    <div class="flex items-center gap-3">
-      <a href="/" target="_blank" class="text-xs font-semibold px-3 py-2 rounded-3xl text-gray-300 hover:text-white bg-gray-900 border border-gray-800 hover:border-gray-700 transition-all flex items-center gap-1.5">
+    <div class="flex items-center gap-2">
+      <a href="/" target="_blank" class="text-xs font-bold px-3 py-2 rounded-xl text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all flex items-center gap-1.5" title="Ver Web en Vivo">
         <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
-        <span>Ver Web en Vivo</span>
+        <span class="hidden sm:inline">Web</span>
       </a>
 
-      <button type="button" id="btn-save-cms" class="text-xs font-bold px-5 py-2.5 rounded-3xl text-white bg-emerald-600 hover:bg-emerald-700 shadow-lg shadow-emerald-500/60 transition-all flex items-center gap-2">
-        <i data-lucide="save" class="w-4 h-4"></i>
-        <span>Guardar Cambios</span>
+      <button type="button" id="btn-save-cms" class="text-xs font-black px-3.5 sm:px-4 py-2 rounded-xl text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 shadow-md shadow-blue-600/30 transition-all flex items-center gap-1.5">
+        <i data-lucide="save" class="w-3.5 h-3.5"></i>
+        <span>Guardar</span>
       </button>
 
-      <a href="/admin/logout" class="p-2 text-gray-400 hover:text-red-400 rounded-3xl hover:bg-red-950/20 transition-all" title="Cerrar Sesión">
+      <a href="/admin/logout" class="p-2 text-slate-400 hover:text-red-400 rounded-xl hover:bg-slate-800 transition-all" title="Cerrar Sesión">
         <i data-lucide="log-out" class="w-4 h-4"></i>
       </a>
     </div>
   </header>
 
   <!-- CONTENIDO PRINCIPAL: SIDEBAR + PANELES -->
-  <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-4 sm:p-6 gap-6">
+  <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 gap-6 relative">
     
+    <!-- Backdrop Móvil -->
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden md:hidden"></div>
+
     <!-- BARRA LATERAL DE NAVEGACIÓN (TABS) -->
-    <aside class="w-full md:w-64 flex-shrink-0 space-y-1">
-      <div class="p-3 bg-gray-900/50 rounded-3xl border border-gray-800/80 mb-3">
+    <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-72 bg-slate-900 border-r border-slate-800 z-50 p-4 transform -translate-x-full transition-transform duration-200 ease-in-out md:translate-x-0 md:static md:w-64 md:bg-transparent md:border-r-0 md:z-auto md:p-0 md:block flex-shrink-0 space-y-2 overflow-y-auto">
+      <div class="flex items-center justify-between md:hidden pb-3 mb-2 border-b border-slate-800">
+        <span class="font-black text-sm text-white">Menú del Panel</span>
+        <button type="button" id="btn-close-mobile-menu" class="p-1.5 text-slate-400 hover:text-white rounded-lg">✕</button>
+      </div>
+
+      <div class="p-3 bg-slate-900 rounded-2xl border border-slate-800 mb-3 shadow-sm">
         <div class="flex items-center gap-3">
-          <div class="w-9 h-9 rounded-3xl bg-emerald-500 text-white flex items-center justify-center font-bold text-sm">
-            <%= (username || 'A')[0].toUpperCase() %>
+          <div class="w-9 h-9 rounded-2xl <%= role === 'admin' ? 'bg-blue-600' : 'bg-amber-500' %> text-white flex items-center justify-center font-bold text-sm shadow-md">
+            <%= (name || username || 'U')[0].toUpperCase() %>
           </div>
           <div class="overflow-hidden">
-            <p class="text-xs font-bold text-white truncate"><%= username %></p>
-            <p class="text-[10px] text-emerald-400 flex items-center gap-1">
-              <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 inline-block animate-pulse"></span> Organizador
-            </p>
+            <p class="text-xs font-bold text-white truncate"><%= name || username %></p>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <span class="w-1.5 h-1.5 rounded-full <%= role === 'admin' ? 'bg-blue-400 animate-pulse' : 'bg-amber-400' %>"></span>
+              <span class="text-[10px] font-bold uppercase tracking-wider <%= role === 'admin' ? 'text-blue-400' : 'text-amber-400' %>">
+                <%= role === 'admin' ? 'Administrador' : 'Editor' %>
+              </span>
+            </div>
           </div>
         </div>
       </div>
 
       <nav class="space-y-1">
-        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold bg-emerald-600 text-white shadow-lg shadow-emerald-500/40 hover:bg-emerald-700 transition-all text-left" data-tab="countdown">
-          <i data-lucide="clock" class="w-4 h-4"></i>
-          <span>⏰ Cuenta Regresiva</span>
+        <!-- Pestaña de Corridas (Administrador) -->
+        <% if (role === 'admin') { %>
+        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold bg-blue-600 text-white shadow-md shadow-blue-600/30 transition-all text-left" data-tab="races">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="calendar" class="w-4 h-4"></i>
+            <span>🏃‍♂️ Corridas & Fechas</span>
+          </div>
+          <span class="text-[10px] bg-blue-800 text-blue-200 px-2 py-0.5 rounded-full font-black"><%= (races || []).length %></span>
         </button>
+        <% } %>
 
-        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="gallery">
-          <i data-lucide="image" class="w-4 h-4"></i>
-          <span>🖼️ Galería de Fotos</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="brand">
-          <i data-lucide="palette" class="w-4 h-4"></i>
-          <span>Identidad & Marca</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="hero">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
-          <span>Sección Principal (Hero)</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="circuits">
-          <i data-lucide="flag" class="w-4 h-4"></i>
-          <span>Circuitos & Edades</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="kits">
-          <i data-lucide="tag" class="w-4 h-4"></i>
-          <span>Kits de Corredor</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="testimonials">
-          <i data-lucide="message-square" class="w-4 h-4"></i>
-          <span>Testimonios Familiares</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="faqs">
-          <i data-lucide="help-circle" class="w-4 h-4"></i>
-          <span>Preguntas Frecuentes</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="seo">
-          <i data-lucide="search" class="w-4 h-4"></i>
-          <span>SEO & Google Events</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="leads">
-          <div class="flex items-center gap-3">
-            <i data-lucide="inbox" class="w-4 h-4"></i>
-            <span>Inscripciones</span>
+        <!-- Base de Datos de Participantes (Admin y Editor) -->
+        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold <%= role !== 'admin' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-gray-300 hover:text-white hover:bg-gray-900' %> transition-all text-left" data-tab="leads">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="users" class="w-4 h-4"></i>
+            <span>📋 Base de Participantes</span>
           </div>
           <% if (leads && leads.length > 0) { %>
           <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full"><%= leads.length %></span>
           <% } %>
         </button>
 
-        <button type="button" class="tab-btn w-full flex items-center gap-3 px-3.5 py-2.5 rounded-3xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-800 transition-all text-left" data-tab="security">
+        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="countdown">
+          <i data-lucide="clock" class="w-4 h-4"></i>
+          <span>⏰ Cuenta Regresiva</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="circuits">
+          <i data-lucide="flag" class="w-4 h-4"></i>
+          <span>Circuitos & Edades</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="gallery">
+          <i data-lucide="image" class="w-4 h-4"></i>
+          <span>🖼️ Galería de Fotos</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="kits">
+          <i data-lucide="tag" class="w-4 h-4"></i>
+          <span>Kits de Corredor</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="brand">
+          <i data-lucide="palette" class="w-4 h-4"></i>
+          <span>Identidad & Marca</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="hero">
+          <i data-lucide="sparkles" class="w-4 h-4"></i>
+          <span>Sección Principal (Hero)</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="testimonials">
+          <i data-lucide="message-square" class="w-4 h-4"></i>
+          <span>Testimonios Familiares</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="faqs">
+          <i data-lucide="help-circle" class="w-4 h-4"></i>
+          <span>Preguntas Frecuentes</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="seo">
+          <i data-lucide="search" class="w-4 h-4"></i>
+          <span>SEO & Google Events</span>
+        </button>
+
+        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="security">
           <i data-lucide="shield" class="w-4 h-4"></i>
           <span>Seguridad & Clave</span>
         </button>
@@ -132,8 +171,119 @@
     <main class="flex-1 min-w-0">
       <form id="cms-form" onsubmit="return false;" class="space-y-6">
         
+        <!-- PESTAÑA: GESTIÓN DE CORRIDAS & FECHAS (SOLO ADMINISTRADOR) -->
+        <% if (role === 'admin') { %>
+        <div id="tab-races" class="tab-pane space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <div>
+                <h2 class="text-lg font-black text-white flex items-center gap-2">
+                  <i data-lucide="calendar" class="w-5 h-5 text-blue-400"></i>
+                  Gestión y Programación de Corridas
+                </h2>
+                <p class="text-xs text-gray-400 mt-0.5">Crea nuevas ediciones, define la fecha de largada y activa la corrida oficial para el landing.</p>
+              </div>
+              <button type="button" id="btn-open-new-race" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/30 transition-all flex items-center gap-2">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Generar Nueva Corrida</span>
+              </button>
+            </div>
+
+            <!-- Formulario Desplegable para Crear Nueva Corrida -->
+            <div id="new-race-panel" class="hidden mb-8 p-6 rounded-2xl bg-gray-900 border border-blue-500/30 shadow-xl space-y-4">
+              <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                  <i data-lucide="flag" class="w-4 h-4 text-blue-400"></i>
+                  Crear Nueva Edición de Carrera
+                </h3>
+                <button type="button" id="btn-cancel-new-race" class="text-xs text-gray-400 hover:text-white">✕ Cancelar</button>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="sm:col-span-2">
+                  <label class="block text-xs text-gray-300 font-semibold mb-1">Nombre Oficial del Evento *</label>
+                  <input type="text" id="input-newRaceName" placeholder="Ej: KidsRun 2026 - Gran Corrida Bicentenario" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                  <label class="block text-xs text-gray-300 font-semibold mb-1">Fecha y Hora de Largada (ISO) *</label>
+                  <input type="datetime-local" id="input-newRaceDate" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                  <label class="block text-xs text-gray-300 font-semibold mb-1">Hora de Largada Visible</label>
+                  <input type="text" id="input-newRaceTime" placeholder="09:00 AM" value="09:00 AM" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                  <label class="block text-xs text-gray-300 font-semibold mb-1">Lugar del Evento</label>
+                  <input type="text" id="input-newRaceLocation" placeholder="Parque Bicentenario • Circuito Cerrado" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+
+                <div>
+                  <label class="block text-xs text-gray-300 font-semibold mb-1">Cupo Máximo de Niños</label>
+                  <input type="number" id="input-newRaceMax" value="500" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                </div>
+              </div>
+
+              <div class="flex items-center justify-between pt-3 border-t border-gray-800">
+                <label class="flex items-center gap-2 text-xs text-gray-300 cursor-pointer">
+                  <input type="checkbox" id="input-newRaceActive" checked class="w-4 h-4 rounded text-blue-600 focus:ring-blue-500 bg-gray-950 border-gray-800">
+                  <span class="font-bold text-blue-400">Activar de inmediato para la portada y el formulario web</span>
+                </label>
+                <button type="button" id="btn-submit-new-race" class="px-5 py-2 rounded-xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-700 shadow-md transition-all">
+                  Guardar y Publicar Corrida
+                </button>
+              </div>
+            </div>
+
+            <!-- Lista de Corridas Registradas -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="races-list-container">
+              <% (races || []).forEach(race => { %>
+              <div class="p-5 rounded-2xl bg-gray-900/80 border <%= race.status === 'active' ? 'border-blue-500/80 ring-1 ring-blue-500/30 shadow-lg shadow-blue-500/10' : 'border-gray-800' %> flex flex-col justify-between space-y-4">
+                <div>
+                  <div class="flex items-center justify-between mb-2">
+                    <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full <%= race.status === 'active' ? 'bg-blue-500/20 text-blue-300 border border-blue-500/40' : 'bg-gray-800 text-gray-400 border border-gray-700' %>">
+                      <%= race.status === 'active' ? '⚡ ACTIVA EN WEB' : 'PROGRAMADA' %>
+                    </span>
+                    <span class="text-xs font-mono text-gray-400">Año <%= race.year || '2026' %></span>
+                  </div>
+                  <h3 class="text-base font-bold text-white mb-1"><%= race.name %></h3>
+                  <p class="text-xs text-blue-400 font-medium flex items-center gap-1.5 mb-2">
+                    <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+                    <%= race.dateDisplay || race.date %> • <%= race.time %>
+                  </p>
+                  <p class="text-xs text-gray-400 flex items-center gap-1.5">
+                    <i data-lucide="map-pin" class="w-3.5 h-3.5 text-gray-500"></i>
+                    <%= race.location %>
+                  </p>
+                </div>
+
+                <div class="pt-3 border-t border-gray-800 flex items-center justify-between text-xs">
+                  <span class="text-gray-400 text-[11px]">
+                    Cupo: <strong class="text-white"><%= race.maxParticipants || 500 %></strong> inscripciones
+                  </span>
+                  <% if (race.status !== 'active') { %>
+                  <button type="button" data-race-id="<%= race.id %>" class="btn-activate-race px-3 py-1.5 rounded-xl text-xs font-bold text-blue-300 hover:text-white bg-blue-950/60 border border-blue-800 hover:bg-blue-600 transition-all flex items-center gap-1">
+                    <i data-lucide="check" class="w-3.5 h-3.5"></i>
+                    <span>Activar en Web</span>
+                  </button>
+                  <% } else { %>
+                  <span class="text-emerald-400 font-bold flex items-center gap-1">
+                    <i data-lucide="check-circle-2" class="w-3.5 h-3.5"></i> Activa
+                  </span>
+                  <% } %>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+
+          </div>
+        </div>
+        <% } %>
+
         <!-- PESTAÑA: CUENTA REGRESIVA & FECHA DEL EVENTO -->
-        <div id="tab-countdown" class="tab-pane space-y-6">
+        <div id="tab-countdown" class="tab-pane hidden space-y-6">
           <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
             <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
               <i data-lucide="clock" class="w-4 h-4 text-emerald-400"></i>
@@ -208,14 +358,21 @@
                   </div>
                 </div>
 
-                <div class="grid grid-cols-2 gap-2">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
                   <div>
                     <label class="block text-[11px] text-gray-400 mb-0.5">Categoría (Tag)</label>
                     <input type="text" name="gallery[<%= idx %>][category]" value="<%= photo.category || 'Carrera' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-400">
                   </div>
                   <div>
-                    <label class="block text-[11px] text-gray-400 mb-0.5">URL de la Imagen</label>
-                    <input type="text" name="gallery[<%= idx %>][url]" value="<%= photo.url %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-400">
+                    <label class="block text-[11px] text-gray-400 mb-0.5">Foto (URL o Subir)</label>
+                    <div class="flex gap-1.5">
+                      <input type="text" name="gallery[<%= idx %>][url]" value="<%= photo.url %>" class="gallery-url-input w-full bg-gray-950 border border-gray-800 rounded-xl px-2.5 py-1.5 text-xs text-white focus:outline-none focus:border-emerald-400" placeholder="/uploads/..." id="gal-url-<%= idx %>">
+                      <label class="cursor-pointer bg-blue-600/80 hover:bg-blue-600 text-white text-[11px] font-bold px-2.5 py-1.5 rounded-xl flex items-center gap-1 whitespace-nowrap transition-all" title="Subir y optimizar foto">
+                        <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+                        <span>Subir</span>
+                        <input type="file" class="hidden file-uploader-input" data-target-input="#gal-url-<%= idx %>" data-preview-img="img" data-upload-type="standard" accept="image/*">
+                      </label>
+                    </div>
                   </div>
                 </div>
 
@@ -255,8 +412,27 @@
               </div>
 
               <div class="sm:col-span-2">
-                <label class="block text-xs font-semibold text-gray-300 mb-1.5">URL de Imagen del Logo (Opcional - Imagen PNG/SVG)</label>
-                <input type="text" id="input-logoUrl" value="<%= content.brand?.logoUrl || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400" placeholder="https://.../mi-logo.png">
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Logo Oficial (Imagen optimizada en servidor)</label>
+                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                  <div class="w-16 h-16 rounded-2xl bg-gray-900 border border-gray-800 flex items-center justify-center overflow-hidden flex-shrink-0" id="preview-logo-box">
+                    <% if (content.brand?.logoUrl) { %>
+                      <img src="<%= content.brand.logoUrl %>" alt="Logo" class="max-w-full max-h-full object-contain">
+                    <% } else { %>
+                      <i data-lucide="<%= content.brand?.logoIcon || 'trophy' %>" class="w-6 h-6 text-gray-500"></i>
+                    <% } %>
+                  </div>
+                  <div class="flex-1 w-full space-y-2">
+                    <div class="flex gap-2">
+                      <input type="text" id="input-logoUrl" value="<%= content.brand?.logoUrl || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2 text-sm text-white focus:outline-none focus:border-emerald-400" placeholder="/uploads/mi-logo.webp o URL externa">
+                      <label class="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-2xl flex items-center gap-1.5 whitespace-nowrap transition-all shadow-md shadow-blue-600/30">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        <span>Subir Foto</span>
+                        <input type="file" class="hidden file-uploader-input" data-target-input="#input-logoUrl" data-preview-box="#preview-logo-box" data-upload-type="logo" accept="image/*">
+                      </label>
+                    </div>
+                    <p class="text-[11px] text-gray-400">Las imágenes subidas se redimensionan y se convierten a <strong>WebP ultra ligero</strong> automáticamente.</p>
+                  </div>
+                </div>
               </div>
 
               <div>
@@ -565,80 +741,309 @@
 
               <div>
                 <label class="block text-xs font-semibold text-gray-300 mb-1.5">Imagen OpenGraph (WhatsApp, Redes)</label>
-                <input type="text" id="input-ogImage" value="<%= content.seo?.ogImage || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white">
+                <div class="flex gap-2">
+                  <input type="text" id="input-ogImage" value="<%= content.seo?.ogImage || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2 text-sm text-white" placeholder="/uploads/... o URL externa">
+                  <label class="cursor-pointer bg-blue-600/80 hover:bg-blue-600 text-white text-xs font-bold px-3.5 py-2 rounded-2xl flex items-center gap-1.5 whitespace-nowrap transition-all shadow-md shadow-blue-600/20">
+                    <i data-lucide="upload" class="w-4 h-4"></i>
+                    <span>Subir</span>
+                    <input type="file" class="hidden file-uploader-input" data-target-input="#input-ogImage" data-upload-type="standard" accept="image/*">
+                  </label>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- PESTAÑA: BANDEJA DE INSCRIPCIONES (LEADS) -->
-        <div id="tab-leads" class="tab-pane hidden space-y-6">
-          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
+        <!-- PESTAÑA: BASE DE DATOS DE PARTICIPANTES (ADMINISTRADOR Y EDITOR) -->
+        <div id="tab-leads" class="tab-pane <%= role === 'admin' ? 'hidden' : '' %> space-y-5">
+          <div class="bg-slate-900 border border-slate-800 rounded-3xl p-4 sm:p-7 shadow-xl space-y-5">
+            
+            <!-- Cabecera de la Base de Datos -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800">
               <div>
-                <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
-                  <i data-lucide="inbox" class="w-4 h-4 text-emerald-400"></i>
-                  Bandeja de Pequeños Corredores Inscritos (<%= (leads || []).length %>)
-                </h2>
-                <p class="text-xs text-gray-400">Inscripciones y solicitudes de kits registradas en la base de datos.</p>
+                <div class="flex items-center gap-2 mb-1">
+                  <div class="w-8 h-8 rounded-xl bg-blue-600/20 text-blue-400 flex items-center justify-center">
+                    <i data-lucide="users" class="w-4 h-4"></i>
+                  </div>
+                  <h2 class="text-lg sm:text-xl font-black text-white">
+                    Base de Participantes
+                  </h2>
+                  <span class="text-xs bg-blue-600 text-white font-black px-2.5 py-0.5 rounded-full" id="participants-count-badge">
+                    <%= (leads || []).length %>
+                  </span>
+                </div>
+                <p class="text-xs text-slate-400">
+                  Control oficial de inscripciones, pupilos, tutores legales y comprobantes de pago.
+                </p>
               </div>
-              <div class="flex items-center gap-2">
+
+              <!-- Acciones de Cabecera: Exportar CSV + Estado DB -->
+              <div class="flex flex-wrap items-center gap-2.5">
+                <a href="/admin/api/inscriptions/export" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 shadow-md shadow-amber-400/20 active:scale-95 transition-all flex items-center gap-1.5">
+                  <i data-lucide="download" class="w-4 h-4"></i>
+                  <span>Exportar CSV</span>
+                </a>
+
                 <% if (isPostgres) { %>
-                <span class="text-xs bg-emerald-500/30 text-emerald-200 font-bold px-3 py-1.5 rounded-3xl border border-emerald-400 flex items-center gap-1.5 shadow-sm">
+                <span class="text-xs bg-emerald-950/80 text-emerald-300 font-bold px-3 py-1.5 rounded-xl border border-emerald-500/30 flex items-center gap-1.5">
                   <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                  <i data-lucide="database" class="w-3.5 h-3.5"></i> PostgreSQL Activo
+                  <span>PostgreSQL</span>
                 </span>
                 <% } else { %>
-                <span class="text-xs bg-red-500/30 text-red-200 font-bold px-3 py-1.5 rounded-3xl border border-red-400 flex items-center gap-1.5">
-                  <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i> Almacenamiento Local (Backup)
+                <span class="text-xs bg-amber-950/80 text-amber-300 font-bold px-3 py-1.5 rounded-xl border border-amber-500/30 flex items-center gap-1.5">
+                  <i data-lucide="hard-drive" class="w-3.5 h-3.5"></i> Respaldo Local
                 </span>
                 <% } %>
               </div>
             </div>
 
-            <% if (!leads || leads.length === 0) { %>
-            <div class="text-center py-12 text-gray-500">
-              <i data-lucide="user-check" class="w-10 h-10 mx-auto mb-2 opacity-50"></i>
-              <p class="text-sm">Aún no hay inscripciones registradas.</p>
+            <!-- Barra de Herramientas: Búsqueda Inteligente y Filtros -->
+            <div class="space-y-3">
+              <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                  <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-500">
+                    <i data-lucide="search" class="w-4 h-4"></i>
+                  </div>
+                  <input type="text" id="filter-search-input" placeholder="Buscar por RUT o Nombre del padre/tutor, pupilo, dorsal o email..." class="admin-input w-full pl-10 pr-4 py-2.5 text-xs text-white placeholder-slate-500">
+                </div>
+
+                <!-- Filtro por Circuito -->
+                <div class="sm:w-56">
+                  <select id="filter-circuit-select" class="admin-input w-full py-2.5 text-xs text-white cursor-pointer">
+                    <option value="all">Todos los Circuitos</option>
+                    <option value="500">500 Metros (Mini Runners)</option>
+                    <option value="1">1 Kilómetro (Rayos)</option>
+                    <option value="2">2 Kilómetros (Campeones)</option>
+                    <option value="3">3 Kilómetros (Titanes)</option>
+                  </select>
+                </div>
+              </div>
+              <p class="text-[11px] text-slate-400 flex items-center gap-1">
+                <i data-lucide="info" class="w-3.5 h-3.5 text-blue-400 flex-shrink-0"></i>
+                <span>Al escribir el <strong>RUT o nombre del apoderado</strong>, el filtro mostrará automáticamente a todos los pupilos asociados a esa familia.</span>
+              </p>
             </div>
-            <% } else { %>
-            <div class="space-y-4">
-              <% leads.forEach(lead => { %>
-              <div id="lead-row-<%= lead.id %>" class="p-4 rounded-3xl bg-gray-900/60 border border-gray-800 flex flex-col sm:flex-row items-start justify-between gap-4">
-                <div class="space-y-1">
-                  <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-sm font-bold text-white"><%= lead.name %> (Tutor)</span>
-                    <span class="text-xs text-emerald-400 font-mono"><%= lead.email %></span>
-                    <% if (lead.phone) { %>
-                    <span class="text-xs text-gray-400 font-mono">• <%= lead.phone %></span>
+
+            <!-- VISTA MÓVIL (CARDS RESPONSIVE - MOBILE FIRST) -->
+            <div class="block lg:hidden space-y-3" id="participants-mobile-list">
+              <% if (!leads || leads.length === 0) { %>
+              <div class="text-center py-10 bg-slate-950/60 rounded-2xl border border-slate-800 text-slate-400 space-y-2">
+                <i data-lucide="user-x" class="w-8 h-8 mx-auto opacity-50 text-slate-500"></i>
+                <p class="text-sm font-bold text-slate-300">Aún no hay inscripciones registradas.</p>
+                <p class="text-xs text-slate-500">Las inscripciones web aparecerán aquí al instante.</p>
+              </div>
+              <% } else { %>
+                <% leads.forEach(lead => { %>
+                <div class="participant-row bg-slate-950/80 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 space-y-3 transition-colors shadow-sm"
+                     data-search="<%= ((lead.tutorRut || '') + ' ' + (lead.name || '') + ' ' + (lead.kidName || '') + ' ' + (lead.email || '') + ' ' + (lead.phone || '') + ' ' + (lead.emergencyContact || '') + ' ' + (lead.bibNumber || '')).toLowerCase() %>"
+                     data-distance="<%= (lead.distance || '').toLowerCase() %>">
+                  
+                  <div class="flex items-start justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                      <span class="font-mono font-black text-amber-400 text-xs bg-amber-950/80 border border-amber-500/30 px-2 py-0.5 rounded-lg">
+                        #<%= lead.bibNumber || '----' %>
+                      </span>
+                      <div>
+                        <h3 class="font-bold text-white text-sm flex items-center gap-1">
+                          <i data-lucide="smile" class="w-3.5 h-3.5 text-blue-400"></i>
+                          <span><%= lead.kidName || 'Sin nombre' %></span>
+                        </h3>
+                        <span class="text-[11px] text-slate-400"><%= lead.kidAge ? lead.kidAge + ' años' : 'Edad no indicada' %></span>
+                      </div>
+                    </div>
+
+                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-900/60 text-blue-300 border border-blue-500/30">
+                      <%= lead.distance || 'General' %>
+                    </span>
+                  </div>
+
+                  <!-- Datos del Tutor Legal -->
+                  <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="text-slate-400 text-[11px]">Tutor Legal:</span>
+                      <span class="font-bold text-white"><%= lead.name %></span>
+                    </div>
+                    <% if (lead.tutorRut) { %>
+                    <div class="flex items-center justify-between">
+                      <span class="text-slate-400 text-[11px]">RUT Tutor:</span>
+                      <span class="font-mono font-bold text-amber-300"><%= lead.tutorRut %></span>
+                    </div>
+                    <% } %>
+                    <div class="flex items-center justify-between">
+                      <span class="text-slate-400 text-[11px]">Contacto:</span>
+                      <span class="font-mono text-slate-300"><%= lead.emergencyContact || lead.phone || lead.email %></span>
+                    </div>
+                  </div>
+
+                  <!-- Comprobante y Acciones Móvil -->
+                  <div class="flex items-center justify-between pt-1">
+                    <div>
+                      <% if (lead.paymentProof) { %>
+                      <button type="button" class="btn-view-proof inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-900 transition-colors text-xs font-bold" data-proof-url="<%= lead.paymentProof %>" data-pupil="<%= lead.kidName || 'Pupilo' %>" data-tutor="<%= lead.name || 'Tutor' %>">
+                        <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
+                        <span>Ver Comprobante</span>
+                      </button>
+                      <% } else { %>
+                      <span class="text-slate-500 text-xs italic flex items-center gap-1">
+                        <i data-lucide="clock" class="w-3.5 h-3.5"></i> Comprobante Pendiente
+                      </span>
+                      <% } %>
+                    </div>
+
+                    <% if (role === 'admin') { %>
+                    <button type="button" data-lead-id="<%= lead.id %>" class="btn-delete-lead p-2 text-red-400 hover:text-white hover:bg-red-950/80 rounded-xl transition-all" title="Eliminar registro">
+                      <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
                     <% } %>
                   </div>
-                  <% if (lead.kidName) { %>
-                  <p class="text-xs font-bold text-emerald-400 flex items-center gap-1.5 pt-1">
-                    <i data-lucide="smile" class="w-3.5 h-3.5"></i>
-                    Niño/a: <%= lead.kidName %> <%= lead.kidAge ? '(' + lead.kidAge + ' años)' : '' %>
-                    <% if (lead.distance) { %>
-                    <span class="px-2 py-0.5 rounded bg-emerald-500/30 text-emerald-200 border border-emerald-400 text-[10px] ml-1">
-                      <%= lead.distance %>
-                    </span>
-                    <% } %>
-                  </p>
-                  <% } %>
-                  <p class="text-xs text-gray-400 mt-1 leading-relaxed bg-gray-950/60 p-3 rounded-xl border border-gray-800">
-                    <%= lead.message %>
-                  </p>
-                  <p class="text-[10px] text-gray-500 pt-1">
-                    Inscripción enviada el <%= new Date(lead.createdAt).toLocaleString('es-ES') %>
-                  </p>
                 </div>
-                <button type="button" data-lead-id="<%= lead.id %>" class="btn-delete-lead text-xs text-red-400 hover:text-red-300 px-3 py-1.5 rounded-xl bg-red-950/30 border border-red-900/40 hover:bg-red-950/60 transition-all flex items-center gap-1">
-                  <i data-lucide="trash" class="w-3.5 h-3.5"></i>
-                  <span>Eliminar</span>
+                <% }); %>
+              <% } %>
+            </div>
+
+            <!-- VISTA ESCRITORIO (TABLA COMPLETA) -->
+            <div class="hidden lg:block overflow-x-auto rounded-2xl border border-slate-800 bg-slate-950/40">
+              <table class="w-full text-left text-xs text-slate-300" id="participants-table">
+                <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-mono text-[10px] border-b border-slate-800">
+                  <tr>
+                    <th class="py-3.5 px-4 font-black">Dorsal</th>
+                    <th class="py-3.5 px-4 font-black">Pupilo/a</th>
+                    <th class="py-3.5 px-4 font-black">Edad</th>
+                    <th class="py-3.5 px-4 font-black">Circuito</th>
+                    <th class="py-3.5 px-4 font-black">Tutor / Apoderado</th>
+                    <th class="py-3.5 px-4 font-black">RUT Tutor</th>
+                    <th class="py-3.5 px-4 font-black">Teléfono / Emergencia</th>
+                    <th class="py-3.5 px-4 font-black">Comprobante</th>
+                    <th class="py-3.5 px-4 font-black">Fecha</th>
+                    <% if (role === 'admin') { %>
+                    <th class="py-3.5 px-4 font-black text-right">Acción</th>
+                    <% } %>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-800/80" id="participants-tbody">
+                  <% if (!leads || leads.length === 0) { %>
+                  <tr id="no-participants-row">
+                    <td colspan="<%= role === 'admin' ? 10 : 9 %>" class="text-center py-12 text-slate-500">
+                      <i data-lucide="user-check" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
+                      <p class="text-sm font-bold text-slate-400">Aún no hay inscripciones registradas en la base de datos.</p>
+                      <p class="text-xs text-slate-600 mt-1">Los registros desde el landing se reflejarán aquí al instante.</p>
+                    </td>
+                  </tr>
+                  <% } else { %>
+                    <% leads.forEach(lead => { %>
+                    <tr id="lead-row-<%= lead.id %>" class="participant-row hover:bg-slate-900/60 transition-colors"
+                        data-search="<%= ((lead.tutorRut || '') + ' ' + (lead.name || '') + ' ' + (lead.kidName || '') + ' ' + (lead.email || '') + ' ' + (lead.phone || '') + ' ' + (lead.emergencyContact || '') + ' ' + (lead.bibNumber || '')).toLowerCase() %>"
+                        data-distance="<%= (lead.distance || '').toLowerCase() %>">
+                      
+                      <!-- Dorsal Oficial -->
+                      <td class="py-3.5 px-4 font-mono font-black text-amber-400">
+                        #<%= lead.bibNumber || '----' %>
+                      </td>
+
+                      <!-- Nombre Pupilo -->
+                      <td class="py-3.5 px-4 font-bold text-white">
+                        <div class="flex items-center gap-1.5">
+                          <i data-lucide="smile" class="w-3.5 h-3.5 text-blue-400 flex-shrink-0"></i>
+                          <span><%= lead.kidName || 'No indicado' %></span>
+                        </div>
+                      </td>
+
+                      <!-- Edad -->
+                      <td class="py-3.5 px-4 text-slate-300 font-medium">
+                        <%= lead.kidAge ? lead.kidAge + ' años' : '-' %>
+                      </td>
+
+                      <!-- Distancia / Circuito con badge -->
+                      <td class="py-3.5 px-4">
+                        <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-950 text-blue-300 border border-blue-500/40">
+                          <%= lead.distance || 'General' %>
+                        </span>
+                      </td>
+
+                      <!-- Nombre Tutor y Correo -->
+                      <td class="py-3.5 px-4">
+                        <div class="font-bold text-white"><%= lead.name %></div>
+                        <div class="text-[11px] font-mono text-slate-500"><%= lead.email %></div>
+                      </td>
+
+                      <!-- RUT Tutor -->
+                      <td class="py-3.5 px-4 font-mono font-bold text-amber-300 text-[11px]">
+                        <%= lead.tutorRut || '-' %>
+                      </td>
+
+                      <!-- Teléfono de Emergencia -->
+                      <td class="py-3.5 px-4 font-mono text-slate-300">
+                        <%= lead.emergencyContact || lead.phone || '-' %>
+                      </td>
+
+                      <!-- Comprobante de Pago (Agrandar al Pinchar) -->
+                      <td class="py-3.5 px-4">
+                        <% if (lead.paymentProof) { %>
+                        <button type="button" class="btn-view-proof inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-950 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900 transition-all text-[11px] font-bold cursor-pointer" data-proof-url="<%= lead.paymentProof %>" data-pupil="<%= lead.kidName || 'Pupilo' %>" data-tutor="<%= lead.name || 'Tutor' %>" title="Agrandar comprobante">
+                          <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
+                          <span>Ver Foto</span>
+                        </button>
+                        <% } else { %>
+                        <span class="text-slate-500 text-[11px] italic">Pendiente</span>
+                        <% } %>
+                      </td>
+
+                      <!-- Fecha Registro -->
+                      <td class="py-3.5 px-4 text-slate-400 text-[11px] font-mono">
+                        <%= new Date(lead.createdAt).toLocaleDateString('es-ES') %>
+                      </td>
+
+                      <!-- Acciones (Solo Administrador) -->
+                      <% if (role === 'admin') { %>
+                      <td class="py-3.5 px-4 text-right">
+                        <button type="button" data-lead-id="<%= lead.id %>" class="btn-delete-lead p-1.5 rounded-lg text-red-400 hover:text-white hover:bg-red-950/80 transition-all" title="Eliminar registro">
+                          <i data-lucide="trash-2" class="w-4 h-4"></i>
+                        </button>
+                      </td>
+                      <% } %>
+                    </tr>
+                    <% }); %>
+                  <% } %>
+                </tbody>
+              </table>
+            </div>
+
+            <!-- Fila Sin Resultados (búsqueda vacía) -->
+            <div id="no-search-results" class="hidden text-center py-8 bg-slate-950/50 rounded-2xl border border-slate-800 text-slate-400 space-y-1">
+              <i data-lucide="search-x" class="w-7 h-7 mx-auto text-slate-500"></i>
+              <p class="text-sm font-bold text-slate-300">No se encontraron inscripciones con ese criterio.</p>
+              <p class="text-xs text-slate-500">Prueba buscando por RUT, nombre del padre, nombre del niño o dorsal.</p>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- MODAL LIGHTBOX PARA VER COMPROBANTE DE PAGO EN GRANDE -->
+        <div id="proof-lightbox-modal" class="fixed inset-0 z-50 hidden proof-modal-backdrop bg-slate-950/90 flex items-center justify-center p-3 sm:p-6">
+          <div class="relative max-w-2xl w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 animate-in fade-in zoom-in-95 duration-150">
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2">
+                <i data-lucide="receipt" class="w-5 h-5 text-emerald-400"></i>
+                <div>
+                  <h3 class="text-sm font-black text-white" id="lightbox-pupil-title">Comprobante de Transferencia</h3>
+                  <p class="text-[11px] text-slate-400" id="lightbox-tutor-sub">Acreditación oficial del pago</p>
+                </div>
+              </div>
+              <div class="flex items-center gap-2">
+                <a id="lightbox-download-link" href="#" target="_blank" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs text-slate-200 font-bold flex items-center gap-1" download>
+                  <i data-lucide="download" class="w-3.5 h-3.5"></i>
+                  <span>Abrir Original</span>
+                </a>
+                <button type="button" id="btn-close-lightbox" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors">
+                  ✕
                 </button>
               </div>
-              <% }); %>
             </div>
-            <% } %>
+
+            <!-- Imagen del Comprobante -->
+            <div class="w-full max-h-[70vh] bg-slate-950 rounded-2xl flex items-center justify-center overflow-auto p-2 border border-slate-800">
+              <img id="lightbox-img" src="" alt="Comprobante de Pago" class="max-w-full max-h-[65vh] object-contain rounded-xl shadow-lg">
+            </div>
           </div>
         </div>
 
@@ -646,12 +1051,12 @@
         <div id="tab-security" class="tab-pane hidden space-y-6">
           <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800 max-w-md">
             <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
-              <i data-lucide="shield" class="w-4 h-4 text-emerald-400"></i>
-              Cambiar Contraseña de Administrador
+              <i data-lucide="shield" class="w-4 h-4 text-blue-400"></i>
+              Cambiar Contraseña de Acceso
             </h2>
             <p class="text-xs text-gray-400 mb-6">Actualiza tu clave de acceso de forma segura.</p>
 
-            <form id="form-change-password" class="space-y-4">
+            <div id="form-change-password-container" class="space-y-4">
               <div>
                 <label class="block text-xs font-semibold text-gray-300 mb-1.5">Contraseña Actual</label>
                 <input type="password" id="input-currentPassword" required class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
@@ -660,10 +1065,10 @@
                 <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nueva Contraseña (mínimo 6 caracteres)</label>
                 <input type="password" id="input-newPassword" required minlength="6" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
               </div>
-              <button type="submit" class="px-5 py-2.5 rounded-3xl text-xs font-bold text-white bg-yellow-500 hover:bg-yellow-400 transition-all">
+              <button type="button" id="btn-submit-change-password" class="px-5 py-2.5 rounded-3xl text-xs font-bold text-white bg-yellow-500 hover:bg-yellow-400 transition-all">
                 Actualizar Clave
               </button>
-            </form>
+            </div>
           </div>
         </div>
 

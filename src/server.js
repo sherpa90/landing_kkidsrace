@@ -73,6 +73,11 @@ app.set('views', path.join(__dirname, 'views'));
 
 // Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
+// Servir uploads persistentes optimizados del CMS con caché eficiente
+app.use('/uploads', express.static(path.resolve(__dirname, '../data/uploads'), {
+  maxAge: '7d',
+  immutable: true
+}));
 
 // Rutas
 app.use('/', publicRoutes);

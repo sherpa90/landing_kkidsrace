@@ -74,7 +74,7 @@ function deepMerge(target, source) {
   return result;
 }
 
-// Gestión de Leads / Contactos recibidos
+// Gestión de Leads / Contactos e Inscripciones de Participantes
 function getLeads() {
   try {
     if (fs.existsSync(LEADS_FILE)) {
@@ -90,18 +90,30 @@ function getLeads() {
 function addLead(leadData) {
   try {
     const leads = getLeads();
+    const content = getContent();
+    const activeRace = getActiveRace();
+
     const newLead = {
-      id: crypto.randomUUID ? crypto.randomUUID() : `lead_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: crypto.randomUUID ? crypto.randomUUID() : `insc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      raceId: leadData.raceId || (activeRace ? activeRace.id : 'race-2026-primavera'),
+      raceName: leadData.raceName || (activeRace ? activeRace.name : 'KidsRun 2026'),
+      // Datos del tutor (minimización de datos)
       name: (leadData.name || leadData.tutorName || '').trim(),
       email: (leadData.email || '').trim(),
       phone: (leadData.phone || '').trim(),
+      // Datos del participante menor (mínimos para resguardo y seguridad)
       kidName: String(leadData.kidName || '').trim(),
-      kidAge: String(leadData.kidAge ?? '').trim(),
+      kidAge: leadData.kidAge ? parseInt(leadData.kidAge, 10) : null,
       distance: String(leadData.distance || leadData.category || '').trim(),
-      subject: (leadData.subject || (leadData.distance ? `Inscripción - ${leadData.distance}` : '')).trim(),
-      message: (leadData.message || '').trim(),
+      emergencyContact: (leadData.emergencyContact || leadData.phone || '').trim(),
+      medicalNotes: (leadData.medicalNotes || leadData.message || '').trim(),
+      message: (leadData.message || leadData.medicalNotes || '').trim(),
+      subject: (leadData.subject || `Inscripción - ${leadData.distance || 'KidsRun'}`).trim(),
+      paymentProof: (leadData.paymentProof || '').trim(),
+      consentGiven: Boolean(leadData.consentGiven !== false), // Consentimiento de tutor legal
       createdAt: new Date().toISOString(),
-      read: false
+      status: 'confirmed',
+      bibNumber: generateBibNumber(leads.length + 101)
     };
 
     leads.unshift(newLead);
@@ -116,6 +128,72 @@ function addLead(leadData) {
     console.error('Error guardando lead:', err);
     return { success: false, error: err.message };
   }
+}
+
+function generateBibNumber(num) {
+  return String(num).padStart(4, '0');
+}
+
+function getRaces() {
+  const content = getContent();
+  return content.races || [];
+}
+
+function getActiveRace() {
+  const races = getRaces();
+  return races.find(r => r.status === 'active') || races[0] || null;
+}
+
+function saveRace(raceData) {
+  const content = getContent();
+  let races = content.races || [];
+
+  if (raceData.id) {
+    // Editar existente
+    const idx = races.findIndex(r => r.id === raceData.id);
+    if (idx !== -1) {
+      if (raceData.status === 'active') {
+        races.forEach(r => { r.status = 'inactive'; });
+      }
+      races[idx] = { ...races[idx], ...raceData };
+    }
+  } else {
+    // Crear nueva
+    const id = `race-${Date.now()}-${Math.random().toString(36).substring(2, 6)}`;
+    if (raceData.status === 'active') {
+      races.forEach(r => { r.status = 'inactive'; });
+    }
+    races.unshift({
+      id,
+      name: raceData.name || 'Nueva Corrida KidsRun',
+      year: new Date(raceData.date || Date.now()).getFullYear(),
+      date: raceData.date || new Date().toISOString(),
+      dateDisplay: raceData.dateDisplay || '',
+      time: raceData.time || '09:00 AM',
+      location: raceData.location || 'Parque Bicentenario',
+      city: raceData.city || 'Sector Central',
+      status: raceData.status || 'planned',
+      circuits: raceData.circuits || ['500 Metros', '1 Kilómetro', '2 Kilómetros', '3 Kilómetros'],
+      maxParticipants: parseInt(raceData.maxParticipants, 10) || 500,
+      createdAt: new Date().toISOString()
+    });
+  }
+
+  // Sincronizar fecha del countdown si la carrera guardada es la activa
+  const active = races.find(r => r.status === 'active');
+  if (active) {
+    content.countdown = {
+      ...content.countdown,
+      targetDate: active.date,
+      eventDateDisplay: active.dateDisplay || content.countdown?.eventDateDisplay,
+      eventTime: active.time || content.countdown?.eventTime,
+      locationName: active.location || content.countdown?.locationName,
+      locationCity: active.city || content.countdown?.locationCity
+    };
+  }
+
+  content.races = races;
+  return saveContent(content);
 }
 
 function deleteLead(id) {
@@ -134,6 +212,25 @@ function deleteLead(id) {
 // Configuración de Paletas de Colores para el tema moderno
 // Colores corporativos: Rojo (#ef4444), Verde (#10b981), Amarillo (#facc15)
 const COLOR_THEMES = {
+  blue_sport: {
+    name: 'Azul Deportivo, Amarillo y Rojo (KidsRun Oficial)',
+    primary: 'blue-600',
+    primaryHex: '#1d4ed8',
+    secondaryHex: '#facc15',
+    accentHex: '#ef4444',
+    gradient: 'from-blue-600 via-red-500 to-amber-400',
+    gradientDark: 'from-blue-400 via-red-400 to-yellow-300',
+    glow: 'rgba(29, 78, 216, 0.4)',
+    solidBtn: 'bg-blue-600 hover:bg-blue-700 text-white font-bold',
+    solidBtnSecondary: 'bg-amber-400 hover:bg-amber-500 text-slate-900 font-bold',
+    solidBtnDanger: 'bg-red-600 hover:bg-red-700 text-white font-bold',
+    badgePrimary: 'bg-blue-600 text-white',
+    badgeSecondary: 'bg-amber-400 text-slate-900',
+    badgeDanger: 'bg-red-600 text-white',
+    badgeBorder: 'border-blue-600 text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-blue-950',
+    cardBorder: 'border-blue-500',
+    cardHover: 'hover:border-red-400'
+  },
   green_yellow: {
     name: 'Rojo, Verde y Amarillo Corporativo',
     primary: 'emerald-500',
@@ -269,8 +366,8 @@ const COLOR_THEMES = {
   }
 };
 
-function getTheme(accentColor = 'green_yellow') {
-  return COLOR_THEMES[accentColor] || COLOR_THEMES.green_yellow;
+function getTheme(accentColor = 'blue_sport') {
+  return COLOR_THEMES[accentColor] || COLOR_THEMES.blue_sport;
 }
 
 module.exports = {
@@ -279,6 +376,9 @@ module.exports = {
   getLeads,
   addLead,
   deleteLead,
+  getRaces,
+  getActiveRace,
+  saveRace,
   COLOR_THEMES,
   getTheme
 };

@@ -54,13 +54,58 @@ router.get('/', (req, res) => {
     ]
   };
 
+  const activeRace = contentStore.getActiveRace();
+  const races = contentStore.getRaces();
+
   res.render('index', {
     content,
     theme,
     themeMode,
     siteUrl,
+    activeRace,
+    races,
     jsonLd: JSON.stringify(jsonLd)
   });
+});
+
+// Página Dedicada de Inscripción Mobile-First
+router.get('/inscribir', (req, res) => {
+  const content = contentStore.getContent();
+  const theme = contentStore.getTheme(content.brand?.accentColor || 'green_yellow');
+  const themeMode = content.brand?.themeMode || 'light';
+  const siteUrl = content.seo?.canonicalUrl || `${req.protocol}://${req.get('host')}`;
+  const activeRace = contentStore.getActiveRace();
+
+  res.render('inscribir', {
+    content,
+    theme,
+    themeMode,
+    siteUrl,
+    activeRace
+  });
+});
+
+// Endpoint público para subir y optimizar captura de comprobante de pago
+const imageService = require('../services/imageService');
+router.post('/api/upload-proof', imageService.upload.single('proof'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No se ha adjuntado ningún archivo de comprobante.' });
+    }
+
+    const result = await imageService.processAndSaveImage(req.file.buffer, req.file.originalname, 'payment_proof');
+    return res.json({
+      success: true,
+      message: 'Comprobante guardado y optimizado con éxito.',
+      data: result
+    });
+  } catch (err) {
+    console.error('Error procesando comprobante:', err);
+    return res.status(500).json({
+      success: false,
+      error: err.message || 'Error procesando el comprobante.'
+    });
+  }
 });
 
 // Endpoint Dinámico de Sitemap XML
@@ -83,18 +128,17 @@ router.get('/robots.txt', (req, res) => {
   res.render('robots', { siteUrl, allowIndex });
 });
 
-// Endpoint para Inscripciones y Contacto Familiar (PostgreSQL + Local Fallback)
-router.post('/api/contact', async (req, res) => {
-  const { name, email, phone, kidName, kidAge, distance, subject, message } = req.body;
+// Endpoint para Consultas Generales de Contacto (Sección Contacto Portada)
+router.post('/api/inquiry', async (req, res) => {
+  const { name, email, phone, subject, message } = req.body;
 
-  if (!name || !email) {
+  if (!name || !email || !message) {
     return res.status(400).json({
       success: false,
-      error: 'Por favor ingresa tu Nombre (Padre/Tutor) y Correo Electrónico.'
+      error: 'Por favor completa tu nombre, correo electrónico y mensaje.'
     });
   }
 
-  // Validación básica de email
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   if (!emailRegex.test(email)) {
     return res.status(400).json({
@@ -103,27 +147,94 @@ router.post('/api/contact', async (req, res) => {
     });
   }
 
-  const result = await db.saveInscription({
+  // Guardar consulta en la base de datos o registro
+  await db.saveInscription({
+    name: name.trim(),
+    email: email.trim(),
+    phone: (phone || '').trim(),
+    kidName: 'Consulta General',
+    subject: (subject || 'Consulta Web').trim(),
+    message: message.trim(),
+    distance: 'Contacto General'
+  });
+
+  return res.json({
+    success: true,
+    message: '¡Gracias por contactarnos! Tu mensaje fue recibido y te responderemos a la brevedad.'
+  });
+});
+
+// Endpoint para Inscripciones y Contacto Familiar (Cumplimiento de Protección de Datos)
+router.post('/api/contact', async (req, res) => {
+  const {
+    raceId,
     name,
     email,
     phone,
     kidName,
     kidAge,
     distance,
-    subject: subject || (distance ? `Inscripción ${distance} - Niño: ${kidName || 'N/A'}` : 'Consulta KidsRun'),
-    message: message || `Pre-inscripción realizada para el niño/a ${kidName || 'No indicado'} (${kidAge ? kidAge + ' años' : ''}) en distancia ${distance || 'General'}.`
+    emergencyContact,
+    medicalNotes,
+    consentGiven,
+    paymentProof,
+    tutorRut
+  } = req.body;
+
+  if (!name || !email) {
+    return res.status(400).json({
+      success: false,
+      error: 'Por favor ingresa tu Nombre (Padre/Tutor) y Correo Electrónico de contacto.'
+    });
+  }
+
+  if (!kidName) {
+    return res.status(400).json({
+      success: false,
+      error: 'Por favor ingresa el Nombre o Apodo deportivo de tu pupilo.'
+    });
+  }
+
+  // Validación de email
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    return res.status(400).json({
+      success: false,
+      error: 'Por favor introduce un correo electrónico válido.'
+    });
+  }
+
+  const activeRace = contentStore.getActiveRace();
+  const targetRaceId = raceId || (activeRace ? activeRace.id : 'race-2026-primavera');
+  const targetRaceName = activeRace ? activeRace.name : 'KidsRun 2026';
+
+  const result = await db.saveInscription({
+    raceId: targetRaceId,
+    raceName: targetRaceName,
+    name,
+    email,
+    phone,
+    tutorRut: tutorRut || '',
+    kidName,
+    kidAge: parseInt(kidAge, 10) || null,
+    distance: distance || '500m (3-5 años)',
+    emergencyContact: emergencyContact || phone,
+    medicalNotes,
+    paymentProof: paymentProof || '',
+    consentGiven: Boolean(consentGiven === 'true' || consentGiven === true || consentGiven === 'on'),
+    subject: `Inscripción ${distance || 'General'} - Pupilo: ${kidName}`
   });
 
   if (result.success) {
     return res.json({
       success: true,
-      message: '¡Inscripción registrada con éxito en la base de datos! Te contactaremos con los detalles del kit.',
+      message: '¡Inscripción confirmada con éxito! Sus datos están debidamente protegidos y se ha reservado el cupo y kit oficial.',
       source: result.source
     });
   } else {
     return res.status(500).json({
       success: false,
-      error: 'Ocurrió un error al procesar tu solicitud. Inténtalo nuevamente más tarde.'
+      error: 'Ocurrió un error al procesar la inscripción. Por favor inténtalo nuevamente.'
     });
   }
 });

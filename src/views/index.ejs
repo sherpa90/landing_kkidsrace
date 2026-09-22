@@ -64,7 +64,12 @@
           colors: {
             brand: {
               DEFAULT: '<%= theme.primaryHex %>',
-              light: '<%= theme.primaryHex %>20',
+              light: '<%= theme.primaryHex %>15',
+              subtle: '#eff6ff',
+            },
+            accent: {
+              yellow: '#facc15',
+              red: '#ef4444',
             }
           }
         }
@@ -78,15 +83,15 @@
   <!-- Estilos Personalizados y Animaciones -->
   <link rel="stylesheet" href="/css/custom.css">
 </head>
-<body class="bg-slate-50 text-slate-800 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300 selection:bg-emerald-500 selection:text-white antialiased relative overflow-x-hidden">
+<body class="bg-white text-slate-800 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300 selection:bg-blue-600 selection:text-white antialiased relative overflow-x-hidden">
 
-  <!-- Luces ambientales de fondo adaptables (corporativo: rojo/verde/amarillo) -->
-  <div class="ambient-glow ambient-green w-[650px] h-[650px] top-[-100px] left-1/2 -translate-x-1/2"></div>
-  <div class="ambient-glow ambient-red w-[550px] h-[550px] top-[500px] right-[-150px]"></div>
-  <div class="ambient-glow ambient-yellow w-[600px] h-[600px] top-[2200px] left-[-200px]"></div>
+  <!-- Luces ambientales de fondo: Blanco predominante con destellos Azul, Rojo y Amarillo sutiles -->
+  <div class="ambient-glow ambient-blue w-[650px] h-[650px] top-[-120px] left-1/2 -translate-x-1/2"></div>
+  <div class="ambient-glow ambient-red w-[500px] h-[500px] top-[600px] right-[-150px]"></div>
+  <div class="ambient-glow ambient-yellow w-[550px] h-[550px] top-[2100px] left-[-200px]"></div>
 
   <!-- Barra de Navegación Superior -->
-  <header id="navbar" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white/80 dark:bg-gray-950/85 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 shadow-sm">
+  <header id="navbar" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white/90 dark:bg-gray-950/85 backdrop-blur-md border-b border-slate-100 dark:border-white/10 shadow-sm">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
       
       <!-- Logotipo: Soporta Imagen Personalizada o Icono + Texto -->
@@ -94,18 +99,18 @@
         <% if (content.brand?.logoUrl) { %>
         <img src="<%= content.brand.logoUrl %>" alt="<%= content.brand?.name || 'KidsRun' %>" class="h-11 w-auto object-contain">
         <% } else { %>
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr <%= theme.gradient %> p-[1px] shadow-lg shadow-emerald-300/50 group-hover:scale-105 transition-transform">
-          <div class="w-full h-full bg-white dark:bg-gray-950 rounded-3xl flex items-center justify-center">
-            <i data-lucide="<%= content.brand?.logoIcon || 'trophy' %>" class="w-5 h-5 text-emerald-600 dark:text-emerald-400"></i>
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr <%= theme.gradient %> p-[2px] shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
+          <div class="w-full h-full bg-white dark:bg-gray-950 rounded-2xl flex items-center justify-center">
+            <i data-lucide="<%= content.brand?.logoIcon || 'trophy' %>" class="w-5 h-5 text-blue-600 dark:text-yellow-400"></i>
           </div>
         </div>
         <% } %>
 
         <div class="flex flex-col">
-          <span class="text-xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors">
+          <span class="text-xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-yellow-400 transition-colors">
             <%= content.brand?.logoText || 'KidsRun 2026' %>
           </span>
-          <span class="text-[10px] font-bold text-emerald-600 dark:text-yellow-400 -mt-1 hidden sm:block">
+          <span class="text-[10px] font-bold text-blue-600 dark:text-yellow-400 -mt-0.5 hidden sm:block tracking-wide uppercase">
             <%= content.brand?.tagline || 'Corrida Infantil & Familiar' %>
           </span>
         </div>
@@ -113,14 +118,15 @@
 
       <!-- Menú de Navegación Escritorio -->
       <nav class="hidden lg:flex items-center gap-7 text-sm font-bold text-slate-600 dark:text-gray-300">
-        <a href="#countdown" class="hover:text-emerald-600 dark:hover:text-yellow-400 transition-colors flex items-center gap-1">
-          <i data-lucide="clock" class="w-3.5 h-3.5"></i> Cuenta Regresiva
+        <a href="#countdown" class="hover:text-blue-600 dark:hover:text-yellow-400 transition-colors flex items-center gap-1.5">
+          <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-600 dark:text-yellow-400"></i> Cuenta Regresiva
         </a>
-        <a href="#circuits" class="hover:text-slate-900 dark:hover:text-white transition-colors">Circuitos</a>
-        <a href="#schedule" class="hover:text-slate-900 dark:hover:text-white transition-colors">Cronograma</a>
-        <a href="#gallery" class="hover:text-slate-900 dark:hover:text-white transition-colors">Galería</a>
-        <a href="#kits" class="hover:text-slate-900 dark:hover:text-white transition-colors">Kits & Precios</a>
-        <a href="#faq" class="hover:text-slate-900 dark:hover:text-white transition-colors">Preguntas</a>
+        <a href="#circuits" class="hover:text-blue-600 dark:hover:text-white transition-colors">Circuitos</a>
+        <a href="#schedule" class="hover:text-blue-600 dark:hover:text-white transition-colors">Cronograma</a>
+        <a href="#gallery" class="hover:text-blue-600 dark:hover:text-white transition-colors">Galería</a>
+        <a href="#kits" class="hover:text-blue-600 dark:hover:text-white transition-colors">Kits & Precios</a>
+        <a href="#faq" class="hover:text-blue-600 dark:hover:text-white transition-colors">Preguntas</a>
+        <a href="#contact" class="hover:text-blue-600 dark:hover:text-white transition-colors">Contacto</a>
       </nav>
 
       <!-- Acciones de Cabecera: Conmutador Modo Claro/Oscuro + CMS + Inscripción -->
@@ -132,12 +138,12 @@
           <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
         </button>
 
-        <a href="/admin" class="text-xs font-semibold px-3 py-2 rounded-2xl border border-slate-200 dark:border-gray-800 text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white transition-all flex items-center gap-1.5" title="Panel CMS">
+        <a href="/admin" class="text-xs font-semibold px-3.5 py-2.5 rounded-2xl border border-slate-200 dark:border-gray-800 text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 transition-all flex items-center gap-1.5" title="Panel CMS">
           <i data-lucide="lock" class="w-3.5 h-3.5"></i>
           CMS Admin
         </a>
 
-        <a href="#contact" class="px-5 py-2.5 rounded-2xl text-sm font-bold <%= theme.solidBtn %> hover:scale-105 transition-all shadow-md shadow-emerald-300/50 hover:shadow-emerald-400/60 transform hover:-translate-y-0.5 flex items-center gap-1.5">
+        <a href="/inscribir" class="px-5 py-2.5 rounded-2xl text-sm font-bold <%= theme.solidBtn %> hover:scale-105 transition-all shadow-md shadow-blue-600/30 transform hover:-translate-y-0.5 flex items-center gap-1.5">
           <i data-lucide="user-plus" class="w-4 h-4"></i>
           <span>Inscribir Niño/a</span>
         </a>
@@ -157,17 +163,18 @@
 
     <!-- Menú Desplegable Móvil -->
     <div id="mobile-menu" class="hidden lg:hidden bg-white/95 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-6 py-6 space-y-4 shadow-xl">
-      <a href="#countdown" class="block text-emerald-600 dark:text-yellow-400 font-bold">⏰ Cuenta Regresiva</a>
-      <a href="#circuits" class="block text-slate-700 dark:text-gray-300 font-medium">Circuitos por Edades</a>
-      <a href="#schedule" class="block text-slate-700 dark:text-gray-300 font-medium">Cronograma del Día</a>
-      <a href="#gallery" class="block text-slate-700 dark:text-gray-300 font-medium">Galería de Fotos</a>
-      <a href="#kits" class="block text-slate-700 dark:text-gray-300 font-medium">Kits y Valores</a>
-      <a href="#faq" class="block text-slate-700 dark:text-gray-300 font-medium">Preguntas Frecuentes</a>
+      <a href="#countdown" class="block text-blue-600 dark:text-yellow-400 font-bold">⏰ Cuenta Regresiva</a>
+      <a href="#circuits" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Circuitos por Edades</a>
+      <a href="#schedule" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Cronograma del Día</a>
+      <a href="#gallery" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Galería de Fotos</a>
+      <a href="#kits" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Kits y Valores</a>
+      <a href="#faq" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Preguntas Frecuentes</a>
+      <a href="#contact" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Contacto & Ayuda</a>
       <div class="pt-4 border-t border-slate-200 dark:border-gray-800 flex flex-col gap-3">
         <a href="/admin" class="text-center text-sm font-semibold py-2 px-4 rounded-xl border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-gray-300">
           CMS Admin
         </a>
-        <a href="#contact" class="text-center py-2.5 px-4 rounded-2xl text-sm font-bold <%= theme.solidBtn %>">
+        <a href="/inscribir" class="text-center py-2.5 px-4 rounded-2xl text-sm font-bold <%= theme.solidBtn %>">
           Inscribir Niño/a
         </a>
       </div>
@@ -176,22 +183,22 @@
 
   <main>
     <!-- SECCIÓN HERO -->
-    <section class="relative min-h-[90vh] flex items-center justify-center pt-32 pb-16 overflow-hidden">
+    <section class="relative min-h-[92vh] flex items-center justify-center pt-32 pb-20 overflow-hidden bg-gradient-to-b from-blue-50/50 via-white to-white dark:from-gray-950 dark:via-gray-900 dark:to-gray-950">
       <canvas id="hero-canvas" class="absolute inset-0 w-full h-full pointer-events-none z-0"></canvas>
 
       <div class="relative z-10 max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
         <!-- Badge Superior Animado -->
         <% if (content.hero?.badgeText) { %>
-        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-emerald-400/70 bg-emerald-200 backdrop-blur-md text-xs font-black text-emerald-700 dark:text-emerald-300 mb-6 hover:border-emerald-400/80 transition-all cursor-pointer group">
-          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-ping"></span>
+        <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-blue-200 bg-blue-50/90 backdrop-blur-md text-xs font-black text-blue-700 dark:border-yellow-400/40 dark:bg-yellow-400/10 dark:text-yellow-300 mb-6 hover:border-blue-300 shadow-sm transition-all cursor-pointer group">
+          <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
           <span><%= content.hero.badgeText %></span>
-          <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform"></i>
+          <i data-lucide="arrow-right" class="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform text-blue-600 dark:text-yellow-400"></i>
         </div>
         <% } %>
 
-        <!-- Título Principal con Efecto Gradiente -->
-        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.1] mb-6">
+        <!-- Título Principal con Efecto Gradiente Atlético -->
+        <h1 class="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.12] mb-6">
           <span><%= content.hero?.headlinePrefix || 'La Carrera Más Divertida del Año para' %></span>
           <br>
           <span class="text-gradient bg-gradient-to-r <%= theme.gradient %>">
@@ -200,43 +207,44 @@
         </h1>
 
         <!-- Subtítulo Descriptivo -->
-        <p class="max-w-3xl mx-auto text-lg sm:text-xl text-slate-600 dark:text-gray-300 font-normal leading-relaxed mb-10">
+        <p class="max-w-3xl mx-auto text-base sm:text-lg lg:text-xl text-slate-600 dark:text-gray-300 font-normal leading-relaxed mb-10">
           <%= content.hero?.subheadline || 'Un día inolvidable de deporte, risas y diversión con medalla para todos los niños.' %>
         </p>
 
         <!-- Botones CTA -->
         <div class="flex flex-col sm:flex-row items-center justify-center gap-4 mb-8">
-          <a href="<%= content.hero?.primaryCtaLink || '#contact' %>" class="w-full sm:w-auto px-8 py-4 rounded-2xl text-base font-bold <%= theme.solidBtn %> hover:scale-105 shadow-xl shadow-emerald-300/50 hover:shadow-emerald-400/60 transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
+          <a href="<%= content.hero?.primaryCtaLink === '#contact' ? '/inscribir' : (content.hero?.primaryCtaLink || '/inscribir') %>" class="w-full sm:w-auto px-8 py-4 rounded-2xl text-base font-bold <%= theme.solidBtn %> hover:scale-105 shadow-xl shadow-blue-600/30 hover:shadow-blue-600/40 transform hover:-translate-y-0.5 transition-all flex items-center justify-center gap-2">
             <span><%= content.hero?.primaryCtaText || 'Inscribir a mi Pequeño/a' %></span>
-            <i data-lucide="sparkles" class="w-4 h-4"></i>
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-300"></i>
           </a>
-          <a href="<%= content.hero?.secondaryCtaLink || '#gallery' %>" class="w-full sm:w-auto px-8 py-4 rounded-2xl text-base font-bold <%= theme.solidBtnSecondary %> hover:scale-105 shadow-sm transition-all flex items-center justify-center gap-2">
-            <i data-lucide="image" class="w-5 h-5 text-emerald-600 dark:text-yellow-400"></i>
+          <a href="<%= content.hero?.secondaryCtaLink || '#circuits' %>" class="w-full sm:w-auto px-8 py-4 rounded-2xl text-base font-bold bg-white text-blue-700 border-2 border-blue-600/20 hover:border-blue-600 hover:bg-blue-50/50 dark:bg-gray-900 dark:text-yellow-400 dark:border-yellow-400/40 hover:scale-105 shadow-sm transition-all flex items-center justify-center gap-2">
+            <i data-lucide="flag" class="w-5 h-5 text-blue-600 dark:text-yellow-400"></i>
             <span><%= content.hero?.secondaryCtaText || 'Ver Galería & Circuitos' %></span>
           </a>
         </div>
 
-        <p class="text-xs font-bold text-emerald-700 dark:text-yellow-300/90 flex items-center justify-center gap-2">
-          <%= content.hero?.statsNotice || '🏅 Medalla finisher garantizada para todos los niños • Cupos limitados' %>
-        </p>
+        <div class="inline-flex items-center gap-2 px-4 py-2 rounded-2xl bg-amber-50 dark:bg-yellow-950/40 border border-amber-200/80 dark:border-yellow-500/30 text-xs font-bold text-amber-900 dark:text-yellow-300">
+          <i data-lucide="award" class="w-4 h-4 text-amber-600 dark:text-yellow-400"></i>
+          <span><%= content.hero?.statsNotice || '🏅 Medalla finisher garantizada para todos los niños • Cupos limitados' %></span>
+        </div>
 
       </div>
     </section>
 
     <!-- SECCIÓN CONTADOR REGRESIVO (COUNTDOWN TIMER) -->
-    <section id="countdown" class="py-16 relative z-10 -mt-8">
+    <section id="countdown" class="py-14 relative z-10 -mt-6">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white/95 dark:bg-gray-900/90 p-8 sm:p-10 rounded-3xl border-2 border-emerald-400/60 dark:border-yellow-400/60 shadow-2xl backdrop-blur-xl relative overflow-hidden">
+        <div class="bg-white dark:bg-gray-900 p-8 sm:p-10 rounded-3xl border border-blue-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative overflow-hidden">
           
           <div class="text-center mb-8">
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-300/50 dark:bg-yellow-300/50 text-emerald-700 dark:text-yellow-300 text-xs font-bold border border-emerald-400/60 dark:border-yellow-400/60 mb-3">
-              <span class="w-2 h-2 rounded-full bg-emerald-500 dark:bg-yellow-400 animate-pulse"></span>
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 text-xs font-bold border border-red-200 dark:border-red-900 mb-3">
+              <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
               <%= content.countdown?.badge || '⏰ ¡FALTAN SÓLO!' %>
             </div>
             <h2 class="text-2xl sm:text-3xl font-black text-slate-900 dark:text-white tracking-tight">
               Cuenta Regresiva para la Gran Largada
             </h2>
-            <p class="text-sm text-slate-500 dark:text-gray-400 mt-1">
+            <p class="text-sm text-slate-500 dark:text-gray-400 mt-1 font-medium">
               <%= content.countdown?.eventDateDisplay || 'Domingo 15 de Noviembre, 2026' %> • <%= content.countdown?.eventTime || '09:00 AM' %>
             </p>
           </div>
@@ -244,23 +252,23 @@
           <!-- Bloques del Contador Dinámico -->
           <div id="countdown-timer" data-target="<%= content.countdown?.targetDate || '2026-11-15T09:00:00' %>" class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-center max-w-3xl mx-auto">
             
-            <div class="p-4 sm:p-6 rounded-3xl bg-slate-50 dark:bg-gray-950/90 border border-slate-200 dark:border-gray-800/80 shadow-sm dark:shadow-inner flex flex-col justify-center items-center">
-              <span id="cd-days" class="text-4xl sm:text-6xl font-black text-emerald-600 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r <%= theme.gradient %>">00</span>
+            <div class="p-4 sm:p-6 rounded-3xl bg-blue-50/60 dark:bg-gray-950/90 border border-blue-100 dark:border-gray-800/80 shadow-sm flex flex-col justify-center items-center">
+              <span id="cd-days" class="text-4xl sm:text-6xl font-black text-blue-600 dark:text-blue-400">00</span>
               <span class="text-xs uppercase tracking-widest text-slate-500 dark:text-gray-400 font-bold mt-2">DÍAS</span>
             </div>
 
-            <div class="p-4 sm:p-6 rounded-3xl bg-slate-50 dark:bg-gray-950/90 border border-slate-200 dark:border-gray-800/80 shadow-sm dark:shadow-inner flex flex-col justify-center items-center">
-              <span id="cd-hours" class="text-4xl sm:text-6xl font-black text-emerald-600 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r <%= theme.gradient %>">00</span>
+            <div class="p-4 sm:p-6 rounded-3xl bg-blue-50/60 dark:bg-gray-950/90 border border-blue-100 dark:border-gray-800/80 shadow-sm flex flex-col justify-center items-center">
+              <span id="cd-hours" class="text-4xl sm:text-6xl font-black text-blue-600 dark:text-blue-400">00</span>
               <span class="text-xs uppercase tracking-widest text-slate-500 dark:text-gray-400 font-bold mt-2">HORAS</span>
             </div>
 
-            <div class="p-4 sm:p-6 rounded-3xl bg-slate-50 dark:bg-gray-950/90 border border-slate-200 dark:border-gray-800/80 shadow-sm dark:shadow-inner flex flex-col justify-center items-center">
-              <span id="cd-minutes" class="text-4xl sm:text-6xl font-black text-emerald-600 dark:text-transparent dark:bg-clip-text dark:bg-gradient-to-r <%= theme.gradient %>">00</span>
+            <div class="p-4 sm:p-6 rounded-3xl bg-blue-50/60 dark:bg-gray-950/90 border border-blue-100 dark:border-gray-800/80 shadow-sm flex flex-col justify-center items-center">
+              <span id="cd-minutes" class="text-4xl sm:text-6xl font-black text-blue-600 dark:text-blue-400">00</span>
               <span class="text-xs uppercase tracking-widest text-slate-500 dark:text-gray-400 font-bold mt-2">MINUTOS</span>
             </div>
 
-            <div class="p-4 sm:p-6 rounded-3xl bg-slate-50 dark:bg-gray-950/90 border border-slate-200 dark:border-gray-800/80 shadow-sm dark:shadow-inner flex flex-col justify-center items-center">
-              <span id="cd-seconds" class="text-4xl sm:text-6xl font-black text-yellow-400 dark:text-yellow-400">00</span>
+            <div class="p-4 sm:p-6 rounded-3xl bg-amber-50/70 dark:bg-gray-950/90 border border-amber-200 dark:border-gray-800/80 shadow-sm flex flex-col justify-center items-center">
+              <span id="cd-seconds" class="text-4xl sm:text-6xl font-black text-amber-500 dark:text-yellow-400">00</span>
               <span class="text-xs uppercase tracking-widest text-slate-500 dark:text-gray-400 font-bold mt-2">SEGUNDOS</span>
             </div>
 
@@ -268,23 +276,27 @@
 
           <!-- Mensaje al expirar -->
           <div id="countdown-expired" class="hidden text-center py-6">
-            <span class="text-2xl sm:text-3xl font-black text-emerald-600 dark:text-yellow-400">🎉 ¡HOY ES EL GRAN DÍA DE LA CORRIDA! 🎉</span>
+            <span class="text-2xl sm:text-3xl font-black text-blue-600 dark:text-yellow-400">🎉 ¡HOY ES EL GRAN DÍA DE LA CORRIDA! 🎉</span>
             <p class="text-slate-600 dark:text-gray-300 mt-2">¡Nos vemos en el arco de largada! Trae tu kit y toda la energía.</p>
           </div>
 
           <!-- Tarjetas de Ubicación y Seguridad -->
-          <div class="mt-8 pt-6 border-t border-slate-200 dark:border-gray-800 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-gray-300">
-            <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-gray-950/50 border border-slate-200 dark:border-gray-800">
-              <i data-lucide="map-pin" class="w-5 h-5 text-emerald-600 dark:text-yellow-400 flex-shrink-0"></i>
+          <div class="mt-8 pt-6 border-t border-slate-100 dark:border-gray-800 grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs text-slate-600 dark:text-gray-300">
+            <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-gray-950/50 border border-slate-100 dark:border-gray-800">
+              <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="map-pin" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+              </div>
               <div>
                 <p class="font-bold text-slate-900 dark:text-white"><%= content.countdown?.locationName || 'Parque Bicentenario' %></p>
                 <p class="text-slate-500 dark:text-gray-400"><%= content.countdown?.locationCity || 'Sector Explanada Central' %></p>
               </div>
             </div>
-            <div class="flex items-center gap-3 p-3 rounded-2xl bg-slate-50 dark:bg-gray-950/50 border border-slate-200 dark:border-gray-800">
-              <i data-lucide="shield-check" class="w-5 h-5 text-emerald-600 dark:text-emerald-400 flex-shrink-0"></i>
+            <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-gray-950/50 border border-slate-100 dark:border-gray-800">
+              <div class="w-9 h-9 rounded-xl bg-red-100 dark:bg-red-950 flex items-center justify-center flex-shrink-0">
+                <i data-lucide="shield-check" class="w-5 h-5 text-red-600 dark:text-red-400"></i>
+              </div>
               <div>
-                <p class="font-bold text-slate-900 dark:text-white">Circuito 100% Seguro</p>
+                <p class="font-bold text-slate-900 dark:text-white">Circuito 100% Protegido</p>
                 <p class="text-slate-500 dark:text-gray-400">Sin vehículos • Ambulancia y paramédicos certificados</p>
               </div>
             </div>
@@ -295,7 +307,7 @@
     </section>
 
     <!-- BARRA DE MÉTRICAS -->
-    <section class="py-12 border-y border-slate-200 dark:border-white/5 bg-white/70 dark:bg-gray-950/80 backdrop-blur-sm relative z-10">
+    <section class="py-12 border-y border-slate-100 dark:border-white/5 bg-slate-50/60 dark:bg-gray-950/80 backdrop-blur-sm relative z-10">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
           <% (content.metrics || []).forEach(metric => { %>
@@ -304,7 +316,7 @@
               <%= metric.value %>
             </div>
             <div class="text-xs sm:text-sm font-bold text-slate-600 dark:text-gray-400 flex items-center justify-center gap-1.5">
-              <i data-lucide="<%= metric.icon || 'award' %>" class="w-4 h-4 text-emerald-600 dark:text-yellow-400"></i>
+              <i data-lucide="<%= metric.icon || 'award' %>" class="w-4 h-4 text-blue-600 dark:text-yellow-400"></i>
               <%= metric.label %>
             </div>
           </div>
@@ -314,40 +326,40 @@
     </section>
 
     <!-- SECCIÓN DE CIRCUITOS Y CATEGORÍAS -->
-    <section id="circuits" class="py-24 relative z-10">
+    <section id="circuits" class="py-24 relative z-10 bg-white dark:bg-gray-950">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-16">
-          <h2 class="text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-yellow-400 mb-3">CIRCUITOS ADAPTADOS</h2>
-          <p class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
+          <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">CIRCUITOS ADAPTADOS</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight">
             Una distancia ideal para cada edad
-          </p>
-          <p class="text-slate-600 dark:text-gray-400 text-sm mt-3">Diseñados para garantizar la diversión, el esfuerzo sano y la seguridad de cada corredor.</p>
+          </h2>
+          <p class="text-slate-600 dark:text-gray-400 text-sm sm:text-base mt-3">Diseñados para garantizar la diversión, el esfuerzo sano y la seguridad de cada corredor.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
           <% (content.categories || []).forEach(cat => { %>
-          <div class="bg-white dark:bg-gray-900/60 p-6 rounded-3xl flex flex-col justify-between border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-xl transition-all group">
+          <div class="bg-white dark:bg-gray-900/80 p-7 rounded-3xl flex flex-col justify-between border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-300 group">
             <div>
-              <div class="flex items-center justify-between mb-4">
-                <span class="text-xs font-black px-3 py-1 rounded-full bg-emerald-300/50 dark:bg-yellow-200/50 text-emerald-700 dark:text-yellow-300 border border-emerald-400/60 dark:border-yellow-400/60">
+              <div class="flex items-center justify-between mb-5">
+                <span class="text-xs font-black px-3.5 py-1.5 rounded-full bg-amber-50 dark:bg-yellow-400/20 text-amber-700 dark:text-yellow-300 border border-amber-200 dark:border-yellow-400/30">
                   <%= cat.badge %>
                 </span>
-                <div class="w-10 h-10 rounded-2xl bg-slate-100 dark:bg-gray-950 flex items-center justify-center text-emerald-600 dark:text-yellow-400 group-hover:scale-110 transition-transform">
+                <div class="w-11 h-11 rounded-2xl bg-blue-50 dark:bg-gray-950 flex items-center justify-center text-blue-600 dark:text-yellow-400 group-hover:scale-110 group-hover:bg-blue-600 group-hover:text-white transition-all">
                   <i data-lucide="<%= cat.icon || 'smile' %>" class="w-5 h-5"></i>
                 </div>
               </div>
 
               <div class="text-2xl font-black text-slate-900 dark:text-white mb-1"><%= cat.distance %></div>
-              <h3 class="text-base font-bold text-emerald-600 dark:text-yellow-300 mb-3"><%= cat.title %></h3>
+              <h3 class="text-base font-bold text-blue-600 dark:text-yellow-300 mb-3"><%= cat.title %></h3>
               <p class="text-xs text-slate-600 dark:text-gray-400 leading-relaxed"><%= cat.description %></p>
             </div>
 
-            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-gray-800 flex items-center justify-between text-xs">
-              <span class="text-emerald-600 dark:text-emerald-400 font-bold flex items-center gap-1">
-                <i data-lucide="check" class="w-3.5 h-3.5"></i> Medalla Finisher
+            <div class="mt-6 pt-4 border-t border-slate-100 dark:border-gray-800 flex items-center justify-between text-xs font-bold">
+              <span class="text-slate-600 dark:text-gray-300 flex items-center gap-1.5">
+                <i data-lucide="award" class="w-4 h-4 text-amber-500"></i> Medalla Finisher
               </span>
-              <a href="#contact" class="text-emerald-600 dark:text-yellow-400 hover:opacity-80 font-bold flex items-center">
-                Elegir <i data-lucide="chevron-right" class="w-3.5 h-3.5 ml-0.5"></i>
+              <a href="#contact" class="text-blue-600 dark:text-yellow-400 hover:text-blue-700 dark:hover:underline flex items-center">
+                Elegir <i data-lucide="chevron-right" class="w-4 h-4 ml-0.5 group-hover:translate-x-0.5 transition-transform"></i>
               </a>
             </div>
           </div>
@@ -357,20 +369,20 @@
     </section>
 
     <!-- SECCIÓN CRONOGRAMA DEL DÍA -->
-    <section id="schedule" class="py-20 bg-slate-100/70 dark:bg-gradient-to-b dark:from-gray-950 dark:via-gray-900/40 dark:to-gray-950 relative z-10 border-t border-slate-200 dark:border-white/5">
+    <section id="schedule" class="py-20 bg-slate-50/70 dark:bg-gray-900/40 relative z-10 border-t border-slate-100 dark:border-white/5">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <h2 class="text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-yellow-400 mb-3">HORARIOS Y ACTIVIDADES</h2>
-          <p class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+          <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">HORARIOS Y ACTIVIDADES</span>
+          <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
             Cronograma de la Gran Jornada
-          </p>
+          </h2>
           <p class="text-slate-600 dark:text-gray-400 text-sm mt-2">Ven temprano para disfrutar de todas las sorpresas preparadas para la familia.</p>
         </div>
 
         <div class="space-y-4">
           <% (content.schedule || []).forEach(item => { %>
-          <div class="bg-white dark:bg-gray-900/60 p-5 rounded-3xl border border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm hover:border-emerald-400/70 dark:hover:border-yellow-400/60 transition-all">
-            <div class="px-4 py-2 rounded-2xl bg-emerald-300/50 dark:bg-yellow-300/50 text-emerald-700 dark:text-yellow-300 font-black text-sm tracking-wide border border-emerald-400/60 dark:border-yellow-400/60 flex-shrink-0">
+          <div class="bg-white dark:bg-gray-900/80 p-5 rounded-3xl border border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm hover:border-blue-400 dark:hover:border-yellow-400/60 transition-all">
+            <div class="px-4 py-2 rounded-2xl bg-blue-600 text-white font-black text-sm tracking-wide shadow-sm flex-shrink-0">
               <%= item.time %>
             </div>
             <div class="flex-1">
@@ -384,14 +396,14 @@
     </section>
 
     <!-- SECCIÓN GALERÍA DE IMÁGENES INTERACTIVA (CON LIGHTBOX) -->
-    <section id="gallery" class="py-24 relative z-10">
+    <section id="gallery" class="py-24 relative z-10 bg-white dark:bg-gray-950">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-3xl mx-auto mb-12">
-          <h2 class="text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-yellow-400 mb-3">RECUERDOS INOLVIDABLES</h2>
-          <p class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
+          <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">RECUERDOS INOLVIDABLES</span>
+          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
             Galería de Ediciones Anteriores
-          </p>
+          </h2>
           <p class="text-slate-600 dark:text-gray-400 text-sm">Haz clic en cualquier imagen para verla en tamaño completo.</p>
         </div>
 
@@ -410,16 +422,16 @@
             </div>
 
             <!-- Overlay dinámico -->
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent opacity-85 group-hover:opacity-95 transition-opacity flex flex-col justify-between p-5 text-white">
+            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent opacity-80 group-hover:opacity-95 transition-opacity flex flex-col justify-between p-5 text-white">
               <div class="flex justify-end">
-                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-400/70 text-emerald-200 border border-emerald-400/70 backdrop-blur-md">
+                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-600/90 text-white border border-blue-400/40 backdrop-blur-md">
                   <%= photo.category || 'KidsRun' %>
                 </span>
               </div>
               <div>
-                <h4 class="text-base font-bold text-white group-hover:text-emerald-300 transition-colors flex items-center justify-between">
+                <h4 class="text-base font-bold text-white group-hover:text-amber-300 transition-colors flex items-center justify-between">
                   <span><%= photo.title %></span>
-                  <i data-lucide="maximize-2" class="w-4 h-4 text-emerald-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  <i data-lucide="maximize-2" class="w-4 h-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
                 </h4>
                 <p class="text-xs text-gray-200 mt-1 line-clamp-2"><%= photo.caption %></p>
               </div>
@@ -446,23 +458,23 @@
     </div>
 
     <!-- SECCIÓN DE KITS Y PRECIOS -->
-    <section id="kits" class="py-24 bg-slate-100/70 dark:bg-gradient-to-b dark:from-gray-950 dark:via-gray-900/30 dark:to-gray-950 relative z-10 border-t border-slate-200 dark:border-white/5">
+    <section id="kits" class="py-24 bg-slate-50/70 dark:bg-gray-900/40 relative z-10 border-t border-slate-100 dark:border-white/5">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         <div class="text-center max-w-3xl mx-auto mb-16">
-          <h2 class="text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-yellow-400 mb-3">INSCRIPCIÓN OFICIAL</h2>
-          <p class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
+          <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">INSCRIPCIÓN OFICIAL</span>
+          <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
             Kits de Corredor Disponibles
-          </p>
+          </h2>
           <p class="text-slate-600 dark:text-gray-400 text-sm">Todos los kits incluyen polera técnica y medalla de metal finisher garantizada.</p>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8 items-stretch">
           <% (content.pricing?.plans || []).forEach(plan => { %>
-          <div class="relative bg-white dark:bg-gray-900/70 rounded-3xl p-8 flex flex-col justify-between transition-all shadow-md <%= plan.isPopular ? 'border-2 border-emerald-500 dark:border-yellow-400 shadow-xl shadow-emerald-300/50 md:-translate-y-2' : 'border border-slate-200 dark:border-white/10' %>">
+          <div class="relative bg-white dark:bg-gray-900/80 rounded-3xl p-8 flex flex-col justify-between transition-all shadow-md <%= plan.isPopular ? 'border-2 border-blue-600 dark:border-yellow-400 shadow-xl shadow-blue-500/15 md:-translate-y-2' : 'border border-slate-200 dark:border-white/10' %>">
             
             <% if (plan.isPopular) { %>
-             <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-emerald-600 text-white text-[11px] font-black uppercase tracking-wider px-4 py-1 rounded-full shadow-md">
+             <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[11px] font-black uppercase tracking-wider px-4 py-1 rounded-full shadow-md">
               <%= plan.badge || 'MÁS ELEGIDO' %>
             </div>
             <% } %>
@@ -483,14 +495,16 @@
                 <span class="text-4xl font-black text-slate-900 dark:text-white">
                   $<%= plan.priceMonthly %>
                 </span>
-                <span class="text-xs text-slate-500 dark:text-gray-400">/inscripción</span>
+                <span class="text-xs text-slate-500 dark:text-gray-400 font-medium">/inscripción</span>
               </div>
 
               <!-- Lista de Beneficios -->
               <ul class="space-y-3 mb-8 text-xs text-slate-700 dark:text-gray-300">
                 <% (plan.features || []).forEach(feat => { %>
                 <li class="flex items-center gap-2.5">
-                  <i data-lucide="check" class="w-4 h-4 text-emerald-500 flex-shrink-0"></i>
+                  <div class="w-4 h-4 rounded-full bg-blue-100 dark:bg-blue-950 flex items-center justify-center flex-shrink-0">
+                    <i data-lucide="check" class="w-3 h-3 text-blue-600 dark:text-blue-400"></i>
+                  </div>
                   <span><%= feat %></span>
                 </li>
                 <% }); %>
@@ -498,7 +512,7 @@
             </div>
 
             <!-- Botón CTA -->
-            <a href="#contact" class="w-full text-center py-3.5 px-4 rounded-2xl text-xs font-bold transition-all <%= plan.isPopular ? theme.solidBtn : 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-gray-800 dark:hover:bg-gray-700' %> shadow-lg shadow-emerald-300/60">
+            <a href="/inscribir" class="w-full text-center py-3.5 px-4 rounded-2xl text-xs font-bold transition-all <%= plan.isPopular ? theme.solidBtn : 'bg-slate-900 text-white hover:bg-slate-800 dark:bg-gray-800 dark:hover:bg-gray-700' %> shadow-md hover:scale-[1.02]">
               <%= plan.ctaText || 'Inscribir Ahora' %>
             </a>
           </div>
@@ -509,22 +523,22 @@
     </section>
 
     <!-- SECCIÓN DE TESTIMONIOS -->
-    <section id="testimonials" class="py-24 relative z-10">
+    <section id="testimonials" class="py-24 relative z-10 bg-white dark:bg-gray-950">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center max-w-3xl mx-auto mb-16">
-          <h2 class="text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-yellow-400 mb-3">EXPERIENCIA FAMILIAR</h2>
-          <p class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+          <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">EXPERIENCIA FAMILIAR</span>
+          <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
             Opiniones de Papás y Mamás
-          </p>
+          </h2>
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
           <% (content.testimonials || []).forEach(testimonial => { %>
-          <div class="bg-white dark:bg-gray-900/60 p-8 rounded-3xl flex flex-col justify-between border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-xl transition-all">
+          <div class="bg-white dark:bg-gray-900/60 p-8 rounded-3xl flex flex-col justify-between border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-blue-200 transition-all">
             <div>
-              <div class="flex items-center gap-1 text-yellow-400 dark:text-yellow-400 mb-4">
+              <div class="flex items-center gap-1 text-amber-400 dark:text-yellow-400 mb-4">
                 <% for (let i = 0; i < (testimonial.stars || 5); i++) { %>
-                <i data-lucide="star" class="w-4 h-4 fill-yellow-400"></i>
+                <i data-lucide="star" class="w-4 h-4 fill-amber-400 text-amber-400"></i>
                 <% } %>
               </div>
               <p class="text-slate-700 dark:text-gray-300 text-sm leading-relaxed mb-6 italic">
@@ -532,7 +546,7 @@
               </p>
             </div>
             <div class="flex items-center gap-3 pt-4 border-t border-slate-100 dark:border-gray-800">
-              <img src="<%= testimonial.avatar %>" alt="<%= testimonial.name %>" class="w-10 h-10 rounded-full object-cover border border-emerald-400/60" loading="lazy">
+              <img src="<%= testimonial.avatar %>" alt="<%= testimonial.name %>" class="w-10 h-10 rounded-full object-cover border border-blue-200 dark:border-blue-900" loading="lazy">
               <div>
                 <p class="text-sm font-bold text-slate-900 dark:text-white"><%= testimonial.name %></p>
                 <p class="text-xs text-slate-500 dark:text-gray-400"><%= testimonial.role %></p>
@@ -545,19 +559,19 @@
     </section>
 
     <!-- SECCIÓN DE PREGUNTAS FRECUENTES (FAQ) -->
-    <section id="faq" class="py-24 relative z-10 border-t border-slate-200 dark:border-white/5">
+    <section id="faq" class="py-24 relative z-10 bg-slate-50/70 dark:bg-gray-900/30 border-t border-slate-100 dark:border-white/5">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <h2 class="text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-yellow-400 mb-3">RESOLVEMOS TUS DUDAS</h2>
-          <p class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
+          <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">RESOLVEMOS TUS DUDAS</span>
+          <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
             Preguntas Frecuentes para Padres
-          </p>
+          </h2>
         </div>
 
         <div class="space-y-4">
           <% (content.faqs || []).forEach((faq, index) => { %>
           <div class="faq-item bg-white dark:bg-gray-900/60 rounded-3xl border border-slate-200 dark:border-white/10 shadow-sm overflow-hidden transition-all">
-            <button class="faq-trigger w-full px-6 py-5 text-left flex items-center justify-between text-base font-bold text-slate-900 dark:text-white hover:text-emerald-600 dark:hover:text-yellow-300 transition-colors">
+            <button class="faq-trigger w-full px-6 py-5 text-left flex items-center justify-between text-base font-bold text-slate-900 dark:text-white hover:text-blue-600 dark:hover:text-yellow-300 transition-colors">
               <span><%= faq.question %></span>
               <i data-lucide="chevron-down" class="faq-icon w-5 h-5 text-slate-400 dark:text-gray-400 transition-transform duration-300"></i>
             </button>
@@ -570,104 +584,105 @@
       </div>
     </section>
 
-    <!-- SECCIÓN DE FORMULARIO DE PRE-INSCRIPCIÓN FAMILIAR -->
-    <section id="contact" class="py-24 bg-slate-100/80 dark:bg-gradient-to-b dark:from-gray-950 dark:via-gray-900/60 dark:to-gray-950 relative z-10 border-t border-slate-200 dark:border-white/5">
+    <!-- SECCIÓN DE CONTACTO & ATENCIÓN A FAMILIAS -->
+    <section id="contact" class="py-24 bg-white dark:bg-gray-950 relative z-10 border-t border-slate-100 dark:border-white/5">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
           
-          <!-- Información y Canales -->
+          <!-- Información y Canales Oficiales -->
           <div class="space-y-6">
-            <span class="text-xs font-black uppercase tracking-widest text-emerald-600 dark:text-yellow-400">INSCRIPCIÓN RÁPIDA</span>
+            <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400">ESTAMOS PARA AYUDARTE</span>
             <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight leading-tight">
-              <%= content.contact?.title || 'Inscribe a tu Pequeño Corredor' %>
+              ¿Tienes Dudas sobre la Corrida? Escríbenos
             </h2>
-            <p class="text-slate-600 dark:text-gray-300 leading-relaxed text-sm">
-              <%= content.contact?.subtitle || 'Completa los datos del tutor y del participante para reservar el cupo y el kit oficial en nuestra base de datos.' %>
+            <p class="text-slate-600 dark:text-gray-300 leading-relaxed text-sm sm:text-base">
+              Si tienes consultas sobre los circuitos, retiro de kits de corredor, auspicios o requerimientos especiales para tu familia, contáctanos y nuestro equipo de organización te responderá a la brevedad.
             </p>
 
             <div class="space-y-4 pt-4">
               <div class="flex items-center gap-3 text-sm text-slate-700 dark:text-gray-300">
-                <div class="w-10 h-10 rounded-2xl bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 flex items-center justify-center text-emerald-600 dark:text-yellow-400 shadow-sm">
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-gray-900 border border-blue-100 dark:border-gray-800 flex items-center justify-center text-blue-600 dark:text-yellow-400 shadow-sm">
                   <i data-lucide="mail" class="w-5 h-5"></i>
                 </div>
                 <div>
-                  <p class="text-xs text-slate-500 dark:text-gray-400">Mesa de Ayuda a Familias</p>
+                  <p class="text-xs text-slate-500 dark:text-gray-400">Correo Electrónico</p>
                   <p class="font-bold text-slate-900 dark:text-white"><%= content.contact?.email || 'contacto@kidsrun2026.com' %></p>
                 </div>
               </div>
 
               <div class="flex items-center gap-3 text-sm text-slate-700 dark:text-gray-300">
-                <div class="w-10 h-10 rounded-2xl bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 flex items-center justify-center text-emerald-600 dark:text-yellow-400 shadow-sm">
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-gray-900 border border-blue-100 dark:border-gray-800 flex items-center justify-center text-blue-600 dark:text-yellow-400 shadow-sm">
                   <i data-lucide="phone" class="w-5 h-5"></i>
                 </div>
                 <div>
-                  <p class="text-xs text-slate-500 dark:text-gray-400">WhatsApp Oficial</p>
+                  <p class="text-xs text-slate-500 dark:text-gray-400">WhatsApp de Atención</p>
                   <p class="font-bold text-slate-900 dark:text-white"><%= content.contact?.phone || '+56 9 8765 4321' %></p>
                 </div>
               </div>
 
               <div class="flex items-center gap-3 text-sm text-slate-700 dark:text-gray-300">
-                <div class="w-10 h-10 rounded-2xl bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 flex items-center justify-center text-emerald-600 dark:text-yellow-400 shadow-sm">
+                <div class="w-10 h-10 rounded-2xl bg-blue-50 dark:bg-gray-900 border border-blue-100 dark:border-gray-800 flex items-center justify-center text-blue-600 dark:text-yellow-400 shadow-sm">
                   <i data-lucide="map-pin" class="w-5 h-5"></i>
                 </div>
                 <div>
-                  <p class="text-xs text-slate-500 dark:text-gray-400">Lugar de Largada</p>
+                  <p class="text-xs text-slate-500 dark:text-gray-400">Ubicación del Evento</p>
                   <p class="font-bold text-slate-900 dark:text-white"><%= content.contact?.location || 'Parque Bicentenario • Explanada Central' %></p>
                 </div>
               </div>
             </div>
+
+            <!-- Banner Invitación a Inscripción -->
+            <div class="p-4 rounded-2xl bg-blue-50/80 dark:bg-blue-950/40 border border-blue-100 dark:border-blue-900/40 flex items-center justify-between">
+              <div>
+                <p class="text-xs font-bold text-blue-900 dark:text-blue-200">¿Listo para inscribir a tu hijo/a?</p>
+                <p class="text-[11px] text-blue-700 dark:text-blue-300">Reserva su cupo y medalla oficial en 1 minuto.</p>
+              </div>
+              <a href="/inscribir" class="px-4 py-2 rounded-xl text-xs font-black text-white bg-blue-600 hover:bg-blue-700 shadow-sm transition-all whitespace-nowrap">
+                Inscribir Ahora →
+              </a>
+            </div>
           </div>
 
-          <!-- Formulario Adaptado a Niños (PostgreSQL Backend) -->
-          <div class="bg-white dark:bg-gray-900/80 p-8 rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl">
+          <!-- Formulario Típico de Contacto -->
+          <div class="bg-white dark:bg-gray-900/90 p-8 sm:p-10 rounded-3xl border border-slate-200 dark:border-white/10 shadow-2xl shadow-blue-900/5">
+            <h3 class="text-lg font-bold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+              <i data-lucide="message-square" class="w-5 h-5 text-blue-600 dark:text-yellow-400"></i>
+              Envíanos un Mensaje
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-gray-400 mb-6">
+              Te responderemos a tu correo o WhatsApp a la mayor brevedad.
+            </p>
+
             <form id="contact-form" class="space-y-4">
-              
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label for="name" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Nombre del Padre / Tutor *</label>
-                  <input type="text" id="name" name="name" required placeholder="Ej: Marcela González" class="w-full bg-slate-50 dark:bg-gray-950/80 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors">
-                </div>
-                <div>
-                  <label for="email" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Correo Electrónico *</label>
-                  <input type="email" id="email" name="email" required placeholder="marcela@correo.com" class="w-full bg-slate-50 dark:bg-gray-950/80 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors">
-                </div>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="sm:col-span-2">
-                  <label for="kidName" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Nombre del Niño/a Corredor *</label>
-                  <input type="text" id="kidName" name="kidName" required placeholder="Ej: Mateo González" class="w-full bg-slate-50 dark:bg-gray-950/80 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors">
-                </div>
-                <div>
-                  <label for="kidAge" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Edad *</label>
-                  <input type="number" id="kidAge" name="kidAge" min="2" max="15" required placeholder="7" class="w-full bg-slate-50 dark:bg-gray-950/80 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors">
-                </div>
+              <div>
+                <label for="contact-name" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Nombre Completo *</label>
+                <input type="text" id="contact-name" name="name" required placeholder="Tu nombre y apellido" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label for="phone" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Teléfono</label>
-                  <input type="tel" id="phone" name="phone" placeholder="+56 9 1234 5678" class="w-full bg-slate-50 dark:bg-gray-950/80 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors">
+                  <label for="contact-email" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Correo Electrónico *</label>
+                  <input type="email" id="contact-email" name="email" required placeholder="ejemplo@correo.com" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
                 </div>
                 <div>
-                  <label for="distance" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Circuito / Distancia *</label>
-                  <select id="distance" name="distance" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white focus:outline-none focus:border-emerald-500 transition-colors">
-                    <option value="500m (3-5 años)">500 Metros - Mini Runners (3-5 años)</option>
-                    <option value="1K (6-8 años)">1 Kilómetro - Pequeños Rayos (6-8 años)</option>
-                    <option value="2K (9-11 años)">2 Kilómetros - Súper Campeones (9-11 años)</option>
-                    <option value="3K (12-14 años)">3 Kilómetros - Jóvenes Titanes (12-14 años)</option>
-                  </select>
+                  <label for="contact-phone" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Teléfono / WhatsApp</label>
+                  <input type="tel" id="contact-phone" name="phone" placeholder="+56 9 1234 5678" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
                 </div>
               </div>
 
               <div>
-                <label for="message" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Comentarios o Consultas Especiales</label>
-                <textarea id="message" name="message" rows="3" placeholder="Alergias, talla de polera sugerida o dudas..." class="w-full bg-slate-50 dark:bg-gray-950/80 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-emerald-500 transition-colors"></textarea>
+                <label for="contact-subject" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Asunto de la Consulta</label>
+                <input type="text" id="contact-subject" name="subject" placeholder="Consulta sobre distancias, kits, retiro de poleras..." class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors">
               </div>
 
-              <button type="submit" class="w-full py-4 rounded-2xl text-sm font-black <%= theme.solidBtn %> hover:scale-105 shadow-lg shadow-emerald-300/50 transition-all flex items-center justify-center gap-2">
-                <span><%= content.contact?.formButtonText || 'Completar Pre-Inscripción Oficial' %></span>
-                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+              <div>
+                <label for="contact-message" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1.5">Mensaje *</label>
+                <textarea id="contact-message" name="message" required rows="4" placeholder="Escribe tu consulta aquí..." class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-300 dark:border-gray-800 rounded-2xl px-4 py-3 text-sm text-slate-900 dark:text-white placeholder-slate-400 focus:outline-none focus:border-blue-600 transition-colors"></textarea>
+              </div>
+
+              <button type="submit" class="w-full py-3.5 rounded-2xl text-sm font-black <%= theme.solidBtn %> hover:scale-[1.01] shadow-lg shadow-blue-600/20 transition-all flex items-center justify-center gap-2">
+                <span>Enviar Mensaje</span>
+                <i data-lucide="send" class="w-4 h-4"></i>
               </button>
             </form>
           </div>
@@ -677,8 +692,8 @@
     </section>
   </main>
 
-  <!-- PIE DE PÁGINA (FOOTER) -->
-  <footer class="border-t border-slate-200 dark:border-white/5 bg-slate-100 dark:bg-gray-950 py-12 relative z-10 text-xs text-slate-600 dark:text-gray-400 transition-colors">
+  <!-- PIE DE PÁGINA (FOOTER) - Premium y Sobrio en Slate-900 -->
+  <footer class="border-t border-slate-800 bg-slate-900 py-12 relative z-10 text-xs text-slate-400 transition-colors">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
       
       <!-- Marca y Copyright -->
@@ -687,34 +702,34 @@
         <img src="<%= content.brand.logoUrl %>" alt="" class="h-7 w-auto object-contain">
         <% } else { %>
         <div class="w-7 h-7 rounded-xl bg-gradient-to-tr <%= theme.gradient %> p-[1px]">
-          <div class="w-full h-full bg-white dark:bg-gray-950 rounded-2xl flex items-center justify-center">
-            <i data-lucide="<%= content.brand?.logoIcon || 'trophy' %>" class="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400"></i>
+          <div class="w-full h-full bg-slate-900 rounded-xl flex items-center justify-center">
+            <i data-lucide="<%= content.brand?.logoIcon || 'trophy' %>" class="w-3.5 h-3.5 text-yellow-400"></i>
           </div>
         </div>
         <% } %>
-        <span class="font-bold text-slate-900 dark:text-white"><%= content.brand?.name || 'KidsRun 2026' %></span>
-        <span class="text-slate-300 dark:text-gray-600">|</span>
+        <span class="font-bold text-white"><%= content.brand?.name || 'KidsRun 2026' %></span>
+        <span class="text-slate-600">|</span>
         <span><%= content.footer?.copyright || '© 2026 KidsRun. Todos los derechos reservados.' %></span>
       </div>
 
       <!-- Redes Sociales y Acceso Admin -->
       <div class="flex items-center gap-4">
         <% if (content.footer?.socialLinks?.twitter) { %>
-        <a href="<%= content.footer.socialLinks.twitter %>" target="_blank" rel="noopener" class="hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="Twitter">
+        <a href="<%= content.footer.socialLinks.twitter %>" target="_blank" rel="noopener" class="text-slate-400 hover:text-white transition-colors" aria-label="Twitter">
           <i data-lucide="twitter" class="w-4 h-4"></i>
         </a>
         <% } %>
-        <% if (content.footer?.socialLinks?.github) { %>
-        <a href="<%= content.footer.socialLinks.github %>" target="_blank" rel="noopener" class="hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="Instagram">
+        <% if (content.footer?.socialLinks?.github || content.footer?.socialLinks?.instagram) { %>
+        <a href="<%= content.footer?.socialLinks?.instagram || content.footer?.socialLinks?.github %>" target="_blank" rel="noopener" class="text-slate-400 hover:text-white transition-colors" aria-label="Instagram">
           <i data-lucide="instagram" class="w-4 h-4"></i>
         </a>
         <% } %>
-        <% if (content.footer?.socialLinks?.linkedin) { %>
-        <a href="<%= content.footer.socialLinks.linkedin %>" target="_blank" rel="noopener" class="hover:text-slate-900 dark:hover:text-white transition-colors" aria-label="Facebook">
+        <% if (content.footer?.socialLinks?.linkedin || content.footer?.socialLinks?.facebook) { %>
+        <a href="<%= content.footer?.socialLinks?.facebook || content.footer?.socialLinks?.linkedin %>" target="_blank" rel="noopener" class="text-slate-400 hover:text-white transition-colors" aria-label="Facebook">
           <i data-lucide="facebook" class="w-4 h-4"></i>
         </a>
         <% } %>
-        <a href="/admin" class="ml-4 text-xs text-emerald-700 dark:text-yellow-400 hover:opacity-80 flex items-center gap-1 font-bold">
+        <a href="/admin" class="ml-4 text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 font-bold">
           <i data-lucide="shield" class="w-3.5 h-3.5"></i>
           CMS Admin
         </a>

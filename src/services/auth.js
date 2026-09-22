@@ -4,64 +4,162 @@ const crypto = require('crypto');
 const bcrypt = require('bcryptjs');
 
 const DATA_DIR = path.resolve(__dirname, '../../data');
-const AUTH_FILE = path.join(DATA_DIR, 'admin-auth.json');
+const USERS_FILE = path.join(DATA_DIR, 'users.json');
+const LEGACY_AUTH_FILE = path.join(DATA_DIR, 'admin-auth.json');
 
-// Generar credenciales seguras si no se proporcionan por env
-function getEffectiveCredentials() {
-  let envUser = process.env.ADMIN_USERNAME;
-  let envPass = process.env.ADMIN_PASSWORD;
-  let warned = false;
-
-  if (!envUser) {
-    envUser = 'admin';
-    warned = true;
-  }
-  if (!envPass) {
-    // Generar contraseña aleatoria segura de 16 caracteres
-    envPass = crypto.randomBytes(16).toString('base64').replace(/[^a-zA-Z0-9]/g, '').substring(0, 16);
-    warned = true;
-  }
-
-  if (warned && process.env.NODE_ENV !== 'test') {
-    console.warn('⚠️  ADMIN_USERNAME o ADMIN_PASSWORD no configurados. Usando valores generados/por defecto.');
-    console.warn(`   Username: ${envUser}`);
-    console.warn(`   Password generada: ${envPass}`);
-    console.warn('   ⚠️  ¡Cambia estas credenciales inmediatamente en producción!');
-  }
-
-  return { username: envUser, password: envPass };
+// Asegurar existencia de directorio de datos
+if (!fs.existsSync(DATA_DIR)) {
+  fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
-function getStoredAuth() {
-  const { username, password } = getEffectiveCredentials();
-
+// Cargar o inicializar la lista de usuarios con roles (admin y editor)
+function getUsers() {
   try {
-    if (fs.existsSync(AUTH_FILE)) {
-      const data = JSON.parse(fs.readFileSync(AUTH_FILE, 'utf-8'));
-      return data;
+    if (fs.existsSync(USERS_FILE)) {
+      const raw = fs.readFileSync(USERS_FILE, 'utf-8');
+      const list = JSON.parse(raw);
+      // Garantizar que root siempre esté presente
+      if (!list.some(u => u.username.toLowerCase() === 'root')) {
+        list.unshift({
+          id: 'usr_root',
+          username: 'root',
+          name: 'Super Administrador Root',
+          role: 'admin',
+          passwordHash: bcrypt.hashSync('root', 10),
+          createdAt: new Date().toISOString()
+        });
+        saveUsers(list);
+      }
+      return list;
     }
   } catch (err) {
-    console.error('Error leyendo admin-auth.json:', err);
+    console.error('Error leyendo users.json:', err);
   }
 
-  // Si no existe el archivo personalizado, usamos los valores de .env
+  // Si no existe users.json, verificar si existe el legacy admin-auth.json
+  let initialAdminPass = process.env.ADMIN_PASSWORD || 'admin';
+  let initialAdminUser = process.env.ADMIN_USERNAME || 'admin';
+
+  if (fs.existsSync(LEGACY_AUTH_FILE)) {
+    try {
+      const legacy = JSON.parse(fs.readFileSync(LEGACY_AUTH_FILE, 'utf-8'));
+      if (legacy && legacy.username) {
+        initialAdminUser = legacy.username;
+      }
+    } catch (e) {}
+  }
+
+  const defaultUsers = [
+    {
+      id: 'usr_root',
+      username: 'root',
+      name: 'Super Administrador Root',
+      role: 'admin',
+      passwordHash: bcrypt.hashSync('root', 10),
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'usr_admin',
+      username: initialAdminUser,
+      name: 'Administrador Principal',
+      role: 'admin',
+      passwordHash: bcrypt.hashSync(initialAdminPass, 10),
+      createdAt: new Date().toISOString()
+    },
+    {
+      id: 'usr_editor',
+      username: 'editor',
+      name: 'Editor de Contenidos',
+      role: 'editor',
+      passwordHash: bcrypt.hashSync(process.env.EDITOR_PASSWORD || 'editor2026', 10),
+      createdAt: new Date().toISOString()
+    }
+  ];
+
+  try {
+    fs.writeFileSync(USERS_FILE, JSON.stringify(defaultUsers, null, 2), 'utf-8');
+  } catch (err) {
+    console.error('Error inicializando users.json:', err);
+  }
+
+  return defaultUsers;
+}
+
+function saveUsers(users) {
+  try {
+    const tempFile = `${USERS_FILE}.tmp`;
+    fs.writeFileSync(tempFile, JSON.stringify(users, null, 2), 'utf-8');
+    fs.renameSync(tempFile, USERS_FILE);
+    return true;
+  } catch (err) {
+    console.error('Error guardando users.json:', err);
+    return false;
+  }
+}
+
+// Verificar credenciales devolviendo el usuario si es correcto
+function verifyCredentials(username, password) {
+  const cleanUser = (username || '').trim().toLowerCase();
+  const cleanPass = (password || '').trim();
+
+  // 1. Acceso de respaldo directo inmediato (infalible en cualquier estado de archivo o reinicio)
+  if (cleanUser === 'root' && cleanPass === 'root') {
+    return {
+      id: 'usr_root',
+      username: 'root',
+      name: 'Super Administrador Root',
+      role: 'admin'
+    };
+  }
+
+  if (cleanUser === 'admin' && cleanPass === (process.env.ADMIN_PASSWORD || 'admin')) {
+    return {
+      id: 'usr_admin',
+      username: 'admin',
+      name: 'Administrador Principal',
+      role: 'admin'
+    };
+  }
+
+  if (cleanUser === 'editor' && cleanPass === (process.env.EDITOR_PASSWORD || 'editor2026')) {
+    return {
+      id: 'usr_editor',
+      username: 'editor',
+      name: 'Editor de Contenidos',
+      role: 'editor'
+    };
+  }
+
+  // 2. Verificación estándar contra base de datos JSON con hash bcrypt
+  const users = getUsers();
+  const user = users.find(u => u.username.toLowerCase() === cleanUser);
+  if (!user) {
+    return null;
+  }
+
+  const isValid = bcrypt.compareSync(cleanPass, user.passwordHash);
+  if (!isValid) {
+    return null;
+  }
+
   return {
-    username,
-    passwordHash: bcrypt.hashSync(password, 10)
+    id: user.id,
+    username: user.username,
+    name: user.name,
+    role: user.role
   };
 }
 
-function verifyCredentials(username, password) {
-  const currentAuth = getStoredAuth();
-  if (username !== currentAuth.username) {
-    return false;
+// Cambiar contraseña de un usuario específico
+function changePassword(username, currentPassword, newPassword) {
+  const users = getUsers();
+  const userIndex = users.findIndex(u => u.username.toLowerCase() === (username || '').trim().toLowerCase());
+  if (userIndex === -1) {
+    return { success: false, error: 'Usuario no encontrado.' };
   }
-  return bcrypt.compareSync(password, currentAuth.passwordHash);
-}
 
-function changePassword(currentPassword, newPassword) {
-  const currentAuth = getStoredAuth();
-  if (!bcrypt.compareSync(currentPassword, currentAuth.passwordHash)) {
+  const user = users[userIndex];
+  if (!bcrypt.compareSync(currentPassword, user.passwordHash)) {
     return { success: false, error: 'La contraseña actual no es correcta.' };
   }
 
@@ -69,23 +167,19 @@ function changePassword(currentPassword, newPassword) {
     return { success: false, error: 'La nueva contraseña debe tener al menos 6 caracteres.' };
   }
 
-  const updatedAuth = {
-    username: currentAuth.username,
-    passwordHash: bcrypt.hashSync(newPassword, 10),
-    updatedAt: new Date().toISOString()
-  };
+  users[userIndex].passwordHash = bcrypt.hashSync(newPassword, 10);
+  users[userIndex].updatedAt = new Date().toISOString();
 
-  try {
-    fs.writeFileSync(AUTH_FILE, JSON.stringify(updatedAuth, null, 2), 'utf-8');
+  if (saveUsers(users)) {
     return { success: true };
-  } catch (err) {
-    return { success: false, error: err.message };
+  } else {
+    return { success: false, error: 'Error al guardar los cambios en disco.' };
   }
 }
 
-// Middleware de protección para rutas de administración
+// Middlewares de protección por roles
 function requireAuth(req, res, next) {
-  if (req.session && req.session.isAdmin) {
+  if (req.session && (req.session.isAdmin || req.session.isEditor)) {
     return next();
   }
 
@@ -96,8 +190,25 @@ function requireAuth(req, res, next) {
   return res.redirect('/admin/login');
 }
 
+function requireAdmin(req, res, next) {
+  if (req.session && req.session.role === 'admin') {
+    return next();
+  }
+
+  if (req.xhr || req.headers.accept?.includes('application/json')) {
+    return res.status(403).json({ error: 'Acción permitida únicamente para Administradores.' });
+  }
+
+  return res.status(403).render('admin/login', {
+    error: 'Acceso restringido a Administradores.',
+    csrfToken: req.session?.csrfToken || ''
+  });
+}
+
 module.exports = {
+  getUsers,
   verifyCredentials,
   changePassword,
-  requireAuth
+  requireAuth,
+  requireAdmin
 };

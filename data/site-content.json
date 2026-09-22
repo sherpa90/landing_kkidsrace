@@ -5,7 +5,7 @@
     "logoText": "KidsRun 2026",
     "logoIcon": "trophy",
     "logoUrl": "",
-    "accentColor": "green_yellow",
+    "accentColor": "blue_sport",
     "themeMode": "light"
   },
   "countdown": {
@@ -41,10 +41,26 @@
     "statsNotice": "🏅 Medalla finisher garantizada para todos los niños • Cupos limitados por seguridad"
   },
   "metrics": [
-    { "value": "+2,500", "label": "Niños y Familias Corriendo", "icon": "users" },
-    { "value": "100%", "label": "Medallas Finisher Aseguradas", "icon": "award" },
-    { "value": "4", "label": "Circuitos por Edades (500m - 3K)", "icon": "flag" },
-    { "value": "0", "label": "Incidentes • Seguridad Máxima", "icon": "shield-check" }
+    {
+      "value": "+2,500",
+      "label": "Niños y Familias Corriendo",
+      "icon": "users"
+    },
+    {
+      "value": "100%",
+      "label": "Medallas Finisher Aseguradas",
+      "icon": "award"
+    },
+    {
+      "value": "4",
+      "label": "Circuitos por Edades (500m - 3K)",
+      "icon": "flag"
+    },
+    {
+      "value": "0",
+      "label": "Incidentes • Seguridad Máxima",
+      "icon": "shield-check"
+    }
   ],
   "categories": [
     {
@@ -125,12 +141,36 @@
     }
   ],
   "schedule": [
-    { "time": "08:00 AM", "title": "Apertura del Recinto & Entrega de Kits", "desc": "Acceso de familias, validación de pulseras de seguridad y retiro de poleras y números de corredor." },
-    { "time": "08:30 AM", "title": "Gran Calentamiento Musical", "desc": "Zumba Kids y monitores disfrazados preparan a todos los participantes con saltos y estiramientos." },
-    { "time": "09:00 AM", "title": "Largada Mini Runners 500m", "desc": "Circuito especial para los pequeños de 3 a 5 años junto a sus padres." },
-    { "time": "09:30 AM", "title": "Largada Pequeños Rayos 1K", "desc": "Salida para corredores de 6 a 8 años con banderilleros y puntos de hidratación." },
-    { "time": "10:15 AM", "title": "Largada 2K y 3K", "desc": "Competencia con chip de cronometraje para las categorías de 9 a 14 años." },
-    { "time": "11:15 AM", "title": "Show Infantil, Fiesta de Espuma & Premiación", "desc": "Reconocimiento a todos los niños, show de magia, sorteos de bicicletas y regalos de auspiciadores." }
+    {
+      "time": "08:00 AM",
+      "title": "Apertura del Recinto & Entrega de Kits",
+      "desc": "Acceso de familias, validación de pulseras de seguridad y retiro de poleras y números de corredor."
+    },
+    {
+      "time": "08:30 AM",
+      "title": "Gran Calentamiento Musical",
+      "desc": "Zumba Kids y monitores disfrazados preparan a todos los participantes con saltos y estiramientos."
+    },
+    {
+      "time": "09:00 AM",
+      "title": "Largada Mini Runners 500m",
+      "desc": "Circuito especial para los pequeños de 3 a 5 años junto a sus padres."
+    },
+    {
+      "time": "09:30 AM",
+      "title": "Largada Pequeños Rayos 1K",
+      "desc": "Salida para corredores de 6 a 8 años con banderilleros y puntos de hidratación."
+    },
+    {
+      "time": "10:15 AM",
+      "title": "Largada 2K y 3K",
+      "desc": "Competencia con chip de cronometraje para las categorías de 9 a 14 años."
+    },
+    {
+      "time": "11:15 AM",
+      "title": "Show Infantil, Fiesta de Espuma & Premiación",
+      "desc": "Reconocimiento a todos los niños, show de magia, sorteos de bicicletas y regalos de auspiciadores."
+    }
   ],
   "pricing": {
     "discountNotice": "Ahorra inscribiendo a 2 o más hermanitos",
@@ -253,5 +293,44 @@
       "linkedin": "https://facebook.com",
       "youtube": "https://youtube.com"
     }
-  }
+  },
+  "races": [
+    {
+      "id": "race-2026-primavera",
+      "name": "KidsRun 2026 - Edición Primavera",
+      "year": 2026,
+      "date": "2026-11-15T09:00:00",
+      "dateDisplay": "Domingo 15 de Noviembre, 2026",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario • Circuito Deportivo Cerrado",
+      "city": "Sector Explanada Central",
+      "status": "inactive",
+      "circuits": [
+        "500 Metros",
+        "1 Kilómetro",
+        "2 Kilómetros",
+        "3 Kilómetros"
+      ],
+      "maxParticipants": 500,
+      "createdAt": "2026-01-10T10:00:00Z"
+    },
+    {
+      "id": "race-2026-otono",
+      "name": "KidsRun 2026 - Edición Otoño",
+      "year": 2026,
+      "date": "2026-05-17T09:30:00",
+      "dateDisplay": "Domingo 17 de Mayo, 2026",
+      "time": "09:30 AM",
+      "location": "Parque Araucano • Pista Atlética",
+      "city": "Sector Las Condes",
+      "status": "inactive",
+      "circuits": [
+        "500 Metros",
+        "1 Kilómetro",
+        "2 Kilómetros"
+      ],
+      "maxParticipants": 350,
+      "createdAt": "2026-01-15T12:00:00Z"
+    }
+  ]
 }

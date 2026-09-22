@@ -180,11 +180,11 @@ function initHeroCanvas() {
   let mouse = { x: null, y: null, radius: 140 };
 
   const colors = [
-    'rgba(239, 68, 68, ',   // Rojo Corporativo
-    'rgba(16, 185, 129, ',   // Verde Corporativo
-    'rgba(250, 204, 21, ',   // Amarillo Corporativo
-    'rgba(99, 102, 241, ',  // Índigo
-    'rgba(6, 182, 212, '    // Cian
+    'rgba(29, 78, 216, ',   // Azul KidsRun
+    'rgba(59, 130, 246, ',  // Azul Claro
+    'rgba(250, 204, 21, ',  // Amarillo Oro
+    'rgba(239, 68, 68, ',   // Rojo Energía
+    'rgba(249, 115, 22, '   // Naranja Sol
   ];
 
   function resize() {
@@ -332,11 +332,11 @@ function initContactForm() {
     const originalBtnText = submitBtn.innerHTML;
     submitBtn.disabled = true;
     submitBtn.innerHTML = `
-      <span class="inline-block animate-spin mr-2">⟳</span> Procesando Inscripción...
+      <span class="inline-block animate-spin mr-2">⟳</span> Enviando Mensaje...
     `;
 
     try {
-      const res = await fetch('/api/contact', {
+      const res = await fetch('/api/inquiry', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -348,10 +348,10 @@ function initContactForm() {
       const json = await res.json();
 
       if (res.ok && json.success) {
-        showToast(json.message, 'success');
+        showToast(json.message || '¡Mensaje recibido! Te responderemos muy pronto.', 'success');
         form.reset();
       } else {
-        showToast(json.error || 'No se pudo enviar la inscripción', 'error');
+        showToast(json.error || 'No se pudo enviar el mensaje. Inténtalo nuevamente.', 'error');
       }
     } catch (err) {
       showToast('Error de conexión. Inténtalo nuevamente.', 'error');
