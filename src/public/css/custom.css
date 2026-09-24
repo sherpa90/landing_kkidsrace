@@ -17,8 +17,9 @@
   --radius-full: 9999px;
 }
 
-body {
+html, body {
   font-family: var(--font-main);
+  max-width: 100%;
   overflow-x: hidden;
 }
 

@@ -87,30 +87,32 @@
 </head>
 <body class="bg-white text-slate-800 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300 selection:bg-blue-600 selection:text-white antialiased relative overflow-x-hidden">
 
-  <!-- Luces ambientales de fondo: Blanco predominante con destellos Azul, Rojo y Amarillo sutiles -->
-  <div class="ambient-glow ambient-blue w-[650px] h-[650px] top-[-120px] left-1/2 -translate-x-1/2"></div>
-  <div class="ambient-glow ambient-red w-[500px] h-[500px] top-[600px] right-[-150px]"></div>
-  <div class="ambient-glow ambient-yellow w-[550px] h-[550px] top-[2100px] left-[-200px]"></div>
+  <!-- Luces ambientales de fondo confinadas (previene desborde horizontal en móviles) -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="ambient-glow ambient-blue w-[500px] sm:w-[650px] h-[500px] sm:h-[650px] top-[-120px] left-1/2 -translate-x-1/2"></div>
+    <div class="ambient-glow ambient-red w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] top-[600px] right-[-80px] sm:right-[-150px]"></div>
+    <div class="ambient-glow ambient-yellow w-[380px] sm:w-[550px] h-[380px] sm:h-[550px] top-[2100px] left-[-100px] sm:left-[-200px]"></div>
+  </div>
 
   <!-- Barra de Navegación Superior -->
   <header id="navbar" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white/90 dark:bg-gray-950/85 backdrop-blur-md border-b border-slate-100 dark:border-white/10 shadow-sm">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+    <div class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
       
       <!-- Logotipo: Soporta Imagen Personalizada o Icono + Texto -->
-      <a href="/" class="flex items-center gap-3 group">
+      <a href="/" class="flex items-center gap-2 sm:gap-3 group min-w-0 max-w-[68%] sm:max-w-none">
         <% if (content.brand?.logoUrl) { %>
-        <img src="<%= content.brand.logoUrl %>" alt="<%= content.brand?.name || 'KidsRun' %>" class="h-11 w-auto object-contain">
+        <img src="<%= content.brand.logoUrl %>" alt="<%= content.brand?.name || 'KidsRun' %>" class="h-8 sm:h-11 w-auto max-w-[140px] sm:max-w-[200px] object-contain">
         <% } else { %>
-        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr <%= theme.gradient %> p-[2px] shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform">
-          <div class="w-full h-full bg-white dark:bg-gray-950 rounded-2xl flex items-center justify-center">
-            <i data-lucide="<%= content.brand?.logoIcon || 'trophy' %>" class="w-5 h-5 text-blue-600 dark:text-yellow-400"></i>
+        <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr <%= theme.gradient %> p-[2px] shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform shrink-0">
+          <div class="w-full h-full bg-white dark:bg-gray-950 rounded-[10px] sm:rounded-2xl flex items-center justify-center">
+            <i data-lucide="<%= content.brand?.logoIcon || 'trophy' %>" class="w-4 h-4 sm:w-5 sm:h-5 text-blue-600 dark:text-yellow-400"></i>
           </div>
         </div>
-        <div class="flex flex-col">
-          <span class="text-xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-yellow-400 transition-colors">
+        <div class="flex flex-col min-w-0">
+          <span class="text-base sm:text-xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-yellow-400 transition-colors truncate">
             <%= content.brand?.logoText || 'KidsRun 2026' %>
           </span>
-          <span class="text-[10px] font-bold text-blue-600 dark:text-yellow-400 -mt-0.5 hidden sm:block tracking-wide uppercase">
+          <span class="text-[9px] sm:text-[10px] font-bold text-blue-600 dark:text-yellow-400 -mt-0.5 hidden sm:block tracking-wide uppercase truncate">
             <%= content.brand?.tagline || 'Corrida Infantil & Familiar' %>
           </span>
         </div>
@@ -135,9 +137,8 @@
         <% if (isSecVis('contact')) { %><a href="#contact" class="hover:text-blue-600 dark:hover:text-white transition-colors">Contacto</a><% } %>
       </nav>
 
-      <!-- Acciones de Cabecera: Conmutador Modo Claro/Oscuro + Inscripción -->
-      <div class="hidden md:flex items-center gap-3">
-        
+      <!-- Acciones de Cabecera Escritorio: Conmutador Modo Claro/Oscuro + Inscripción -->
+      <div class="hidden lg:flex items-center gap-3">
         <!-- Botón de Alternar Modo Claro (White Mode) / Modo Oscuro -->
         <button type="button" id="theme-toggle-btn" class="p-2.5 rounded-2xl border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-gray-900 transition-all" title="Cambiar Modo Claro / Oscuro" aria-label="Cambiar tema">
           <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
@@ -150,14 +151,14 @@
         </a>
       </div>
 
-      <!-- Botón Menú Móvil -->
-      <div class="flex items-center gap-2 lg:hidden">
-        <button type="button" id="theme-toggle-mobile" class="p-2 rounded-2xl border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-yellow-400" aria-label="Alternar tema">
+      <!-- Botones de Acción Móvil (< lg) -->
+      <div class="flex items-center gap-1.5 sm:gap-2 lg:hidden shrink-0">
+        <button type="button" id="theme-toggle-mobile" class="p-2 rounded-xl border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-gray-900 transition-colors" aria-label="Alternar tema">
           <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
           <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
         </button>
-        <button id="mobile-menu-btn" class="text-slate-700 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white p-2 focus:outline-none" aria-label="Abrir menú">
-          <i data-lucide="menu" class="w-6 h-6"></i>
+        <button id="mobile-menu-btn" class="text-slate-700 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-2 rounded-xl border border-slate-200 dark:border-gray-800 hover:bg-slate-100 dark:hover:bg-gray-900 focus:outline-none transition-colors" aria-label="Abrir menú">
+          <i data-lucide="menu" class="w-5 h-5 sm:w-6 sm:h-6"></i>
         </button>
       </div>
     </div>
@@ -243,7 +244,7 @@
     <!-- SECCIÓN CONTADOR REGRESIVO (COUNTDOWN TIMER) -->
     <section id="countdown" style="<%- sStyle('countdown') %>" class="py-14 relative z-10 -mt-6">
       <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white dark:bg-gray-900 p-8 sm:p-10 rounded-3xl border border-blue-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative overflow-hidden">
+        <div class="bg-white dark:bg-gray-900 p-5 sm:p-10 rounded-3xl border border-blue-100 dark:border-gray-800 shadow-xl shadow-blue-900/5 relative overflow-hidden">
           
           <div class="text-center mb-8">
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-red-50 dark:bg-red-950/60 text-red-600 dark:text-red-400 text-xs font-bold border border-red-200 dark:border-red-900 mb-3">
@@ -890,8 +891,8 @@
     </section>
   </main>
 
-  <!-- PIE DE PÁGINA (FOOTER) - Premium y Sobrio en Slate-900 -->
-  <footer class="border-t border-slate-800 bg-slate-900 py-12 relative z-10 text-xs text-slate-400 transition-colors">
+  <!-- PIE DE PÁGINA (FOOTER) - Con espacio inferior para no solapar el botón flotante en móvil -->
+  <footer class="border-t border-slate-800 bg-slate-900 pt-12 pb-28 md:pb-12 relative z-10 text-xs text-slate-400 transition-colors">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
       
       <!-- Marca y Copyright -->
@@ -936,18 +937,18 @@
     </div>
   </footer>
 
-  <!-- BARRA DE ACCIÓN FLOTANTE MÓVIL (STICKY BOTTOM CTA) -->
-  <div id="mobile-sticky-cta" class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md border-t border-slate-200 dark:border-white/10 px-4 py-3 md:hidden transition-transform duration-300 translate-y-full shadow-[0_-4px_20px_rgba(0,0,0,0.1)] pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
-    <div class="flex items-center justify-between gap-3 max-w-md mx-auto">
-      <div class="flex flex-col min-w-0">
+  <!-- BOTÓN FLOTANTE MÓVIL TÁCTIL (FLOATING CTA PILL CON MÁRGENES SEGUROS) -->
+  <div id="mobile-sticky-cta" class="fixed bottom-3 inset-x-3 z-40 md:hidden transition-all duration-300 ease-out translate-y-28 opacity-0 pointer-events-none">
+    <div class="bg-white/95 dark:bg-gray-950/95 border border-slate-200/90 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.18)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.6)] rounded-2xl p-2.5 backdrop-blur-lg flex items-center justify-between gap-2.5 max-w-sm mx-auto">
+      <div class="flex flex-col min-w-0 pl-1">
         <span class="text-[11px] font-black uppercase text-blue-600 dark:text-yellow-400 tracking-wider truncate">
           <%= activeRace ? activeRace.name : (content.brand?.name || 'KidsRun 2026') %>
         </span>
         <span class="text-[10px] text-slate-500 dark:text-gray-400 font-medium truncate">
-          🏅 Medalla finisher & kit incluido
+          🏅 Kit y medalla oficial
         </span>
       </div>
-      <a href="/inscribir" class="flex-shrink-0 px-5 py-2.5 rounded-2xl text-xs font-black <%= theme.solidBtn %> shadow-md shadow-blue-600/30 flex items-center gap-1.5 active:scale-95 transition-transform">
+      <a href="/inscribir" class="shrink-0 px-4 py-2 rounded-xl text-xs font-black <%= theme.solidBtn %> shadow-md shadow-blue-600/30 flex items-center gap-1 active:scale-95 transition-transform">
         <span>Inscribir</span>
         <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
       </a>

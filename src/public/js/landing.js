@@ -528,11 +528,11 @@ function initMobileStickyCta() {
     if (!ticking) {
       window.requestAnimationFrame(() => {
         if (window.scrollY > threshold) {
-          ctaBar.classList.remove('translate-y-full');
-          ctaBar.classList.add('translate-y-0');
+          ctaBar.classList.remove('translate-y-28', 'opacity-0', 'pointer-events-none');
+          ctaBar.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
         } else {
-          ctaBar.classList.add('translate-y-full');
-          ctaBar.classList.remove('translate-y-0');
+          ctaBar.classList.add('translate-y-28', 'opacity-0', 'pointer-events-none');
+          ctaBar.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
         }
         ticking = false;
       });
