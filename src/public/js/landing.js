@@ -481,29 +481,68 @@ function initNavbarScroll() {
   });
 }
 
-// 4. Menú móvil
+// 4. Menú móvil (animado con max-height + swap de ícono)
 function initMobileMenu() {
   const btn = document.getElementById('mobile-menu-btn');
   const menu = document.getElementById('mobile-menu');
+  const iconOpen = document.getElementById('nav-icon-menu');
+  const iconClose = document.getElementById('nav-icon-close');
   if (!btn || !menu) return;
+
+  let isOpen = false;
+
+  function openMenu() {
+    isOpen = true;
+    // Hacer visible el contenedor para medir su altura
+    menu.style.maxHeight = menu.scrollHeight + 'px';
+    menu.setAttribute('aria-hidden', 'false');
+    btn.setAttribute('aria-expanded', 'true');
+    // Swap de ícono
+    if (iconOpen)  { iconOpen.classList.add('opacity-0', 'scale-50');  iconOpen.classList.remove('opacity-100', 'scale-100'); }
+    if (iconClose) { iconClose.classList.remove('opacity-0', 'scale-50', 'pointer-events-none'); iconClose.classList.add('opacity-100', 'scale-100'); }
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMenu() {
+    isOpen = false;
+    menu.style.maxHeight = '0';
+    menu.setAttribute('aria-hidden', 'true');
+    btn.setAttribute('aria-expanded', 'false');
+    // Restaurar ícono
+    if (iconOpen)  { iconOpen.classList.remove('opacity-0', 'scale-50');  iconOpen.classList.add('opacity-100', 'scale-100'); }
+    if (iconClose) { iconClose.classList.add('opacity-0', 'scale-50', 'pointer-events-none'); iconClose.classList.remove('opacity-100', 'scale-100'); }
+    document.body.style.overflow = '';
+  }
 
   btn.addEventListener('click', (e) => {
     e.stopPropagation();
-    menu.classList.toggle('hidden');
+    isOpen ? closeMenu() : openMenu();
   });
 
+  // Cerrar al hacer clic en un enlace
   menu.querySelectorAll('a').forEach(link => {
-    link.addEventListener('click', () => {
-      menu.classList.add('hidden');
-    });
+    link.addEventListener('click', closeMenu);
   });
 
   // Cerrar al pulsar fuera del menú
   document.addEventListener('click', (e) => {
-    if (!menu.classList.contains('hidden') && !menu.contains(e.target) && !btn.contains(e.target)) {
-      menu.classList.add('hidden');
+    if (isOpen && !menu.contains(e.target) && !btn.contains(e.target)) {
+      closeMenu();
     }
   });
+
+  // Cerrar al hacer scroll hacia abajo
+  let lastScrollY = window.scrollY;
+  window.addEventListener('scroll', () => {
+    if (isOpen && window.scrollY > lastScrollY + 10) closeMenu();
+    lastScrollY = window.scrollY;
+  }, { passive: true });
+
+  // Ajustar max-height al cambiar tamaño de ventana
+  window.addEventListener('resize', () => {
+    if (isOpen) menu.style.maxHeight = menu.scrollHeight + 'px';
+    if (window.innerWidth >= 1024) closeMenu(); // lg breakpoint
+  }, { passive: true });
 }
 
 // 11. Barra flotante táctil inferior para móviles (Sticky Bottom CTA)

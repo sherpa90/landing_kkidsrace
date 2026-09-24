@@ -99,12 +99,12 @@
 
   <!-- Barra de Navegación Superior -->
   <header id="navbar" class="fixed top-0 left-0 w-full z-50 transition-all duration-300 bg-white/90 dark:bg-gray-950/85 backdrop-blur-md border-b border-slate-100 dark:border-white/10 shadow-sm">
-    <div class="max-w-7xl mx-auto px-3.5 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between">
-      
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+
       <!-- Logotipo: Soporta Imagen Personalizada o Icono + Texto -->
-      <a href="/" class="flex items-center gap-2 sm:gap-3 group min-w-0 max-w-[68%] sm:max-w-none">
+      <a href="/" class="flex items-center gap-2 sm:gap-3 group min-w-0 shrink-0">
         <% if (content.brand?.logoUrl) { %>
-        <img src="<%= content.brand.logoUrl %>" alt="<%= content.brand?.name || 'KidsRun' %>" class="h-8 sm:h-11 w-auto max-w-[140px] sm:max-w-[200px] object-contain">
+        <img src="<%= content.brand.logoUrl %>" alt="<%= content.brand?.name || 'KidsRun' %>" class="h-8 sm:h-11 w-auto max-w-[110px] sm:max-w-[180px] object-contain">
         <% } else { %>
         <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr <%= theme.gradient %> p-[2px] shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform shrink-0">
           <div class="w-full h-full bg-white dark:bg-gray-950 rounded-[10px] sm:rounded-2xl flex items-center justify-center">
@@ -112,7 +112,7 @@
           </div>
         </div>
         <div class="flex flex-col min-w-0">
-          <span class="text-base sm:text-xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-yellow-400 transition-colors truncate">
+          <span class="text-base sm:text-xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-yellow-400 transition-colors leading-tight truncate max-w-[130px] sm:max-w-none">
             <%= content.brand?.logoText || 'KidsRun 2026' %>
           </span>
           <span class="text-[9px] sm:text-[10px] font-bold text-blue-600 dark:text-yellow-400 -mt-0.5 hidden sm:block tracking-wide uppercase truncate">
@@ -124,63 +124,117 @@
 
       <!-- Menú de Navegación Escritorio -->
       <% const isSecVis = (id) => !(content.sections && content.sections.visibility && content.sections.visibility[id] === false); %>
-      <nav class="hidden lg:flex items-center gap-7 text-sm font-bold text-slate-600 dark:text-gray-300">
+      <nav class="hidden lg:flex items-center gap-6 xl:gap-7 text-sm font-bold text-slate-600 dark:text-gray-300 flex-1 justify-center">
         <% if (isSecVis('countdown')) { %>
-        <a href="#countdown" class="hover:text-blue-600 dark:hover:text-yellow-400 transition-colors flex items-center gap-1.5">
+        <a href="#countdown" class="hover:text-blue-600 dark:hover:text-yellow-400 transition-colors flex items-center gap-1.5 whitespace-nowrap">
           <i data-lucide="clock" class="w-3.5 h-3.5 text-blue-600 dark:text-yellow-400"></i> Cuenta Regresiva
         </a>
         <% } %>
-        <% if (isSecVis('circuits')) { %><a href="#circuits" class="hover:text-blue-600 dark:hover:text-white transition-colors">Circuitos</a><% } %>
-        <% if (isSecVis('schedule')) { %><a href="#schedule" class="hover:text-blue-600 dark:hover:text-white transition-colors">Cronograma</a><% } %>
-        <% if (isSecVis('gallery')) { %><a href="#gallery" class="hover:text-blue-600 dark:hover:text-white transition-colors">Galería</a><% } %>
-        <% if (isSecVis('kits')) { %><a href="#kits" class="hover:text-blue-600 dark:hover:text-white transition-colors">Kits & Precios</a><% } %>
-        <% if (isSecVis('faq')) { %><a href="#faq" class="hover:text-blue-600 dark:hover:text-white transition-colors">Preguntas</a><% } %>
-        <% if (isSecVis('sponsors')) { %><a href="#sponsors" class="hover:text-blue-600 dark:hover:text-white transition-colors">Auspiciadores</a><% } %>
-        <% if (isSecVis('venue')) { %><a href="#venue" class="hover:text-blue-600 dark:hover:text-white transition-colors">Lugar</a><% } %>
-        <% if (isSecVis('contact')) { %><a href="#contact" class="hover:text-blue-600 dark:hover:text-white transition-colors">Contacto</a><% } %>
+        <% if (isSecVis('circuits')) { %><a href="#circuits" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap">Circuitos</a><% } %>
+        <% if (isSecVis('schedule')) { %><a href="#schedule" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap">Cronograma</a><% } %>
+        <% if (isSecVis('gallery')) { %><a href="#gallery" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap">Galería</a><% } %>
+        <% if (isSecVis('kits')) { %><a href="#kits" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap">Kits & Precios</a><% } %>
+        <% if (isSecVis('faq')) { %><a href="#faq" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap">Preguntas</a><% } %>
+        <% if (isSecVis('sponsors')) { %><a href="#sponsors" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap hidden xl:block">Auspiciadores</a><% } %>
+        <% if (isSecVis('venue')) { %><a href="#venue" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap hidden xl:block">Lugar</a><% } %>
+        <% if (isSecVis('contact')) { %><a href="#contact" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap hidden xl:block">Contacto</a><% } %>
       </nav>
 
-      <!-- Acciones de Cabecera Escritorio: Conmutador Modo Claro/Oscuro + Inscripción -->
-      <div class="hidden lg:flex items-center gap-3">
-        <!-- Botón de Alternar Modo Claro (White Mode) / Modo Oscuro -->
+      <!-- Acciones Escritorio: Tema + Inscripción -->
+      <div class="hidden lg:flex items-center gap-3 shrink-0">
         <button type="button" id="theme-toggle-btn" class="p-2.5 rounded-2xl border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-gray-900 transition-all" title="Cambiar Modo Claro / Oscuro" aria-label="Cambiar tema">
           <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
           <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
         </button>
-
-        <a href="/inscribir" class="px-5 py-2.5 rounded-2xl text-sm font-bold <%= theme.solidBtn %> hover:scale-105 transition-all shadow-md shadow-blue-600/30 transform hover:-translate-y-0.5 flex items-center gap-1.5">
+        <a href="/inscribir" class="px-4 xl:px-5 py-2.5 rounded-2xl text-sm font-bold <%= theme.solidBtn %> hover:scale-105 transition-all shadow-md shadow-blue-600/30 transform hover:-translate-y-0.5 flex items-center gap-1.5 whitespace-nowrap">
           <i data-lucide="user-plus" class="w-4 h-4"></i>
           <span>Inscribir Niño/a</span>
         </a>
       </div>
 
-      <!-- Botones de Acción Móvil (< lg) -->
-      <div class="flex items-center gap-1.5 sm:gap-2 lg:hidden shrink-0">
-        <button type="button" id="theme-toggle-mobile" class="p-2 rounded-xl border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-gray-900 transition-colors" aria-label="Alternar tema">
+      <!-- Acciones Móvil (< lg): Tema + Hamburguesa -->
+      <div class="flex items-center gap-2 lg:hidden shrink-0">
+        <button type="button" id="theme-toggle-mobile" class="p-2.5 rounded-xl border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-gray-900 transition-colors touch-manipulation" aria-label="Alternar tema">
           <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
           <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
         </button>
-        <button id="mobile-menu-btn" class="text-slate-700 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white p-2 rounded-xl border border-slate-200 dark:border-gray-800 hover:bg-slate-100 dark:hover:bg-gray-900 focus:outline-none transition-colors" aria-label="Abrir menú">
-          <i data-lucide="menu" class="w-5 h-5 sm:w-6 sm:h-6"></i>
+        <button id="mobile-menu-btn" aria-expanded="false" aria-controls="mobile-menu" class="relative p-2.5 rounded-xl border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-gray-300 hover:text-slate-900 dark:hover:text-white hover:bg-slate-100 dark:hover:bg-gray-900 focus:outline-none transition-all touch-manipulation" aria-label="Abrir menú">
+          <!-- Ícono Menu -->
+          <i data-lucide="menu" id="nav-icon-menu" class="w-5 h-5 transition-all duration-200"></i>
+          <!-- Ícono X (cierre) — oculto inicialmente -->
+          <i data-lucide="x" id="nav-icon-close" class="w-5 h-5 absolute inset-0 m-auto transition-all duration-200 opacity-0 scale-50 pointer-events-none"></i>
         </button>
       </div>
     </div>
 
-    <!-- Menú Desplegable Móvil -->
-    <div id="mobile-menu" class="hidden lg:hidden bg-white/95 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-200 dark:border-white/10 px-6 py-6 space-y-4 shadow-xl">
-      <% if (isSecVis('countdown')) { %><a href="#countdown" class="block text-blue-600 dark:text-yellow-400 font-bold">⏰ Cuenta Regresiva</a><% } %>
-      <% if (isSecVis('circuits')) { %><a href="#circuits" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Circuitos por Edades</a><% } %>
-      <% if (isSecVis('schedule')) { %><a href="#schedule" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Cronograma del Día</a><% } %>
-      <% if (isSecVis('gallery')) { %><a href="#gallery" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Galería de Fotos</a><% } %>
-      <% if (isSecVis('kits')) { %><a href="#kits" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Kits y Valores</a><% } %>
-      <% if (isSecVis('faq')) { %><a href="#faq" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Preguntas Frecuentes</a><% } %>
-      <% if (isSecVis('sponsors')) { %><a href="#sponsors" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Auspiciadores Oficiales</a><% } %>
-      <% if (isSecVis('venue')) { %><a href="#venue" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600 dark:hover:text-yellow-400 transition-colors py-1">📍 Lugar del Evento</a><% } %>
-      <% if (isSecVis('contact')) { %><a href="#contact" class="block text-slate-700 dark:text-gray-300 font-medium hover:text-blue-600">Contacto & Ayuda</a><% } %>
-      <div class="pt-4 border-t border-slate-200 dark:border-gray-800 flex flex-col gap-3">
-        <a href="/inscribir" class="text-center py-2.5 px-4 rounded-2xl text-sm font-bold <%= theme.solidBtn %>">
-          Inscribir Niño/a
-        </a>
+    <!-- Menú Desplegable Móvil (animado con max-height) -->
+    <div id="mobile-menu"
+         class="lg:hidden overflow-hidden max-h-0 transition-[max-height] duration-300 ease-in-out"
+         aria-hidden="true"
+         style="max-height:0">
+      <div class="bg-white/98 dark:bg-gray-950/98 backdrop-blur-md border-t border-slate-200 dark:border-white/8 shadow-2xl">
+        <nav class="px-4 py-3 space-y-0.5" aria-label="Menú móvil">
+          <% if (isSecVis('countdown')) { %>
+          <a href="#countdown" class="mobile-nav-link group flex items-center gap-3 py-3 px-4 rounded-xl text-blue-600 dark:text-yellow-400 font-bold hover:bg-blue-50 dark:hover:bg-blue-950/40 active:bg-blue-100 dark:active:bg-blue-900/40 transition-colors">
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-blue-100 dark:bg-blue-900/50 shrink-0"><i data-lucide="clock" class="w-3.5 h-3.5"></i></span>
+            Cuenta Regresiva
+          </a>
+          <% } %>
+          <% if (isSecVis('circuits')) { %>
+          <a href="#circuits" class="mobile-nav-link group flex items-center gap-3 py-3 px-4 rounded-xl text-slate-700 dark:text-gray-300 font-semibold hover:bg-slate-100 dark:hover:bg-gray-800/70 active:bg-slate-200 transition-colors">
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-gray-800 shrink-0"><i data-lucide="flag" class="w-3.5 h-3.5 text-blue-500"></i></span>
+            Circuitos por Edades
+          </a>
+          <% } %>
+          <% if (isSecVis('schedule')) { %>
+          <a href="#schedule" class="mobile-nav-link group flex items-center gap-3 py-3 px-4 rounded-xl text-slate-700 dark:text-gray-300 font-semibold hover:bg-slate-100 dark:hover:bg-gray-800/70 active:bg-slate-200 transition-colors">
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-gray-800 shrink-0"><i data-lucide="calendar-clock" class="w-3.5 h-3.5 text-blue-500"></i></span>
+            Cronograma del Día
+          </a>
+          <% } %>
+          <% if (isSecVis('gallery')) { %>
+          <a href="#gallery" class="mobile-nav-link group flex items-center gap-3 py-3 px-4 rounded-xl text-slate-700 dark:text-gray-300 font-semibold hover:bg-slate-100 dark:hover:bg-gray-800/70 active:bg-slate-200 transition-colors">
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-gray-800 shrink-0"><i data-lucide="image" class="w-3.5 h-3.5 text-blue-500"></i></span>
+            Galería de Fotos
+          </a>
+          <% } %>
+          <% if (isSecVis('kits')) { %>
+          <a href="#kits" class="mobile-nav-link group flex items-center gap-3 py-3 px-4 rounded-xl text-slate-700 dark:text-gray-300 font-semibold hover:bg-slate-100 dark:hover:bg-gray-800/70 active:bg-slate-200 transition-colors">
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-gray-800 shrink-0"><i data-lucide="tag" class="w-3.5 h-3.5 text-blue-500"></i></span>
+            Kits y Valores
+          </a>
+          <% } %>
+          <% if (isSecVis('faq')) { %>
+          <a href="#faq" class="mobile-nav-link group flex items-center gap-3 py-3 px-4 rounded-xl text-slate-700 dark:text-gray-300 font-semibold hover:bg-slate-100 dark:hover:bg-gray-800/70 active:bg-slate-200 transition-colors">
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-gray-800 shrink-0"><i data-lucide="help-circle" class="w-3.5 h-3.5 text-blue-500"></i></span>
+            Preguntas Frecuentes
+          </a>
+          <% } %>
+          <% if (isSecVis('sponsors')) { %>
+          <a href="#sponsors" class="mobile-nav-link group flex items-center gap-3 py-3 px-4 rounded-xl text-slate-700 dark:text-gray-300 font-semibold hover:bg-slate-100 dark:hover:bg-gray-800/70 active:bg-slate-200 transition-colors">
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-gray-800 shrink-0"><i data-lucide="building-2" class="w-3.5 h-3.5 text-blue-500"></i></span>
+            Auspiciadores
+          </a>
+          <% } %>
+          <% if (isSecVis('venue')) { %>
+          <a href="#venue" class="mobile-nav-link group flex items-center gap-3 py-3 px-4 rounded-xl text-slate-700 dark:text-gray-300 font-semibold hover:bg-slate-100 dark:hover:bg-gray-800/70 active:bg-slate-200 transition-colors">
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-gray-800 shrink-0"><i data-lucide="map-pin" class="w-3.5 h-3.5 text-blue-500"></i></span>
+            Lugar del Evento
+          </a>
+          <% } %>
+          <% if (isSecVis('contact')) { %>
+          <a href="#contact" class="mobile-nav-link group flex items-center gap-3 py-3 px-4 rounded-xl text-slate-700 dark:text-gray-300 font-semibold hover:bg-slate-100 dark:hover:bg-gray-800/70 active:bg-slate-200 transition-colors">
+            <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-gray-800 shrink-0"><i data-lucide="mail" class="w-3.5 h-3.5 text-blue-500"></i></span>
+            Contacto & Ayuda
+          </a>
+          <% } %>
+        </nav>
+        <div class="px-4 pb-5 pt-2 border-t border-slate-200 dark:border-white/8">
+          <a href="/inscribir" class="mobile-nav-link w-full text-center py-3.5 px-4 rounded-2xl text-sm font-bold <%= theme.solidBtn %> flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20 active:scale-95 transition-transform">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            Inscribir Niño/a
+          </a>
+        </div>
       </div>
     </div>
   </header>

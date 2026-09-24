@@ -19,30 +19,35 @@
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
   <!-- BARRA SUPERIOR DEL DASHBOARD -->
-  <header class="h-16 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 px-3 sm:px-6 flex items-center justify-between">
-    <div class="flex items-center gap-3">
-      <!-- Botón Hamburguesa / Menú Móvil -->
-      <button type="button" id="btn-toggle-mobile-menu" class="md:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors" title="Abrir Menú">
+  <header class="h-14 sm:h-16 border-b border-slate-800 bg-slate-900/95 backdrop-blur-md sticky top-0 z-40 flex items-center justify-between px-3 sm:px-5 gap-2">
+
+    <!-- LADO IZQUIERDO: Hamburguesa + Logo -->
+    <div class="flex items-center gap-2 sm:gap-3 min-w-0">
+      <!-- Botón Hamburguesa (sólo en md para abajo) -->
+      <button type="button" id="btn-toggle-mobile-menu"
+        class="md:hidden p-2 rounded-xl text-slate-300 hover:text-white hover:bg-slate-800 transition-colors shrink-0"
+        aria-label="Abrir Menú">
         <i data-lucide="menu" class="w-5 h-5"></i>
       </button>
 
-      <div class="flex items-center gap-2.5">
+      <!-- Logo + Nombre -->
+      <div class="flex items-center gap-2 min-w-0">
         <% if (content.brand?.logoUrl) { %>
-        <img src="<%= content.brand.logoUrl %>" alt="Logo" class="w-8 h-8 rounded-xl object-contain bg-slate-900 border border-slate-750 p-0.5 shadow-md">
+        <img src="<%= content.brand.logoUrl %>" alt="Logo" class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl object-contain bg-slate-900 border border-slate-700 p-0.5 shadow-md shrink-0">
         <% } else { %>
-        <div class="w-8 h-8 rounded-xl bg-amber-400 flex items-center justify-center text-slate-950 font-black shadow-md">
-          <i data-lucide="trophy" class="w-4 h-4"></i>
+        <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-amber-400 flex items-center justify-center text-slate-950 font-black shadow-md shrink-0">
+          <i data-lucide="trophy" class="w-3.5 h-3.5 sm:w-4 sm:h-4"></i>
         </div>
         <% } %>
-        <div class="flex items-center gap-2">
-          <span class="font-black text-sm text-white tracking-tight truncate max-w-[140px] sm:max-w-none"><%= content.brand?.name || 'KidsRun 2026' %></span>
-          <span class="text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full border border-blue-400">CMS</span>
+        <div class="flex items-center gap-1.5 min-w-0">
+          <span class="font-black text-sm text-white tracking-tight truncate max-w-[90px] xs:max-w-[120px] sm:max-w-[180px] md:max-w-none"><%= content.brand?.name || 'KidsRun 2026' %></span>
+          <span class="text-[9px] sm:text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full border border-blue-400 shrink-0">CMS</span>
         </div>
       </div>
     </div>
 
-    <!-- Identificación de Usuario & Rol en Cabecera -->
-    <div class="hidden sm:flex items-center gap-2">
+    <!-- CENTRO: Rol/Usuario (sólo en pantallas md+) -->
+    <div class="hidden md:flex items-center gap-2 flex-1 justify-center">
       <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl <%= role === 'admin' ? 'bg-blue-950/90 border border-blue-500/50 text-blue-300' : 'bg-amber-950/90 border border-amber-500/50 text-amber-300' %>">
         <span class="w-2 h-2 rounded-full <%= role === 'admin' ? 'bg-blue-400 animate-pulse' : 'bg-amber-400' %>"></span>
         <span class="text-xs font-black uppercase tracking-wider">
@@ -52,40 +57,55 @@
       </div>
     </div>
 
-    <!-- Acciones Rápidas -->
-    <div class="flex items-center gap-2">
-      <!-- Botón Quick Toggle Modo Construcción en Header -->
-      <button type="button" id="btn-header-toggle-construction" class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm <%= content.construction?.enabled ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 hover:bg-amber-500/30' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white' %>" title="Activar o Desactivar Modo Construcción instantáneamente con un clic">
-        <i data-lucide="construction" class="w-3.5 h-3.5 text-amber-400"></i>
+    <!-- LADO DERECHO: Acciones -->
+    <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
+
+      <!-- Botón Toggle Construcción (icono en móvil, texto en sm+) -->
+      <button type="button" id="btn-header-toggle-construction"
+        class="text-xs font-bold px-2 sm:px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1 sm:gap-1.5 cursor-pointer shadow-sm
+               <%= content.construction?.enabled
+                 ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 hover:bg-amber-500/30'
+                 : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white' %>"
+        title="Activar o Desactivar Modo Construcción">
+        <i data-lucide="construction" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
         <span class="hidden sm:inline">Construcción:</span>
         <span id="header-construction-status-text" class="font-black <%= content.construction?.enabled ? 'text-amber-400' : 'text-slate-400' %>">
           <%= content.construction?.enabled ? 'ON' : 'OFF' %>
         </span>
       </button>
 
-      <!-- Indicador de Modo Construcción -->
-      <div id="top-construction-badge" class="<%= content.construction?.enabled ? 'sm:flex' : 'hidden' %> items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold">
+      <!-- Indicador de Modo Construcción (sólo lg+) -->
+      <div id="top-construction-badge" class="hidden lg:<%= content.construction?.enabled ? 'flex' : 'hidden' %> items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold">
         <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
-        <span>Modo Construcción Activo</span>
+        <span>Activo</span>
       </div>
 
-      <a href="/preview-construction" target="_blank" class="text-xs font-bold px-3 py-2 rounded-xl text-amber-300 hover:text-white bg-amber-950/40 hover:bg-amber-900 border border-amber-500/30 transition-all flex items-center gap-1.5" title="Previsualizar cómo ve el público la web">
-        <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-400"></i>
-        <span class="hidden sm:inline">Vista Público</span>
+      <!-- Vista Público (icono siempre, texto en sm+) -->
+      <a href="/preview-construction" target="_blank"
+        class="text-xs font-bold px-2 sm:px-3 py-2 rounded-xl text-amber-300 hover:text-white bg-amber-950/40 hover:bg-amber-900 border border-amber-500/30 transition-all flex items-center gap-1 sm:gap-1.5"
+        title="Previsualizar cómo ve el público la web">
+        <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+        <span class="hidden sm:inline">Público</span>
       </a>
 
-      <a href="/" target="_blank" class="text-xs font-bold px-3 py-2 rounded-xl text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all flex items-center gap-1.5" title="Ver Web en Vivo (Bypass Administrador)">
+      <!-- Web en Vivo (solo sm+) -->
+      <a href="/" target="_blank"
+        class="hidden sm:flex text-xs font-bold px-3 py-2 rounded-xl text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 transition-all items-center gap-1.5"
+        title="Ver Web en Vivo">
         <i data-lucide="external-link" class="w-3.5 h-3.5 text-blue-400"></i>
-        <span class="hidden sm:inline">Web (Bypass)</span>
+        <span class="hidden md:inline">Web</span>
       </a>
 
+      <!-- Guardar (solo admin) -->
       <% if (role === 'admin') { %>
-      <button type="button" id="btn-save-cms" class="text-xs font-black px-3.5 sm:px-4 py-2 rounded-xl text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 shadow-md shadow-blue-600/30 transition-all flex items-center gap-1.5">
-        <i data-lucide="save" class="w-3.5 h-3.5"></i>
+      <button type="button" id="btn-save-cms"
+        class="text-xs font-black px-3 sm:px-4 py-2 rounded-xl text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 shadow-md shadow-blue-600/30 transition-all flex items-center gap-1.5">
+        <i data-lucide="save" class="w-3.5 h-3.5 shrink-0"></i>
         <span>Guardar</span>
       </button>
       <% } %>
 
+      <!-- Cerrar Sesión -->
       <a href="/admin/logout" class="p-2 text-slate-400 hover:text-red-400 rounded-xl hover:bg-slate-800 transition-all" title="Cerrar Sesión">
         <i data-lucide="log-out" class="w-4 h-4"></i>
       </a>
