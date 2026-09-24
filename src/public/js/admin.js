@@ -1540,13 +1540,101 @@ function initUsersManager() {
   const usernameInput = document.getElementById('user-input-username');
   const roleInput = document.getElementById('user-input-role');
   const passwordInput = document.getElementById('user-input-password');
+  const passwordConfirmInput = document.getElementById('user-input-password-confirm');
   const passwordLabel = document.getElementById('user-label-password');
   const passwordHint = document.getElementById('user-hint-password');
+  const confirmWrapper = document.getElementById('user-confirm-password-wrapper');
+  const pwMatchHint = document.getElementById('pw-match-hint');
+  const pwBars = [1,2,3,4].map(i => document.getElementById(`pw-bar-${i}`));
+  const pwStrengthLabel = document.getElementById('pw-strength-label');
+  const roleDescBox = document.getElementById('role-description-box');
+  const roleDescText = document.getElementById('role-description-text');
   const container = document.getElementById('users-list-container');
   const usersBadge = document.getElementById('users-count-badge');
   const emptyState = document.getElementById('users-empty-state');
 
   if (!container && !openCreateBtn) return;
+
+  // --- Descripciones de roles ---
+  const roleDescriptions = {
+    editor: {
+      text: '📋 <strong>Editor de terreno:</strong> Puede acceder al escáner de cédulas para acreditación en ruta, ver y buscar participantes inscritos. No puede modificar contenido del sitio ni gestionar usuarios.',
+      classes: 'bg-amber-950/50 border-amber-500/30 text-amber-200'
+    },
+    admin: {
+      text: '🛡️ <strong>Administrador:</strong> Acceso completo al CMS — puede editar contenido del sitio, gestionar corridas, preguntas frecuentes, cronograma, usuarios y ver inscripciones. Úsalo solo para personas de confianza.',
+      classes: 'bg-blue-950/50 border-blue-500/30 text-blue-200'
+    }
+  };
+
+  function updateRoleDescription() {
+    if (!roleInput || !roleDescBox || !roleDescText) return;
+    const desc = roleDescriptions[roleInput.value];
+    if (desc) {
+      roleDescText.innerHTML = desc.text;
+      roleDescBox.className = `mt-2 p-2.5 rounded-xl text-[11px] leading-relaxed border ${desc.classes}`;
+      roleDescBox.classList.remove('hidden');
+    } else {
+      roleDescBox.classList.add('hidden');
+    }
+  }
+
+  // --- Medidor de fortaleza de contraseña ---
+  function getPasswordStrength(pwd) {
+    let score = 0;
+    if (pwd.length >= 12) score++;
+    if (pwd.length >= 16) score++;
+    if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
+    if (/[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) score++;
+    return score; // 0-4
+  }
+
+  function updatePasswordStrength() {
+    if (!passwordInput) return;
+    const pwd = passwordInput.value;
+    const score = pwd.length === 0 ? 0 : getPasswordStrength(pwd);
+    const labels = ['', 'Débil', 'Regular', 'Buena', 'Muy fuerte'];
+    const colors = ['bg-slate-700', 'bg-red-500', 'bg-amber-500', 'bg-emerald-500', 'bg-emerald-400'];
+
+    pwBars.forEach((bar, i) => {
+      if (!bar) return;
+      bar.className = `h-1 flex-1 rounded-full transition-all ${i < score ? colors[score] : 'bg-slate-700'}`;
+    });
+    if (pwStrengthLabel) {
+      pwStrengthLabel.textContent = pwd.length > 0 ? labels[score] || '' : '';
+      pwStrengthLabel.className = `text-[10px] ${score <= 1 ? 'text-red-400' : score === 2 ? 'text-amber-400' : 'text-emerald-400'}`;
+    }
+    checkPasswordMatch();
+  }
+
+  function checkPasswordMatch() {
+    if (!passwordConfirmInput || !pwMatchHint) return;
+    const pw = passwordInput ? passwordInput.value : '';
+    const conf = passwordConfirmInput.value;
+    if (!pw && !conf) {
+      pwMatchHint.classList.add('hidden');
+      return;
+    }
+    if (conf.length > 0) {
+      if (pw === conf) {
+        pwMatchHint.textContent = '✓ Las contraseñas coinciden';
+        pwMatchHint.className = 'text-[10px] text-emerald-400 mt-0.5 block';
+      } else {
+        pwMatchHint.textContent = '✗ Las contraseñas no coinciden';
+        pwMatchHint.className = 'text-[10px] text-red-400 mt-0.5 block';
+      }
+      pwMatchHint.classList.remove('hidden');
+    } else {
+      pwMatchHint.classList.add('hidden');
+    }
+  }
+
+  if (passwordInput) passwordInput.addEventListener('input', updatePasswordStrength);
+  if (passwordConfirmInput) passwordConfirmInput.addEventListener('input', checkPasswordMatch);
+  if (roleInput) {
+    roleInput.addEventListener('change', updateRoleDescription);
+    updateRoleDescription(); // initial render
+  }
 
   function resetForm() {
     if (editIdInput) editIdInput.value = '';
@@ -1557,11 +1645,17 @@ function initUsersManager() {
     }
     if (roleInput) roleInput.value = 'editor';
     if (passwordInput) passwordInput.value = '';
+    if (passwordConfirmInput) passwordConfirmInput.value = '';
     if (passwordLabel) passwordLabel.textContent = 'Contraseña *';
     if (passwordHint) passwordHint.classList.add('hidden');
+    if (confirmWrapper) confirmWrapper.classList.remove('hidden');
+    if (pwMatchHint) pwMatchHint.classList.add('hidden');
+    pwBars.forEach(bar => { if (bar) bar.className = 'h-1 flex-1 rounded-full bg-slate-700 transition-all'; });
+    if (pwStrengthLabel) pwStrengthLabel.textContent = '';
     if (formTitle) {
       formTitle.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i><span>Crear Nuevo Usuario</span>`;
     }
+    updateRoleDescription();
     if (window.lucide) window.lucide.createIcons();
   }
 
@@ -1624,11 +1718,12 @@ function initUsersManager() {
             ${initial}
           </div>
           <div>
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-2 flex-wrap">
               <h4 class="font-bold text-sm text-white">${u.name}</h4>
               <span class="text-[10px] font-mono px-2 py-0.5 rounded-md ${isAdmin ? 'bg-blue-950 text-blue-300 border border-blue-500/40' : 'bg-amber-950 text-amber-300 border border-amber-500/40'}">
                 ${isAdmin ? 'ADMIN' : 'EDITOR'}
               </span>
+              ${isMe ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30">Eres tú</span>' : ''}
             </div>
             <p class="text-xs text-slate-400 font-mono mt-0.5">@${u.username}</p>
           </div>
@@ -1676,18 +1771,23 @@ function initUsersManager() {
       const username = usernameInput ? usernameInput.value.trim() : '';
       const role = roleInput ? roleInput.value : 'editor';
       const password = passwordInput ? passwordInput.value : '';
+      const passwordConfirm = passwordConfirmInput ? passwordConfirmInput.value : '';
 
       if (!name) {
         return showAdminToast('Por favor ingresa el nombre de la persona', 'error');
       }
       if (!isEdit && (!username || username.length < 3)) {
-        return showAdminToast('El usuario debe tener al menos 3 caracteres', 'error');
+        return showAdminToast('El nombre de usuario debe tener al menos 3 caracteres', 'error');
       }
       if (!isEdit && (!password || password.length < 12)) {
         return showAdminToast('La contraseña debe tener al menos 12 caracteres', 'error');
       }
       if (isEdit && password && password.length < 12) {
         return showAdminToast('La nueva contraseña debe tener al menos 12 caracteres', 'error');
+      }
+      // Confirmar contraseña solo al crear o si se ingresó nueva contraseña en edición
+      if (password && !isEdit && password !== passwordConfirm) {
+        return showAdminToast('Las contraseñas no coinciden. Por favor verifica.', 'error');
       }
 
       saveBtn.disabled = true;
@@ -1746,10 +1846,19 @@ function initUsersManager() {
           usernameInput.value = username;
           usernameInput.disabled = true;
         }
-        if (roleInput) roleInput.value = role;
+        if (roleInput) {
+          roleInput.value = role;
+          updateRoleDescription();
+        }
         if (passwordInput) passwordInput.value = '';
+        if (passwordConfirmInput) passwordConfirmInput.value = '';
         if (passwordLabel) passwordLabel.textContent = 'Nueva Contraseña (Opcional)';
         if (passwordHint) passwordHint.classList.remove('hidden');
+        // En modo edición, ocultar el campo de confirmación (la contraseña es opcional)
+        if (confirmWrapper) confirmWrapper.classList.add('hidden');
+        if (pwMatchHint) pwMatchHint.classList.add('hidden');
+        pwBars.forEach(bar => { if (bar) bar.className = 'h-1 flex-1 rounded-full bg-slate-700 transition-all'; });
+        if (pwStrengthLabel) pwStrengthLabel.textContent = '';
 
         if (formTitle) {
           formTitle.innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-emerald-400"></i><span>Editar Usuario: @${username}</span>`;
@@ -1802,7 +1911,6 @@ function initUsersManager() {
     loadUsersList();
   }
 }
-
 // 13. Gestor de Cronograma de Actividades (SOLO Administrador)
 function initScheduleManager() {
   const container = document.getElementById('schedule-admin-container');
