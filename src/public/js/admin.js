@@ -1529,99 +1529,166 @@ function initRutScanner() {
 
 // 12. Gestor de Usuarios y Accesos (SOLO Administrador)
 function initUsersManager() {
-  const openCreateBtn = document.getElementById('btn-open-create-user');
-  const emptyCreateBtn = document.getElementById('btn-empty-create-user');
-  const cancelBtn = document.getElementById('btn-cancel-user-form');
-  const formPanel = document.getElementById('user-form-panel');
-  const saveBtn = document.getElementById('btn-save-user');
-  const formTitle = document.getElementById('user-form-title');
-  const editIdInput = document.getElementById('user-edit-id');
-  const nameInput = document.getElementById('user-input-name');
-  const usernameInput = document.getElementById('user-input-username');
-  const roleInput = document.getElementById('user-input-role');
-  const passwordInput = document.getElementById('user-input-password');
-  const passwordConfirmInput = document.getElementById('user-input-password-confirm');
-  const passwordLabel = document.getElementById('user-label-password');
-  const passwordHint = document.getElementById('user-hint-password');
-  const confirmWrapper = document.getElementById('user-confirm-password-wrapper');
-  const pwMatchHint = document.getElementById('pw-match-hint');
-  const pwBars = [1,2,3,4].map(i => document.getElementById(`pw-bar-${i}`));
-  const pwStrengthLabel = document.getElementById('pw-strength-label');
-  const roleDescBox = document.getElementById('role-description-box');
-  const roleDescText = document.getElementById('role-description-text');
   const container = document.getElementById('users-list-container');
-  const usersBadge = document.getElementById('users-count-badge');
-  const emptyState = document.getElementById('users-empty-state');
+  if (!container) return; // Si no existe el contenedor (rol no admin), salir sin error
 
-  if (!container && !openCreateBtn) return;
+  // Elementos del DOM
+  const formCard           = document.getElementById('user-form-card');
+  const toggleCreateBtn    = document.getElementById('btn-toggle-create-user');
+  const toggleCreateText   = document.getElementById('btn-toggle-create-text');
+  const cancelBtnTop       = document.getElementById('btn-cancel-user-form');
+  const cancelBtnBottom    = document.getElementById('btn-cancel-user-form-bottom');
+  const formTitle          = document.getElementById('user-form-card-title');
+  const formSubtitle       = document.getElementById('user-form-card-subtitle');
+  const formHeaderIcon     = document.getElementById('form-header-icon');
+  const errorBox           = document.getElementById('user-form-error-box');
+  const errorMsg           = document.getElementById('user-form-error-msg');
 
-  // --- Descripciones de roles ---
-  const roleDescriptions = {
-    editor: {
-      text: '📋 <strong>Editor de terreno:</strong> Puede acceder al escáner de cédulas para acreditación en ruta, ver y buscar participantes inscritos. No puede modificar contenido del sitio ni gestionar usuarios.',
-      classes: 'bg-amber-950/50 border-amber-500/30 text-amber-200'
-    },
-    admin: {
-      text: '🛡️ <strong>Administrador:</strong> Acceso completo al CMS — puede editar contenido del sitio, gestionar corridas, preguntas frecuentes, cronograma, usuarios y ver inscripciones. Úsalo solo para personas de confianza.',
-      classes: 'bg-blue-950/50 border-blue-500/30 text-blue-200'
-    }
-  };
+  // Campos
+  const editIdInput        = document.getElementById('user-edit-id');
+  const nameInput          = document.getElementById('user-input-name');
+  const usernameContainer  = document.getElementById('user-username-container');
+  const usernameInput      = document.getElementById('user-input-username');
+  const roleInput          = document.getElementById('user-input-role');
+  const roleCardEditor     = document.getElementById('role-card-editor');
+  const roleCardAdmin      = document.getElementById('role-card-admin');
 
-  function updateRoleDescription() {
-    if (!roleInput || !roleDescBox || !roleDescText) return;
-    const desc = roleDescriptions[roleInput.value];
-    if (desc) {
-      roleDescText.innerHTML = desc.text;
-      roleDescBox.className = `mt-2 p-2.5 rounded-xl text-[11px] leading-relaxed border ${desc.classes}`;
-      roleDescBox.classList.remove('hidden');
+  // Contraseñas
+  const passwordInput      = document.getElementById('user-input-password');
+  const passwordConfirm    = document.getElementById('user-input-password-confirm');
+  const confirmContainer   = document.getElementById('user-confirm-password-container');
+  const passwordLabel      = document.getElementById('user-label-password');
+  const passwordHint       = document.getElementById('user-hint-password');
+  const togglePwBtn        = document.getElementById('btn-toggle-pw-visibility');
+  const togglePwText       = document.getElementById('pw-toggle-text');
+  const pwBars             = [1,2,3,4].map(i => document.getElementById('pw-bar-' + i));
+  const pwStrengthLabel    = document.getElementById('pw-strength-label');
+  const pwMatchHint        = document.getElementById('pw-match-hint');
+
+  // Guardar
+  const saveBtn            = document.getElementById('btn-save-user');
+  const saveBtnText        = document.getElementById('btn-save-user-text');
+
+  // Badges y Contadores
+  const totalBadge         = document.getElementById('users-total-badge');
+  const adminCountEl       = document.getElementById('users-admin-count');
+  const editorCountEl      = document.getElementById('users-editor-count');
+  const sidebarCountBadge  = document.getElementById('users-count-badge');
+  const emptyState         = document.getElementById('users-empty-state');
+
+  // ---------------------------------------------------------
+  // Helper: Request con CSRF
+  // ---------------------------------------------------------
+  async function apiFetch(url, options = {}) {
+    const meta = document.querySelector('meta[name="csrf-token"]');
+    const csrf = meta ? meta.getAttribute('content') : '';
+    const headers = new Headers(options.headers || {});
+    headers.set('Content-Type', 'application/json');
+    headers.set('Accept', 'application/json');
+    if (csrf) headers.set('X-CSRF-Token', csrf);
+
+    const res = await fetch(url, { credentials: 'same-origin', ...options, headers });
+    const data = await res.json().catch(() => ({}));
+    return { ok: res.ok, status: res.status, data };
+  }
+
+  // ---------------------------------------------------------
+  // Selector de Rol Visual (Cards)
+  // ---------------------------------------------------------
+  function setRole(role) {
+    if (roleInput) roleInput.value = role;
+
+    if (role === 'editor') {
+      if (roleCardEditor) {
+        roleCardEditor.className = 'role-card-opt p-4 rounded-2xl border-2 border-amber-500/70 bg-amber-950/20 cursor-pointer transition-all hover:border-amber-400 shadow-sm';
+        const badge = roleCardEditor.querySelector('.role-indicator-badge');
+        if (badge) { badge.textContent = 'Seleccionado'; badge.classList.remove('hidden'); }
+      }
+      if (roleCardAdmin) {
+        roleCardAdmin.className = 'role-card-opt p-4 rounded-2xl border-2 border-slate-700 bg-slate-950/40 cursor-pointer transition-all hover:border-blue-400 opacity-70';
+        const badge = roleCardAdmin.querySelector('.role-indicator-badge');
+        if (badge) badge.classList.add('hidden');
+      }
     } else {
-      roleDescBox.classList.add('hidden');
+      if (roleCardAdmin) {
+        roleCardAdmin.className = 'role-card-opt p-4 rounded-2xl border-2 border-blue-500/70 bg-blue-950/20 cursor-pointer transition-all hover:border-blue-400 shadow-sm';
+        const badge = roleCardAdmin.querySelector('.role-indicator-badge');
+        if (badge) { badge.textContent = 'Seleccionado'; badge.classList.remove('hidden'); }
+      }
+      if (roleCardEditor) {
+        roleCardEditor.className = 'role-card-opt p-4 rounded-2xl border-2 border-slate-700 bg-slate-950/40 cursor-pointer transition-all hover:border-amber-400 opacity-70';
+        const badge = roleCardEditor.querySelector('.role-indicator-badge');
+        if (badge) badge.classList.add('hidden');
+      }
     }
   }
 
-  // --- Medidor de fortaleza de contraseña ---
-  function getPasswordStrength(pwd) {
-    let score = 0;
-    if (pwd.length >= 12) score++;
-    if (pwd.length >= 16) score++;
-    if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) score++;
-    if (/[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) score++;
-    return score; // 0-4
+  if (roleCardEditor) roleCardEditor.addEventListener('click', () => setRole('editor'));
+  if (roleCardAdmin) roleCardAdmin.addEventListener('click', () => setRole('admin'));
+
+  // ---------------------------------------------------------
+  // Toggle Ver/Ocultar Contraseña
+  // ---------------------------------------------------------
+  if (togglePwBtn && passwordInput) {
+    togglePwBtn.addEventListener('click', () => {
+      const isPassword = passwordInput.type === 'password';
+      passwordInput.type = isPassword ? 'text' : 'password';
+      if (passwordConfirm) passwordConfirm.type = isPassword ? 'text' : 'password';
+      if (togglePwText) togglePwText.textContent = isPassword ? 'Ocultar' : 'Ver clave';
+      const icon = togglePwBtn.querySelector('i');
+      if (icon) icon.setAttribute('data-lucide', isPassword ? 'eye-off' : 'eye');
+      if (window.lucide) window.lucide.createIcons();
+    });
   }
 
-  function updatePasswordStrength() {
-    if (!passwordInput) return;
-    const pwd = passwordInput.value;
-    const score = pwd.length === 0 ? 0 : getPasswordStrength(pwd);
-    const labels = ['', 'Débil', 'Regular', 'Buena', 'Muy fuerte'];
+  // ---------------------------------------------------------
+  // Medidor de Fortaleza de Contraseña
+  // ---------------------------------------------------------
+  function calcStrength(pwd) {
+    let s = 0;
+    if (pwd.length >= 12) s++;
+    if (pwd.length >= 16) s++;
+    if (/[A-Z]/.test(pwd) && /[a-z]/.test(pwd)) s++;
+    if (/[0-9]/.test(pwd) && /[^A-Za-z0-9]/.test(pwd)) s++;
+    return s;
+  }
+
+  function updateStrength() {
+    const pwd = passwordInput ? passwordInput.value : '';
+    const s = pwd.length === 0 ? 0 : calcStrength(pwd);
     const colors = ['bg-slate-700', 'bg-red-500', 'bg-amber-500', 'bg-emerald-500', 'bg-emerald-400'];
+    const labels = ['', 'Débil (mínimo 12 caracteres)', 'Aceptable', 'Buena y segura', 'Excelente'];
+    const labelClasses = ['', 'text-red-400', 'text-amber-400', 'text-emerald-400', 'text-emerald-400'];
 
     pwBars.forEach((bar, i) => {
-      if (!bar) return;
-      bar.className = `h-1 flex-1 rounded-full transition-all ${i < score ? colors[score] : 'bg-slate-700'}`;
+      if (bar) bar.className = 'h-1 flex-1 rounded-full transition-all ' + (i < s ? colors[s] : 'bg-slate-700');
     });
+
     if (pwStrengthLabel) {
-      pwStrengthLabel.textContent = pwd.length > 0 ? labels[score] || '' : '';
-      pwStrengthLabel.className = `text-[10px] ${score <= 1 ? 'text-red-400' : score === 2 ? 'text-amber-400' : 'text-emerald-400'}`;
+      pwStrengthLabel.textContent = pwd.length > 0 ? labels[s] : '';
+      pwStrengthLabel.className = 'text-[10px] block ' + (labelClasses[s] || 'text-slate-500');
     }
-    checkPasswordMatch();
+
+    checkMatch();
   }
 
-  function checkPasswordMatch() {
-    if (!passwordConfirmInput || !pwMatchHint) return;
-    const pw = passwordInput ? passwordInput.value : '';
-    const conf = passwordConfirmInput.value;
-    if (!pw && !conf) {
+  function checkMatch() {
+    if (!passwordConfirm || !pwMatchHint) return;
+    const p1 = passwordInput ? passwordInput.value : '';
+    const p2 = passwordConfirm.value;
+
+    if (!p1 && !p2) {
       pwMatchHint.classList.add('hidden');
       return;
     }
-    if (conf.length > 0) {
-      if (pw === conf) {
-        pwMatchHint.textContent = '✓ Las contraseñas coinciden';
-        pwMatchHint.className = 'text-[10px] text-emerald-400 mt-0.5 block';
+
+    if (p2.length > 0) {
+      if (p1 === p2) {
+        pwMatchHint.textContent = '✓ Las contraseñas coinciden perfectamente';
+        pwMatchHint.className = 'text-[10px] text-emerald-400 mt-1 block font-medium';
       } else {
-        pwMatchHint.textContent = '✗ Las contraseñas no coinciden';
-        pwMatchHint.className = 'text-[10px] text-red-400 mt-0.5 block';
+        pwMatchHint.textContent = '✗ Las contraseñas aún no coinciden';
+        pwMatchHint.className = 'text-[10px] text-red-400 mt-1 block font-medium';
       }
       pwMatchHint.classList.remove('hidden');
     } else {
@@ -1629,287 +1696,343 @@ function initUsersManager() {
     }
   }
 
-  if (passwordInput) passwordInput.addEventListener('input', updatePasswordStrength);
-  if (passwordConfirmInput) passwordConfirmInput.addEventListener('input', checkPasswordMatch);
-  if (roleInput) {
-    roleInput.addEventListener('change', updateRoleDescription);
-    updateRoleDescription(); // initial render
+  if (passwordInput) passwordInput.addEventListener('input', updateStrength);
+  if (passwordConfirm) passwordConfirm.addEventListener('input', checkMatch);
+
+  // ---------------------------------------------------------
+  // Errores Inline
+  // ---------------------------------------------------------
+  function showError(msg) {
+    if (errorBox && errorMsg) {
+      errorMsg.textContent = msg;
+      errorBox.classList.remove('hidden');
+      errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
   }
 
+  function hideError() {
+    if (errorBox) errorBox.classList.add('hidden');
+  }
+
+  // ---------------------------------------------------------
+  // Reset del Formulario
+  // ---------------------------------------------------------
   function resetForm() {
+    hideError();
     if (editIdInput) editIdInput.value = '';
     if (nameInput) nameInput.value = '';
     if (usernameInput) {
       usernameInput.value = '';
       usernameInput.disabled = false;
     }
-    if (roleInput) roleInput.value = 'editor';
-    if (passwordInput) passwordInput.value = '';
-    if (passwordConfirmInput) passwordConfirmInput.value = '';
+    if (usernameContainer) usernameContainer.classList.remove('hidden');
+    if (passwordInput) {
+      passwordInput.value = '';
+      passwordInput.type = 'password';
+    }
+    if (passwordConfirm) {
+      passwordConfirm.value = '';
+      passwordConfirm.type = 'password';
+    }
+    if (togglePwText) togglePwText.textContent = 'Ver clave';
     if (passwordLabel) passwordLabel.textContent = 'Contraseña *';
     if (passwordHint) passwordHint.classList.add('hidden');
-    if (confirmWrapper) confirmWrapper.classList.remove('hidden');
+    if (confirmContainer) confirmContainer.classList.remove('hidden');
     if (pwMatchHint) pwMatchHint.classList.add('hidden');
-    pwBars.forEach(bar => { if (bar) bar.className = 'h-1 flex-1 rounded-full bg-slate-700 transition-all'; });
+
+    pwBars.forEach(b => { if (b) b.className = 'h-1 flex-1 rounded-full bg-slate-700 transition-all'; });
     if (pwStrengthLabel) pwStrengthLabel.textContent = '';
-    if (formTitle) {
-      formTitle.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i><span>Crear Nuevo Usuario</span>`;
-    }
-    updateRoleDescription();
+
+    setRole('editor');
+
+    if (formTitle) formTitle.textContent = 'Crear Nuevo Usuario';
+    if (formSubtitle) formSubtitle.textContent = 'Ingresa los datos para otorgar acceso al sistema.';
+    if (formHeaderIcon) formHeaderIcon.setAttribute('data-lucide', 'user-plus');
+    if (saveBtnText) saveBtnText.textContent = 'Guardar Usuario';
+
     if (window.lucide) window.lucide.createIcons();
   }
 
-  function toggleCreateForm() {
-    if (!formPanel) return;
-    const isHidden = formPanel.classList.contains('hidden');
-    if (isHidden || (editIdInput && editIdInput.value)) {
-      resetForm();
-      formPanel.classList.remove('hidden');
-      formPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-      if (nameInput) nameInput.focus();
-    } else {
-      formPanel.classList.add('hidden');
-    }
+  // ---------------------------------------------------------
+  // Abrir / Cerrar Form Card
+  // ---------------------------------------------------------
+  function openForm(isEdit = false) {
+    if (!formCard) return;
+    formCard.classList.remove('hidden');
+    if (toggleCreateText) toggleCreateText.textContent = '✕ Ocultar Formulario';
+    formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    setTimeout(() => { if (nameInput) nameInput.focus(); }, 150);
   }
 
-  if (openCreateBtn) openCreateBtn.addEventListener('click', toggleCreateForm);
-  if (emptyCreateBtn) emptyCreateBtn.addEventListener('click', toggleCreateForm);
+  function closeForm() {
+    if (!formCard) return;
+    formCard.classList.add('hidden');
+    if (toggleCreateText) toggleCreateText.textContent = 'Crear Nuevo Usuario';
+    resetForm();
+  }
 
-  if (cancelBtn && formPanel) {
-    cancelBtn.addEventListener('click', () => {
-      formPanel.classList.add('hidden');
-      resetForm();
+  if (toggleCreateBtn) {
+    toggleCreateBtn.addEventListener('click', () => {
+      if (!formCard) return;
+      const isClosed = formCard.classList.contains('hidden');
+      if (isClosed) {
+        resetForm();
+        openForm(false);
+      } else {
+        closeForm();
+      }
     });
   }
 
-  function updateUsersCount() {
-    if (!container) return;
-    const cards = container.querySelectorAll('.user-card-item');
-    if (usersBadge) usersBadge.textContent = cards.length;
-    if (emptyState) emptyState.classList.toggle('hidden', cards.length > 0);
+  if (cancelBtnTop) cancelBtnTop.addEventListener('click', closeForm);
+  if (cancelBtnBottom) cancelBtnBottom.addEventListener('click', closeForm);
+
+  // ---------------------------------------------------------
+  // Actualizar Contadores en UI
+  // ---------------------------------------------------------
+  function updateCounts(users) {
+    const total = users.length;
+    const admins = users.filter(u => u.role === 'admin').length;
+    const editors = users.filter(u => u.role === 'editor').length;
+
+    if (totalBadge) totalBadge.textContent = `${total} cuenta${total === 1 ? '' : 's'} activa${total === 1 ? '' : 's'}`;
+    if (adminCountEl) adminCountEl.textContent = admins;
+    if (editorCountEl) editorCountEl.textContent = editors;
+    if (sidebarCountBadge) sidebarCountBadge.textContent = total;
+    if (emptyState) emptyState.classList.toggle('hidden', total > 0);
   }
 
+  // ---------------------------------------------------------
+  // Renderizar Tarjetas de Usuario
+  // ---------------------------------------------------------
   function renderUsers(users) {
-    if (!container) return;
-    // Quitar cards existentes para refrescar con los datos más recientes
+    // Quitar únicamente las tarjetas existentes
     container.querySelectorAll('.user-card-item').forEach(el => el.remove());
+    updateCounts(users);
 
-    if (emptyState) {
-      emptyState.classList.toggle('hidden', users.length > 0);
-    }
-
-    const currentUsername = (document.querySelector('header .text-slate-400.font-mono')?.textContent?.replace(/[()]/g, '') || '').trim().toLowerCase();
+    const currentUserMeta = document.querySelector('meta[name="current-user"]');
+    const myUsername = (currentUserMeta ? currentUserMeta.getAttribute('content') : '').trim().toLowerCase();
 
     users.forEach(u => {
-      const card = document.createElement('div');
-      card.className = 'user-card-item bg-slate-950/70 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all';
-      card.setAttribute('data-user-id', u.id);
-      card.setAttribute('data-username', u.username);
-      card.setAttribute('data-name', u.name);
-      card.setAttribute('data-role', u.role);
-
-      const isMe = u.username.toLowerCase() === currentUsername;
-      const initial = (u.name || u.username || 'U')[0].toUpperCase();
+      const isMe = u.username.toLowerCase() === myUsername;
       const isAdmin = u.role === 'admin';
+      const initial = (u.name || u.username || 'U')[0].toUpperCase();
+
+      const card = document.createElement('div');
+      card.className = 'user-card-item bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-2xl p-4.5 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all shadow-md';
+      card.dataset.userId = u.id;
+      card.dataset.username = u.username;
+      card.dataset.name = u.name;
+      card.dataset.role = u.role;
 
       card.innerHTML = `
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 rounded-2xl ${isAdmin ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'bg-amber-600/20 text-amber-400 border border-amber-500/30'} flex items-center justify-center font-bold text-base shrink-0">
+        <div class="flex items-center gap-3.5">
+          <div class="w-11 h-11 rounded-2xl shrink-0 flex items-center justify-center font-black text-sm
+               ${isAdmin ? 'bg-blue-600/20 text-blue-400 border border-blue-500/40 shadow-blue-500/10' : 'bg-amber-600/20 text-amber-400 border border-amber-500/40 shadow-amber-500/10'} shadow-lg">
             ${initial}
           </div>
           <div>
             <div class="flex items-center gap-2 flex-wrap">
-              <h4 class="font-bold text-sm text-white">${u.name}</h4>
-              <span class="text-[10px] font-mono px-2 py-0.5 rounded-md ${isAdmin ? 'bg-blue-950 text-blue-300 border border-blue-500/40' : 'bg-amber-950 text-amber-300 border border-amber-500/40'}">
+              <span class="font-bold text-sm text-white">${u.name}</span>
+              <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg
+                   ${isAdmin ? 'bg-blue-950 text-blue-300 border border-blue-500/40' : 'bg-amber-950 text-amber-300 border border-amber-500/40'}">
                 ${isAdmin ? 'ADMIN' : 'EDITOR'}
               </span>
-              ${isMe ? '<span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30">Eres tú</span>' : ''}
+              ${isMe ? `
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Eres tú
+              </span>` : ''}
             </div>
             <p class="text-xs text-slate-400 font-mono mt-0.5">@${u.username}</p>
           </div>
         </div>
 
-        <div class="flex items-center gap-2 self-end sm:self-auto">
-          <button type="button" class="btn-edit-user px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer" data-id="${u.id}" data-username="${u.username}" data-name="${u.name}" data-role="${u.role}">
-            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+        <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+          <button type="button" class="btn-edit-user px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                  data-id="${u.id}" data-username="${u.username}" data-name="${u.name}" data-role="${u.role}">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5 text-slate-400"></i>
             <span>Editar</span>
           </button>
+
           ${!isMe ? `
-          <button type="button" class="btn-delete-user px-3 py-1.5 rounded-xl bg-red-950/60 hover:bg-red-900 border border-red-500/30 text-xs font-semibold text-red-300 transition-colors flex items-center gap-1.5 cursor-pointer" data-id="${u.id}" data-username="${u.username}">
-            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-            <span>Eliminar</span>
-          </button>
-          ` : ''}
+          <button type="button" class="btn-delete-user p-2 rounded-xl bg-red-950/50 hover:bg-red-900 border border-red-500/30 text-red-300 transition-colors cursor-pointer"
+                  data-id="${u.id}" data-username="${u.username}" title="Eliminar usuario">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>` : ''}
         </div>
       `;
+
       container.appendChild(card);
     });
 
-    if (usersBadge) usersBadge.textContent = users.length;
     if (window.lucide) window.lucide.createIcons();
   }
 
+  // ---------------------------------------------------------
+  // Cargar Lista de Usuarios (Sin limpiar antes de la respuesta)
+  // ---------------------------------------------------------
   async function loadUsersList() {
-    if (!container) return;
     try {
-      const res = await cmsFetch('/admin/api/users');
-      if (res && res.success && Array.isArray(res.users)) {
-        renderUsers(res.users);
+      const { ok, data } = await apiFetch('/admin/api/users');
+      if (ok && data.success && Array.isArray(data.users)) {
+        renderUsers(data.users);
       }
     } catch (err) {
-      console.warn('[users] No se pudo cargar lista via API:', err);
+      console.warn('[users] No se pudo actualizar lista vía API:', err);
     }
   }
 
   window._loadUsersList = loadUsersList;
 
+  // ---------------------------------------------------------
   // Guardar (Crear o Actualizar)
+  // ---------------------------------------------------------
   if (saveBtn) {
     saveBtn.addEventListener('click', async () => {
-      const isEdit = editIdInput ? !!editIdInput.value : false;
-      const name = nameInput ? nameInput.value.trim() : '';
-      const username = usernameInput ? usernameInput.value.trim() : '';
-      const role = roleInput ? roleInput.value : 'editor';
-      const password = passwordInput ? passwordInput.value : '';
-      const passwordConfirm = passwordConfirmInput ? passwordConfirmInput.value : '';
+      hideError();
 
+      const isEdit   = !!(editIdInput && editIdInput.value);
+      const name     = (nameInput ? nameInput.value : '').trim();
+      const username = (usernameInput ? usernameInput.value : '').trim().toLowerCase();
+      const role     = roleInput ? roleInput.value : 'editor';
+      const pw       = passwordInput ? passwordInput.value : '';
+      const pwConf   = passwordConfirm ? passwordConfirm.value : '';
+
+      // Validaciones básicas del lado del cliente
       if (!name) {
-        return showAdminToast('Por favor ingresa el nombre de la persona', 'error');
-      }
-      if (!isEdit && (!username || username.length < 3)) {
-        return showAdminToast('El nombre de usuario debe tener al menos 3 caracteres', 'error');
-      }
-      if (!isEdit && (!password || password.length < 12)) {
-        return showAdminToast('La contraseña debe tener al menos 12 caracteres', 'error');
-      }
-      if (isEdit && password && password.length < 12) {
-        return showAdminToast('La nueva contraseña debe tener al menos 12 caracteres', 'error');
-      }
-      // Confirmar contraseña solo al crear o si se ingresó nueva contraseña en edición
-      if (password && !isEdit && password !== passwordConfirm) {
-        return showAdminToast('Las contraseñas no coinciden. Por favor verifica.', 'error');
-      }
-
-      saveBtn.disabled = true;
-      const origText = saveBtn.innerHTML;
-      saveBtn.innerHTML = '<span class="inline-block animate-spin mr-1.5">⟳</span> Guardando...';
-
-      try {
-        let url = '/admin/api/users';
-        let method = 'POST';
-        let body = { name, username, role, password };
-
-        if (isEdit) {
-          url = `/admin/api/users/${editIdInput.value}`;
-          method = 'PUT';
-          body = { name, role };
-          if (password) body.password = password;
-        }
-
-        const res = await cmsFetch(url, {
-          method,
-          body: JSON.stringify(body)
-        });
-
-        if (res.success) {
-          showAdminToast(res.message || 'Usuario guardado exitosamente', 'success');
-          resetForm();
-          if (formPanel) formPanel.classList.add('hidden');
-          await loadUsersList();
-        } else {
-          showAdminToast(res.error || 'No se pudo guardar el usuario', 'error');
-        }
-      } catch (err) {
-        showAdminToast(err.message || 'Error de conexión', 'error');
-      } finally {
-        saveBtn.disabled = false;
-        saveBtn.innerHTML = origText;
-        if (window.lucide) window.lucide.createIcons();
-      }
-    });
-  }
-
-  // Delegación para Editar y Eliminar
-  if (container) {
-    container.addEventListener('click', async (e) => {
-      // Editar
-      const editBtn = e.target.closest('.btn-edit-user');
-      if (editBtn) {
-        const id = editBtn.getAttribute('data-id');
-        const username = editBtn.getAttribute('data-username');
-        const name = editBtn.getAttribute('data-name');
-        const role = editBtn.getAttribute('data-role');
-
-        if (editIdInput) editIdInput.value = id;
-        if (nameInput) nameInput.value = name;
-        if (usernameInput) {
-          usernameInput.value = username;
-          usernameInput.disabled = true;
-        }
-        if (roleInput) {
-          roleInput.value = role;
-          updateRoleDescription();
-        }
-        if (passwordInput) passwordInput.value = '';
-        if (passwordConfirmInput) passwordConfirmInput.value = '';
-        if (passwordLabel) passwordLabel.textContent = 'Nueva Contraseña (Opcional)';
-        if (passwordHint) passwordHint.classList.remove('hidden');
-        // En modo edición, ocultar el campo de confirmación (la contraseña es opcional)
-        if (confirmWrapper) confirmWrapper.classList.add('hidden');
-        if (pwMatchHint) pwMatchHint.classList.add('hidden');
-        pwBars.forEach(bar => { if (bar) bar.className = 'h-1 flex-1 rounded-full bg-slate-700 transition-all'; });
-        if (pwStrengthLabel) pwStrengthLabel.textContent = '';
-
-        if (formTitle) {
-          formTitle.innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-emerald-400"></i><span>Editar Usuario: @${username}</span>`;
-        }
-        if (window.lucide) window.lucide.createIcons();
-
-        if (formPanel) {
-          formPanel.classList.remove('hidden');
-          formPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }
-        if (nameInput) nameInput.focus();
+        showError('Por favor ingresa el nombre completo de la persona.');
         return;
       }
 
-      // Eliminar
-      const deleteBtn = e.target.closest('.btn-delete-user');
-      if (deleteBtn) {
-        const id = deleteBtn.getAttribute('data-id');
-        const username = deleteBtn.getAttribute('data-username');
-
-        if (!confirm(`¿Estás seguro de eliminar el usuario "@${username}"? Esta acción revocará su acceso de inmediato.`)) {
+      if (!isEdit) {
+        if (!username || username.length < 3) {
+          showError('El nombre de usuario debe tener al menos 3 caracteres (sin espacios).');
           return;
         }
-
-        try {
-          const res = await cmsFetch(`/admin/api/users/${id}`, {
-            method: 'DELETE'
-          });
-
-          if (res.success) {
-            showAdminToast(`Usuario "@${username}" eliminado correctamente`, 'success');
-            const card = deleteBtn.closest('.user-card-item');
-            if (card) {
-              card.remove();
-              updateUsersCount();
-            }
-          } else {
-            showAdminToast(res.error || 'Error al eliminar usuario', 'error');
-          }
-        } catch (err) {
-          showAdminToast(err.message || 'Error de conexión', 'error');
+        if (!/^[a-z0-9_-]+$/.test(username)) {
+          showError('El nombre de usuario solo puede contener letras minúsculas, números o guiones.');
+          return;
         }
+        if (!pw || pw.length < 12) {
+          showError('La contraseña debe tener un mínimo de 12 caracteres.');
+          return;
+        }
+        if (pw !== pwConf) {
+          showError('Las contraseñas no coinciden. Por favor verifica.');
+          return;
+        }
+      } else {
+        if (pw && pw.length < 12) {
+          showError('La nueva contraseña debe tener un mínimo de 12 caracteres.');
+          return;
+        }
+      }
+
+      saveBtn.disabled = true;
+      const origText = saveBtnText ? saveBtnText.textContent : 'Guardar';
+      if (saveBtnText) saveBtnText.textContent = 'Guardando...';
+
+      try {
+        const url    = isEdit ? `/admin/api/users/${editIdInput.value}` : '/admin/api/users';
+        const method = isEdit ? 'PUT' : 'POST';
+        const body   = isEdit
+          ? { name, role, ...(pw ? { password: pw } : {}) }
+          : { name, username, role, password: pw };
+
+        const { ok, data } = await apiFetch(url, { method, body: JSON.stringify(body) });
+
+        if (ok && data.success) {
+          showAdminToast(isEdit ? 'Usuario actualizado exitosamente' : `Usuario @${username} creado con éxito`, 'success');
+          closeForm();
+          await loadUsersList();
+        } else {
+          showError(data.error || 'Ocurrió un error al procesar el usuario.');
+        }
+      } catch (err) {
+        showError('Error de conexión con el servidor. Intenta nuevamente.');
+      } finally {
+        saveBtn.disabled = false;
+        if (saveBtnText) saveBtnText.textContent = origText;
       }
     });
   }
 
-  updateUsersCount();
-  // Cargar usuarios vía API si el contenedor está vacío
-  if (!container.querySelector('.user-card-item')) {
-    loadUsersList();
-  }
+  // ---------------------------------------------------------
+  // Delegación de Eventos: Editar y Eliminar
+  // ---------------------------------------------------------
+  container.addEventListener('click', async (e) => {
+    // EDITAR
+    const editBtn = e.target.closest('.btn-edit-user');
+    if (editBtn) {
+      const id       = editBtn.getAttribute('data-id');
+      const username = editBtn.getAttribute('data-username');
+      const name     = editBtn.getAttribute('data-name');
+      const role     = editBtn.getAttribute('data-role');
+
+      resetForm();
+
+      if (editIdInput) editIdInput.value = id;
+      if (nameInput) nameInput.value = name;
+      if (usernameInput) {
+        usernameInput.value = username;
+        usernameInput.disabled = true;
+      }
+      if (usernameContainer) usernameContainer.classList.add('hidden');
+
+      setRole(role);
+
+      if (passwordLabel) passwordLabel.textContent = 'Nueva Contraseña (Opcional)';
+      if (passwordHint) passwordHint.classList.remove('hidden');
+      if (confirmContainer) confirmContainer.classList.add('hidden');
+
+      if (formTitle) formTitle.textContent = `Editar Usuario: @${username}`;
+      if (formSubtitle) formSubtitle.textContent = 'Puedes actualizar el nombre, el rol de acceso o asignarle una nueva clave.';
+      if (formHeaderIcon) formHeaderIcon.setAttribute('data-lucide', 'edit-3');
+      if (saveBtnText) saveBtnText.textContent = 'Guardar Cambios';
+
+      openForm(true);
+      return;
+    }
+
+    // ELIMINAR
+    const deleteBtn = e.target.closest('.btn-delete-user');
+    if (deleteBtn) {
+      const id       = deleteBtn.getAttribute('data-id');
+      const username = deleteBtn.getAttribute('data-username');
+
+      if (!confirm(`¿Estás seguro de eliminar el usuario "@${username}"?\nEsta acción revocará su acceso al panel de administración de inmediato.`)) {
+        return;
+      }
+
+      deleteBtn.disabled = true;
+      try {
+        const { ok, data } = await apiFetch(`/admin/api/users/${id}`, { method: 'DELETE' });
+
+        if (ok && data.success) {
+          showAdminToast(`Usuario "@${username}" eliminado correctamente`, 'success');
+          const card = deleteBtn.closest('.user-card-item');
+          if (card) {
+            card.remove();
+            // Recontar cards restantes
+            const remaining = container.querySelectorAll('.user-card-item');
+            if (sidebarCountBadge) sidebarCountBadge.textContent = remaining.length;
+            if (totalBadge) totalBadge.textContent = `${remaining.length} cuentas activas`;
+            if (emptyState) emptyState.classList.toggle('hidden', remaining.length > 0);
+          }
+        } else {
+          showAdminToast(data.error || 'No se pudo eliminar el usuario', 'error');
+        }
+      } catch (err) {
+        showAdminToast('Error de conexión al eliminar usuario', 'error');
+      } finally {
+        deleteBtn.disabled = false;
+      }
+    }
+  });
+
+  // Re-contar al inicio en base a las tarjetas existentes en el DOM
+  const existingCards = container.querySelectorAll('.user-card-item');
+  if (sidebarCountBadge) sidebarCountBadge.textContent = existingCards.length;
 }
 // 13. Gestor de Cronograma de Actividades (SOLO Administrador)
 function initScheduleManager() {

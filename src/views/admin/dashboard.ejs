@@ -4,6 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="csrf-token" content="<%= csrfToken || '' %>">
+  <meta name="current-user" content="<%= username || '' %>">
   <title>CMS Dashboard | <%= content.brand?.name || 'KidsRun 2026' %></title>
   <meta name="robots" content="noindex, nofollow">
 
@@ -1815,153 +1816,247 @@
         <!-- PESTAÑA: GESTIÓN DE USUARIOS Y ACCESOS (SOLO ADMINISTRADOR) -->
         <% if (role === 'admin') { %>
         <div id="tab-users" class="tab-pane hidden space-y-6">
-          <div class="glass-panel p-4 sm:p-7 rounded-3xl border border-gray-800 space-y-6">
-            
-            <!-- Cabecera de Usuarios -->
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-800">
-              <div>
-                <div class="flex items-center gap-2 mb-1">
-                  <div class="w-8 h-8 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center">
-                    <i data-lucide="user-cog" class="w-4 h-4"></i>
+
+          <!-- 1. CABECERA PRINCIPAL CON CONTADORES Y ACCIÓN -->
+          <div class="bg-gradient-to-r from-slate-900 via-slate-900 to-slate-950 border border-slate-800 rounded-3xl p-5 sm:p-7 shadow-xl">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-5">
+              
+              <!-- Título & Métricas -->
+              <div class="space-y-2.5">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-2xl bg-emerald-600/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center shrink-0">
+                    <i data-lucide="users" class="w-5 h-5"></i>
                   </div>
-                  <h2 class="text-lg sm:text-xl font-black text-white">Gestión de Usuarios del Sistema</h2>
+                  <div>
+                    <h2 class="text-lg sm:text-xl font-black text-white flex items-center gap-2.5 flex-wrap">
+                      <span>Usuarios & Accesos del Sistema</span>
+                      <span class="text-xs px-2.5 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/40 font-mono font-bold" id="users-total-badge">
+                        <%= (typeof usersList !== 'undefined' ? usersList.length : 0) %> cuentas activas
+                      </span>
+                    </h2>
+                    <p class="text-xs text-slate-400 mt-0.5">Control de cuentas de acceso, roles de administración y permisos de acreditación en terreno.</p>
+                  </div>
                 </div>
-                <p class="text-xs text-gray-400">
-                  Crea, edita o elimina cuentas de acceso. Administra roles (Administrador o Editor para terreno).
-                </p>
+
+                <!-- Resumen de Roles -->
+                <%
+                  const adminCount = (typeof usersList !== 'undefined' ? usersList : []).filter(u => u.role === 'admin').length;
+                  const editorCount = (typeof usersList !== 'undefined' ? usersList : []).filter(u => u.role === 'editor').length;
+                %>
+                <div class="flex items-center gap-2 pt-0.5 flex-wrap">
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-blue-950/70 border border-blue-500/40 text-blue-300 text-xs font-semibold">
+                    <i data-lucide="shield-check" class="w-3.5 h-3.5 text-blue-400"></i>
+                    <strong id="users-admin-count"><%= adminCount %></strong> Administrador<%= adminCount === 1 ? '' : 'es' %>
+                  </span>
+                  <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-amber-950/70 border border-amber-500/40 text-amber-300 text-xs font-semibold">
+                    <i data-lucide="scan-face" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <strong id="users-editor-count"><%= editorCount %></strong> Editor<%= editorCount === 1 ? '' : 'es' %> de Terreno
+                  </span>
+                </div>
               </div>
 
-              <button type="button" id="btn-open-create-user" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/20 active:scale-95 transition-all flex items-center justify-center gap-2">
-                <i data-lucide="user-plus" class="w-4 h-4"></i>
-                <span>Crear Nuevo Usuario</span>
+              <!-- Botón Abrir Formulario -->
+              <div class="shrink-0">
+                <button type="button" id="btn-toggle-create-user" class="w-full sm:w-auto px-5 py-3 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 active:scale-95 shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                  <i data-lucide="user-plus" class="w-4 h-4"></i>
+                  <span id="btn-toggle-create-text">Crear Nuevo Usuario</span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- 2. FORMULARIO INLINE DESPLEGABLE (CREAR / EDITAR) -->
+          <div id="user-form-card" class="hidden bg-slate-900 border-2 border-emerald-500/50 rounded-3xl p-5 sm:p-7 shadow-2xl space-y-5 transition-all animate-in fade-in duration-200">
+            <!-- Cabecera del Formulario -->
+            <div class="flex items-center justify-between pb-4 border-b border-slate-800">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-2xl bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 flex items-center justify-center">
+                  <i data-lucide="user-plus" class="w-4 h-4" id="form-header-icon"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-bold text-white" id="user-form-card-title">Crear Nuevo Usuario</h3>
+                  <p class="text-[11px] text-slate-400" id="user-form-card-subtitle">Ingresa los datos para otorgar acceso al sistema.</p>
+                </div>
+              </div>
+              <button type="button" id="btn-cancel-user-form" class="px-3 py-1.5 rounded-xl text-slate-400 hover:text-white hover:bg-slate-800 transition-colors text-xs flex items-center gap-1 cursor-pointer">
+                <i data-lucide="x" class="w-3.5 h-3.5"></i>
+                <span>Cerrar</span>
               </button>
             </div>
 
-            <!-- Formulario Desplegable para Crear / Editar Usuario -->
-            <div id="user-form-panel" class="hidden p-5 rounded-2xl bg-gray-900 border border-emerald-500/40 shadow-xl space-y-4">
-              <div class="flex items-center justify-between pb-3 border-b border-gray-800">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2" id="user-form-title">
-                  <i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i>
-                  <span>Crear Nuevo Usuario</span>
-                </h3>
-                <button type="button" id="btn-cancel-user-form" class="text-xs text-gray-400 hover:text-white">✕ Cancelar</button>
-              </div>
-
-              <input type="hidden" id="user-edit-id" value="">
-
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-xs font-semibold text-gray-300 mb-1">Nombre Completo *</label>
-                  <input type="text" id="user-input-name" placeholder="Ej: Carlos Silva" class="admin-input w-full px-3.5 py-2 text-xs text-white">
-                </div>
-
-                <div>
-                  <label class="block text-xs font-semibold text-gray-300 mb-1">Nombre de Usuario (Login) *</label>
-                  <input type="text" id="user-input-username" placeholder="Ej: carlossilva" class="admin-input w-full px-3.5 py-2 text-xs text-white font-mono" autocomplete="off">
-                  <span class="text-[10px] text-gray-500 mt-0.5 block">Solo letras, números y guiones. Sin espacios.</span>
-                </div>
-
-                <div class="sm:col-span-2">
-                  <label class="block text-xs font-semibold text-gray-300 mb-1">Rol de Acceso *</label>
-                  <select id="user-input-role" class="admin-input w-full px-3.5 py-2 text-xs text-white">
-                    <option value="editor">Editor — Acceso a Escáner QR y Base de Datos de inscritos</option>
-                    <option value="admin">Administrador — Control total del CMS (contenido, corridas, usuarios)</option>
-                  </select>
-                  <div id="role-description-box" class="mt-2 p-2.5 rounded-xl text-[11px] leading-relaxed border hidden">
-                    <span id="role-description-text"></span>
-                  </div>
-                </div>
-
-                <div>
-                  <label class="block text-xs font-semibold text-gray-300 mb-1" id="user-label-password">Contraseña *</label>
-                  <input type="password" id="user-input-password" placeholder="Mínimo 12 caracteres" minlength="12" class="admin-input w-full px-3.5 py-2 text-xs text-white" autocomplete="new-password">
-                  <span class="text-[10px] text-gray-500 hidden mt-0.5 block" id="user-hint-password">Deja en blanco para mantener la contraseña actual.</span>
-                  <div class="mt-1.5 space-y-1" id="password-strength-wrapper">
-                    <div class="flex gap-1">
-                      <div class="h-1 flex-1 rounded-full bg-slate-700 transition-all" id="pw-bar-1"></div>
-                      <div class="h-1 flex-1 rounded-full bg-slate-700 transition-all" id="pw-bar-2"></div>
-                      <div class="h-1 flex-1 rounded-full bg-slate-700 transition-all" id="pw-bar-3"></div>
-                      <div class="h-1 flex-1 rounded-full bg-slate-700 transition-all" id="pw-bar-4"></div>
-                    </div>
-                    <span class="text-[10px] text-slate-500" id="pw-strength-label"></span>
-                  </div>
-                </div>
-
-                <div id="user-confirm-password-wrapper">
-                  <label class="block text-xs font-semibold text-gray-300 mb-1">Confirmar Contraseña *</label>
-                  <input type="password" id="user-input-password-confirm" placeholder="Repite la contraseña" minlength="12" class="admin-input w-full px-3.5 py-2 text-xs text-white" autocomplete="new-password">
-                  <span class="text-[10px] hidden mt-0.5 block" id="pw-match-hint"></span>
-                </div>
-              </div>
-
-              <div class="flex justify-end gap-2 pt-2">
-                <button type="button" id="btn-save-user" class="px-5 py-2.5 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/30 transition-all flex items-center gap-1.5">
-                  <i data-lucide="check" class="w-4 h-4"></i>
-                  <span>Guardar Usuario</span>
-                </button>
-              </div>
+            <!-- Error Box -->
+            <div id="user-form-error-box" class="hidden p-3.5 rounded-2xl bg-red-950/80 border border-red-500/40 text-red-300 text-xs flex items-center gap-2">
+              <i data-lucide="alert-circle" class="w-4 h-4 shrink-0 text-red-400"></i>
+              <span id="user-form-error-msg"></span>
             </div>
 
-            <!-- Lista de Usuarios Existentes (Diseño Mobile-First) -->
-            <div class="space-y-3" id="users-list-container">
-              <% const hasUsers = typeof usersList !== 'undefined' && usersList && usersList.length > 0; %>
-              
-              <div id="users-empty-state" class="<%= hasUsers ? 'hidden' : '' %> text-center py-12 bg-slate-950/40 rounded-2xl border border-slate-800 text-slate-400 space-y-3 p-6">
-                <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
-                  <i data-lucide="users" class="w-6 h-6"></i>
-                </div>
-                <div>
-                  <h4 class="text-sm font-bold text-slate-200">No se encontraron usuarios registrados</h4>
-                  <p class="text-xs text-slate-500 mt-0.5">Haz clic en "Crear Nuevo Usuario" para añadir un administrador o editor de terreno.</p>
-                </div>
-                <button type="button" id="btn-empty-create-user" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md transition-all cursor-pointer">
-                  <i data-lucide="user-plus" class="w-4 h-4"></i>
-                  <span>Crear Primer Usuario</span>
-                </button>
+            <input type="hidden" id="user-edit-id" value="">
+
+            <!-- Campos -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <!-- Nombre Completo -->
+              <div>
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Nombre Completo *</label>
+                <input type="text" id="user-input-name" placeholder="Ej: Marcela Contreras" class="admin-input w-full px-4 py-2.5 text-xs text-white bg-slate-950/70 border-slate-700 rounded-xl focus:border-emerald-500">
               </div>
 
-              <% (typeof usersList !== 'undefined' ? usersList : []).forEach(u => { %>
-              <div class="user-card-item bg-slate-950/70 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all" data-user-id="<%= u.id %>" data-username="<%= u.username %>" data-name="<%= u.name %>" data-role="<%= u.role %>">
-                <div class="flex items-center gap-3">
-                  <div class="w-10 h-10 rounded-2xl <%= u.role === 'admin' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'bg-amber-600/20 text-amber-400 border border-amber-500/30' %> flex items-center justify-center font-bold text-base shrink-0">
-                    <%= (u.name || u.username)[0].toUpperCase() %>
-                  </div>
-                  <div>
-                    <div class="flex items-center gap-2">
-                      <h4 class="font-bold text-sm text-white"><%= u.name %></h4>
-                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-md <%= u.role === 'admin' ? 'bg-blue-950 text-blue-300 border border-blue-500/40' : 'bg-amber-950 text-amber-300 border border-amber-500/40' %>">
-                        <%= u.role === 'admin' ? 'ADMIN' : 'EDITOR' %>
+              <!-- Nombre de Usuario (Login) -->
+              <div id="user-username-container">
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Nombre de Usuario (Login) *</label>
+                <input type="text" id="user-input-username" placeholder="Ej: mcontreras" autocomplete="off" class="admin-input w-full px-4 py-2.5 text-xs text-white font-mono bg-slate-950/70 border-slate-700 rounded-xl focus:border-emerald-500">
+                <span class="text-[10px] text-slate-500 mt-1 block">Solo letras minúsculas, números o guiones. Sin espacios.</span>
+              </div>
+
+              <!-- Selección de Rol con Tarjetas Visuales -->
+              <div class="sm:col-span-2 space-y-2">
+                <label class="block text-xs font-semibold text-slate-300">Rol y Nivel de Acceso *</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3" id="role-cards-container">
+                  
+                  <!-- Opción Editor -->
+                  <div id="role-card-editor" data-role-val="editor" class="role-card-opt p-4 rounded-2xl border-2 border-amber-500/70 bg-amber-950/20 cursor-pointer transition-all hover:border-amber-400 shadow-sm">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="font-bold text-xs text-amber-300 flex items-center gap-2">
+                        <i data-lucide="scan-face" class="w-4 h-4 text-amber-400"></i> Editor de Terreno
+                      </span>
+                      <span class="role-indicator-badge text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                        Seleccionado
                       </span>
                     </div>
-                    <p class="text-xs text-slate-400 font-mono mt-0.5">@<%= u.username %></p>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                      Acceso exclusivo al <strong>Escáner QR / Cédula</strong> y a la búsqueda de participantes para acreditar en terreno el día de la corrida.
+                    </p>
                   </div>
+
+                  <!-- Opción Administrador -->
+                  <div id="role-card-admin" data-role-val="admin" class="role-card-opt p-4 rounded-2xl border-2 border-slate-700 bg-slate-950/40 cursor-pointer transition-all hover:border-blue-400 opacity-70">
+                    <div class="flex items-center justify-between mb-2">
+                      <span class="font-bold text-xs text-blue-300 flex items-center gap-2">
+                        <i data-lucide="shield-check" class="w-4 h-4 text-blue-400"></i> Administrador
+                      </span>
+                      <span class="role-indicator-badge text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-800 text-slate-400 border border-slate-700 hidden">
+                        Seleccionado
+                      </span>
+                    </div>
+                    <p class="text-[11px] text-slate-400 leading-relaxed">
+                      Control total: Editar corridas, cupos, cronograma, FAQs, fotos, precios, y <strong>crear o revocar cuentas de otros administradores</strong>.
+                    </p>
+                  </div>
+
                 </div>
+                <input type="hidden" id="user-input-role" value="editor">
+              </div>
 
-                <!-- Acciones de Usuario -->
-                <div class="flex items-center gap-2 self-end sm:self-auto">
-                  <% if (u.username === username) { %>
-                  <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
-                    <i data-lucide="user-check" class="w-3 h-3"></i> Eres tú
-                  </span>
-                  <% } %>
-                  <button type="button" class="btn-edit-user px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer" data-id="<%= u.id %>" data-username="<%= u.username %>" data-name="<%= u.name %>" data-role="<%= u.role %>">
-                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
-                    <span>Editar</span>
+              <!-- Contraseña -->
+              <div>
+                <div class="flex items-center justify-between mb-1.5">
+                  <label class="block text-xs font-semibold text-slate-300" id="user-label-password">Contraseña *</label>
+                  <button type="button" id="btn-toggle-pw-visibility" class="text-[11px] text-slate-400 hover:text-white flex items-center gap-1 cursor-pointer">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                    <span id="pw-toggle-text">Ver clave</span>
                   </button>
+                </div>
+                <input type="password" id="user-input-password" placeholder="Mínimo 12 caracteres" minlength="12" autocomplete="new-password" class="admin-input w-full px-4 py-2.5 text-xs text-white bg-slate-950/70 border-slate-700 rounded-xl focus:border-emerald-500">
+                <span class="text-[10px] text-slate-500 hidden mt-1 block" id="user-hint-password">Deja este campo vacío si deseas mantener la contraseña actual.</span>
 
-                  <% if (u.username !== username) { %>
-                  <button type="button" class="btn-delete-user px-3 py-1.5 rounded-xl bg-red-950/60 hover:bg-red-900 border border-red-500/30 text-xs font-semibold text-red-300 transition-colors flex items-center gap-1.5 cursor-pointer" data-id="<%= u.id %>" data-username="<%= u.username %>">
-                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
-                    <span>Eliminar</span>
-                  </button>
-                  <% } %>
+                <!-- Medidor de fortaleza -->
+                <div class="mt-2 space-y-1" id="pw-strength-container">
+                  <div class="flex gap-1.5">
+                    <div class="h-1 flex-1 rounded-full bg-slate-700 transition-all" id="pw-bar-1"></div>
+                    <div class="h-1 flex-1 rounded-full bg-slate-700 transition-all" id="pw-bar-2"></div>
+                    <div class="h-1 flex-1 rounded-full bg-slate-700 transition-all" id="pw-bar-3"></div>
+                    <div class="h-1 flex-1 rounded-full bg-slate-700 transition-all" id="pw-bar-4"></div>
+                  </div>
+                  <span class="text-[10px] text-slate-500 block" id="pw-strength-label"></span>
                 </div>
               </div>
-              <% }); %>
+
+              <!-- Confirmar Contraseña -->
+              <div id="user-confirm-password-container">
+                <label class="block text-xs font-semibold text-slate-300 mb-1.5">Confirmar Contraseña *</label>
+                <input type="password" id="user-input-password-confirm" placeholder="Repite la contraseña" minlength="12" autocomplete="new-password" class="admin-input w-full px-4 py-2.5 text-xs text-white bg-slate-950/70 border-slate-700 rounded-xl focus:border-emerald-500">
+                <span class="text-[10px] hidden mt-1 block font-medium" id="pw-match-hint"></span>
+              </div>
             </div>
 
+            <!-- Footer con Botón Guardar -->
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+              <button type="button" id="btn-cancel-user-form-bottom" class="px-4 py-2.5 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition-colors cursor-pointer">
+                Cancelar
+              </button>
+              <button type="button" id="btn-save-user" class="px-6 py-2.5 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/30 active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
+                <i data-lucide="check" class="w-4 h-4"></i>
+                <span id="btn-save-user-text">Guardar Usuario</span>
+              </button>
+            </div>
           </div>
+
+          <!-- 3. LISTADO DE USUARIOS REGISTRADOS -->
+          <div class="space-y-3" id="users-list-container">
+            <% const hasUsers = typeof usersList !== 'undefined' && usersList && usersList.length > 0; %>
+
+            <!-- Estado Vacío -->
+            <div id="users-empty-state" class="<%= hasUsers ? 'hidden' : '' %> text-center py-14 bg-slate-950/40 rounded-3xl border border-dashed border-slate-700 text-slate-400 space-y-3 px-6">
+              <div class="w-14 h-14 mx-auto rounded-3xl bg-emerald-600/10 border border-emerald-500/20 text-emerald-400 flex items-center justify-center">
+                <i data-lucide="users" class="w-7 h-7"></i>
+              </div>
+              <div>
+                <h4 class="text-sm font-bold text-slate-200">No hay usuarios registrados</h4>
+                <p class="text-xs text-slate-500 mt-1">Haz clic en "Crear Nuevo Usuario" para añadir un administrador o editor de terreno.</p>
+              </div>
+            </div>
+
+            <!-- Tarjetas de Usuarios (Renderizadas en el servidor) -->
+            <% (typeof usersList !== 'undefined' ? usersList : []).forEach(u => { %>
+            <div class="user-card-item bg-slate-900/90 border border-slate-800 hover:border-slate-700 rounded-2xl p-4.5 sm:p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all shadow-md"
+                 data-user-id="<%= u.id %>" data-username="<%= u.username %>" data-name="<%= u.name %>" data-role="<%= u.role %>">
+              
+              <!-- Info del Usuario -->
+              <div class="flex items-center gap-3.5">
+                <div class="w-11 h-11 rounded-2xl shrink-0 flex items-center justify-center font-black text-sm
+                     <%= u.role === 'admin' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/40 shadow-blue-500/10' : 'bg-amber-600/20 text-amber-400 border border-amber-500/40 shadow-amber-500/10' %> shadow-lg">
+                  <%= (u.name || u.username)[0].toUpperCase() %>
+                </div>
+                <div>
+                  <div class="flex items-center gap-2 flex-wrap">
+                    <span class="font-bold text-sm text-white"><%= u.name %></span>
+                    <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg
+                         <%= u.role === 'admin' ? 'bg-blue-950 text-blue-300 border border-blue-500/40' : 'bg-amber-950 text-amber-300 border border-amber-500/40' %>">
+                      <%= u.role === 'admin' ? 'ADMIN' : 'EDITOR' %>
+                    </span>
+                    <% if (u.username === username) { %>
+                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span> Eres tú
+                    </span>
+                    <% } %>
+                  </div>
+                  <p class="text-xs text-slate-400 font-mono mt-0.5">@<%= u.username %></p>
+                </div>
+              </div>
+
+              <!-- Botones de Acción -->
+              <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
+                <button type="button" class="btn-edit-user px-3.5 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer"
+                        data-id="<%= u.id %>" data-username="<%= u.username %>" data-name="<%= u.name %>" data-role="<%= u.role %>">
+                  <i data-lucide="edit-3" class="w-3.5 h-3.5 text-slate-400"></i>
+                  <span>Editar</span>
+                </button>
+
+                <% if (u.username !== username) { %>
+                <button type="button" class="btn-delete-user p-2 rounded-xl bg-red-950/50 hover:bg-red-900 border border-red-500/30 text-red-300 transition-colors cursor-pointer"
+                        data-id="<%= u.id %>" data-username="<%= u.username %>" title="Eliminar usuario">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+                <% } %>
+              </div>
+
+            </div>
+            <% }); %>
+
+          </div>
+
         </div>
+        <% } %>
         <!-- PESTAÑA: MODO CONSTRUCCIÓN (SOLO ADMINISTRADOR) -->
         <div id="tab-construction" class="tab-pane hidden space-y-6">
           <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800 space-y-6">
