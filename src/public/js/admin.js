@@ -1767,22 +1767,32 @@ function initUsersManager() {
   function closeForm() {
     if (!formCard) return;
     formCard.classList.add('hidden');
-    if (toggleCreateText) toggleCreateText.textContent = 'Crear Nuevo Usuario';
+    if (toggleCreateText) toggleCreateText.textContent = '+ Agregar Usuario';
     resetForm();
   }
 
-  if (toggleCreateBtn) {
-    toggleCreateBtn.addEventListener('click', () => {
+  // Vincular todos los botones con clase .btn-open-user-form (cabecera, lista, vacío, pie)
+  const openButtons = document.querySelectorAll('.btn-open-user-form');
+  openButtons.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
       if (!formCard) return;
       const isClosed = formCard.classList.contains('hidden');
-      if (isClosed) {
+      const isEditMode = editIdInput && !!editIdInput.value;
+
+      if (isClosed || isEditMode) {
         resetForm();
         openForm(false);
       } else {
         closeForm();
       }
     });
-  }
+  });
+
+  window._openCreateUserForm = function() {
+    resetForm();
+    openForm(false);
+  };
 
   if (cancelBtnTop) cancelBtnTop.addEventListener('click', closeForm);
   if (cancelBtnBottom) cancelBtnBottom.addEventListener('click', closeForm);
