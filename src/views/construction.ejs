@@ -1,0 +1,433 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- Script de inicialización de Tema Claro / Oscuro -->
+  <script>
+    (function() {
+      const defaultMode = '<%= content.brand?.themeMode || "light" %>';
+      const currentTheme = localStorage.getItem('kidsrun_theme') || defaultMode;
+      if (currentTheme === 'dark') {
+        document.documentElement.classList.add('dark');
+      } else {
+        document.documentElement.classList.remove('dark');
+      }
+    })();
+  </script>
+
+  <title><%= content.construction?.title || 'Próximamente' %> | <%= content.brand?.name || 'KidsRun 2026' %></title>
+  <meta name="description" content="<%= content.construction?.subtitle || 'La Gran Corrida Infantil KidsRun 2026 está preparando una pista llena de aventuras y diversión.' %>">
+  <meta name="robots" content="noindex, follow">
+
+  <!-- Tailwind CSS & Lucide Icons -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              DEFAULT: '<%= theme.primaryHex || "#1d4ed8" %>',
+              light: '<%= (theme.primaryHex || "#1d4ed8") %>15'
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <script src="https://unpkg.com/lucide@1.47.0"></script>
+  <!-- Canvas Confetti CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+  <link rel="stylesheet" href="/css/custom.css">
+
+  <style>
+    /* Animación de la pista atlética */
+    @keyframes trackRunner {
+      0% { transform: translateX(-10%); }
+      50% { transform: translateX(85%); }
+      50.01% { transform: translateX(85%) scaleX(-1); }
+      100% { transform: translateX(-10%) scaleX(-1); }
+    }
+    .runner-animate {
+      animation: trackRunner 14s ease-in-out infinite;
+    }
+    .runner-animate-fast {
+      animation: trackRunner 10s ease-in-out infinite reverse;
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-gray-950 dark:text-gray-100 min-h-screen flex flex-col justify-between antialiased relative overflow-x-hidden selection:bg-blue-600 selection:text-white">
+
+  <!-- Contenedor confinado de luces ambientales -->
+  <div class="fixed inset-0 overflow-hidden pointer-events-none z-0">
+    <div class="ambient-glow ambient-blue w-[500px] sm:w-[650px] h-[500px] sm:h-[650px] top-[-100px] left-1/2 -translate-x-1/2"></div>
+    <div class="ambient-glow ambient-red w-[350px] sm:w-[500px] h-[350px] sm:h-[500px] top-[400px] right-[-100px]"></div>
+    <div class="ambient-glow ambient-yellow w-[380px] sm:w-[550px] h-[380px] sm:h-[550px] bottom-[-100px] left-[-100px]"></div>
+  </div>
+
+  <!-- BANNER SUPERIOR EXCLUSIVO PARA ADMINISTRADORES / PREVIEW -->
+  <% if (isStaff || isPreview) { %>
+  <div class="relative z-50 bg-gradient-to-r from-amber-500 via-amber-600 to-yellow-500 text-slate-950 px-4 py-2.5 shadow-md">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-bold text-center sm:text-left">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-red-700 animate-ping shrink-0"></span>
+        <span>
+          <% if (isPreview) { %>
+            👁️ <strong>Modo Previsualización:</strong> Estás viendo cómo el público percibe la web en construcción.
+          <% } else { %>
+            🚧 <strong>Modo Construcción Activo:</strong> El público solo ve esta página. Como Administrador tienes acceso exclusivo a la web completa.
+          <% } %>
+        </span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="/" class="bg-slate-950 text-white hover:bg-slate-800 px-3 py-1 rounded-xl text-[11px] font-black transition-colors flex items-center gap-1">
+          <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Ver Web Completa (Bypass Admin)</span>
+        </a>
+        <a href="/admin" class="bg-white/30 hover:bg-white/50 text-slate-950 px-3 py-1 rounded-xl text-[11px] font-black transition-colors flex items-center gap-1">
+          <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+          <span>Volver al CMS</span>
+        </a>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
+  <!-- CABECERA PRINCIPAL -->
+  <header class="relative z-20 w-full max-w-6xl mx-auto px-4 sm:px-6 py-6 flex items-center justify-between">
+    <!-- Logotipo -->
+    <a href="/" class="flex items-center gap-2.5 group">
+      <% if (content.brand?.logoUrl) { %>
+      <img src="<%= content.brand.logoUrl %>" alt="<%= content.brand?.name || 'KidsRun' %>" class="h-9 sm:h-11 w-auto max-w-[140px] sm:max-w-[200px] object-contain">
+      <% } else { %>
+      <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-2xl bg-gradient-to-tr <%= theme.gradient %> p-[2px] shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform shrink-0">
+        <div class="w-full h-full bg-white dark:bg-gray-950 rounded-2xl flex items-center justify-center">
+          <i data-lucide="<%= content.brand?.logoIcon || 'trophy' %>" class="w-5 h-5 text-blue-600 dark:text-yellow-400"></i>
+        </div>
+      </div>
+      <div class="flex flex-col">
+        <span class="text-base sm:text-xl font-black tracking-tight text-slate-900 dark:text-white truncate">
+          <%= content.brand?.logoText || 'KidsRun 2026' %>
+        </span>
+        <span class="text-[9px] sm:text-[10px] font-bold text-blue-600 dark:text-yellow-400 -mt-0.5 tracking-wide uppercase">
+          <%= content.brand?.tagline || 'Corrida Infantil & Familiar' %>
+        </span>
+      </div>
+      <% } %>
+    </a>
+
+    <!-- Acciones Cabecera -->
+    <div class="flex items-center gap-2">
+      <!-- Selector Tema Claro / Oscuro -->
+      <button type="button" id="theme-toggle-btn" class="p-2 sm:p-2.5 rounded-2xl border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-gray-900 transition-colors" title="Cambiar Tema" aria-label="Cambiar tema">
+        <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+        <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+      </button>
+
+      <!-- Acceso discreto para administradores -->
+      <a href="/admin" class="text-xs font-bold px-3 py-2 rounded-2xl text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white bg-slate-100 hover:bg-slate-200 dark:bg-gray-900 dark:hover:bg-gray-800 border border-slate-200 dark:border-gray-800 transition-all flex items-center gap-1.5" title="Acceso al Panel Organizador">
+        <i data-lucide="lock" class="w-3.5 h-3.5 text-blue-600 dark:text-yellow-400"></i>
+        <span class="hidden sm:inline">Organizador</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- CONTENIDO HERO DE LANZAMIENTO -->
+  <main class="relative z-10 w-full max-w-4xl mx-auto px-4 sm:px-6 py-6 sm:py-12 flex-1 flex flex-col justify-center items-center text-center">
+
+    <!-- Badge Animado -->
+    <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-amber-300 dark:border-yellow-400/40 bg-amber-50 dark:bg-yellow-400/10 text-xs font-black text-amber-800 dark:text-yellow-300 mb-6 shadow-sm">
+      <span class="w-2.5 h-2.5 rounded-full bg-red-500 animate-ping"></span>
+      <span><%= content.construction?.badge || '🚧 PISTA EN PREPARACIÓN • MUY PRONTO' %></span>
+    </div>
+
+    <!-- Título Principal -->
+    <h1 class="text-3xl sm:text-5xl lg:text-6xl font-black tracking-tight text-slate-900 dark:text-white leading-[1.15] mb-4 max-w-3xl">
+      <%= content.construction?.title || '¡Estamos Calentando Motores!' %>
+    </h1>
+
+    <!-- Subtítulo -->
+    <p class="text-sm sm:text-base lg:text-lg text-slate-600 dark:text-gray-300 max-w-2xl mx-auto leading-relaxed mb-8">
+      <%= content.construction?.subtitle || 'La Gran Corrida Infantil KidsRun 2026 está preparando una pista llena de aventuras, medallas y diversión para toda la familia.' %>
+    </p>
+
+    <!-- PISTA ATLÉTICA INTERACTIVA INFANTIL (ANIMACIÓN DIVERTIDA) -->
+    <div class="w-full max-w-xl mx-auto mb-10 bg-gradient-to-r from-red-600 via-orange-500 to-amber-500 rounded-3xl p-3 shadow-xl shadow-orange-500/15 relative overflow-hidden">
+      <!-- Líneas de carril de la pista -->
+      <div class="bg-red-700/90 rounded-2xl p-4 sm:p-5 relative overflow-hidden border border-white/20">
+        <!-- Carril 1 con Corredor Animado -->
+        <div class="border-b-2 border-dashed border-white/40 pb-3 mb-3 relative flex items-center justify-between">
+          <span class="text-[10px] font-black text-white/80 bg-red-900/60 px-2 py-0.5 rounded-md">Carril 1</span>
+          <div class="absolute left-0 runner-animate text-2xl" title="¡Corredor en marcha!">
+            🏃‍♂️💨
+          </div>
+          <span class="text-sm font-black text-white">🏁 META</span>
+        </div>
+
+        <!-- Carril 2 con Corredora Animada -->
+        <div class="relative flex items-center justify-between pt-1">
+          <span class="text-[10px] font-black text-white/80 bg-red-900/60 px-2 py-0.5 rounded-md">Carril 2</span>
+          <div class="absolute left-0 runner-animate-fast text-2xl" title="¡Corredora veloz!">
+            🏃‍♀️⭐
+          </div>
+          <span class="text-xs font-black text-yellow-300">🏅 MEDALLAS</span>
+        </div>
+      </div>
+
+      <!-- Botón de Confeti Interactivo -->
+      <div class="mt-3 flex justify-center">
+        <button type="button" id="btn-fire-confetti" class="px-4 py-2 rounded-2xl bg-white/90 dark:bg-gray-950/90 hover:bg-white text-slate-900 dark:text-white text-xs font-black shadow-md hover:scale-105 active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
+          <span>¡Lanzar Confeti de Ánimo!</span>
+          <span class="text-base">🎉</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- CONTADOR REGRESIVO A LA APERTURA -->
+    <% if (content.construction?.showCountdown !== false) { %>
+    <div class="w-full max-w-xl mx-auto mb-10">
+      <div class="bg-white dark:bg-gray-900 rounded-3xl p-5 sm:p-7 border border-slate-200 dark:border-gray-800 shadow-xl shadow-slate-900/5">
+        <p class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-4 flex items-center justify-center gap-1.5">
+          <i data-lucide="clock" class="w-3.5 h-3.5"></i>
+          <span>Tiempo Estimado para la Gran Apertura</span>
+        </p>
+
+        <div id="countdown-timer" data-target="<%= content.construction?.targetDate || content.countdown?.targetDate || '2026-11-15T09:00:00' %>" class="grid grid-cols-4 gap-2 sm:gap-4 text-center">
+          <div class="bg-blue-50/70 dark:bg-gray-950 p-3 sm:p-4 rounded-2xl border border-blue-100 dark:border-gray-800">
+            <span id="cd-days" class="text-2xl sm:text-4xl font-black text-blue-600 dark:text-yellow-400">00</span>
+            <span class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mt-1">Días</span>
+          </div>
+          <div class="bg-blue-50/70 dark:bg-gray-950 p-3 sm:p-4 rounded-2xl border border-blue-100 dark:border-gray-800">
+            <span id="cd-hours" class="text-2xl sm:text-4xl font-black text-blue-600 dark:text-yellow-400">00</span>
+            <span class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mt-1">Horas</span>
+          </div>
+          <div class="bg-blue-50/70 dark:bg-gray-950 p-3 sm:p-4 rounded-2xl border border-blue-100 dark:border-gray-800">
+            <span id="cd-minutes" class="text-2xl sm:text-4xl font-black text-blue-600 dark:text-yellow-400">00</span>
+            <span class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mt-1">Minutos</span>
+          </div>
+          <div class="bg-amber-50/70 dark:bg-gray-950 p-3 sm:p-4 rounded-2xl border border-amber-200 dark:border-gray-800">
+            <span id="cd-seconds" class="text-2xl sm:text-4xl font-black text-amber-500 dark:text-yellow-400">00</span>
+            <span class="block text-[9px] sm:text-[10px] font-bold text-slate-500 uppercase mt-1">Segundos</span>
+          </div>
+        </div>
+
+        <p class="text-[11px] text-slate-500 dark:text-gray-400 mt-4 font-medium">
+          📅 Fecha estimada: <strong><%= content.construction?.expectedDate || content.countdown?.eventDateDisplay || 'Domingo 15 de Noviembre, 2026' %></strong>
+        </p>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- FORMULARIO DE AVISO TEMPRANO / NOTIFICACIÓN -->
+    <% if (content.construction?.notifyForm !== false) { %>
+    <div class="w-full max-w-md mx-auto mb-10">
+      <div class="bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl p-6 sm:p-7 text-white shadow-xl shadow-blue-600/20 text-center relative overflow-hidden">
+        <div class="relative z-10">
+          <div class="w-10 h-10 rounded-2xl bg-white/20 text-yellow-300 flex items-center justify-center mx-auto mb-3 backdrop-blur-md">
+            <i data-lucide="bell-ring" class="w-5 h-5"></i>
+          </div>
+          <h3 class="text-base sm:text-lg font-black tracking-tight mb-1">
+            ¡Asegura tu Lugar en la Largada!
+          </h3>
+          <p class="text-xs text-blue-100 mb-5 leading-relaxed">
+            Ingresa tu correo o WhatsApp y te avisaremos antes de que se agoten los primeros cupos con medalla oficial garantizada.
+          </p>
+
+          <form id="notify-form" class="space-y-3">
+            <input type="hidden" name="csrfToken" value="<%= csrfToken %>">
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input type="text" id="notify-contact" name="contact" required placeholder="Tu correo o WhatsApp (+569...)" class="w-full bg-white text-slate-900 placeholder-slate-400 rounded-2xl px-4 py-3 text-xs font-bold focus:outline-none focus:ring-2 focus:ring-yellow-400 shadow-inner">
+              <button type="submit" id="btn-notify" class="px-5 py-3 rounded-2xl bg-yellow-400 hover:bg-yellow-300 text-slate-950 text-xs font-black whitespace-nowrap shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer">
+                <span>Avisarme</span>
+                <i data-lucide="send" class="w-3.5 h-3.5"></i>
+              </button>
+            </div>
+            <div id="notify-feedback" class="hidden text-xs font-bold pt-2"></div>
+          </form>
+        </div>
+      </div>
+    </div>
+    <% } %>
+
+    <!-- PUNTOS DE VALOR PREVIEW -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 w-full max-w-3xl mx-auto mb-10 text-left">
+      <div class="p-4 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-amber-100 dark:bg-amber-950/80 text-amber-600 dark:text-yellow-400 flex items-center justify-center shrink-0">
+          <i data-lucide="award" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-black text-slate-900 dark:text-white">Medalla Finisher</h4>
+          <p class="text-[11px] text-slate-500 dark:text-gray-400 mt-0.5 leading-snug">Metálica oficial para cada niño/a al cruzar la meta.</p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-emerald-100 dark:bg-emerald-950/80 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+          <i data-lucide="shield-check" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-black text-slate-900 dark:text-white">Circuito 100% Seguro</h4>
+          <p class="text-[11px] text-slate-500 dark:text-gray-400 mt-0.5 leading-snug">Calles cerradas, paramédicos e hidratación continua.</p>
+        </div>
+      </div>
+
+      <div class="p-4 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm flex items-start gap-3">
+        <div class="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/80 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+          <i data-lucide="shirt" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-black text-slate-900 dark:text-white">Kit Oficial</h4>
+          <p class="text-[11px] text-slate-500 dark:text-gray-400 mt-0.5 leading-snug">Polera técnica, dorsal numerado y sorpresas de marcas.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- BOTONES DE CONTACTO DIRECTO -->
+    <div class="flex flex-wrap items-center justify-center gap-3">
+      <% if (content.construction?.contactWhatsapp || content.contact?.phone) { %>
+      <a href="https://wa.me/<%= (content.construction?.contactWhatsapp || content.contact?.phone || '').replace(/[^0-9]/g, '') %>" target="_blank" rel="noopener" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-700 dark:text-gray-300 hover:text-emerald-600 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm hover:border-emerald-500/50 transition-all flex items-center gap-2">
+        <i data-lucide="message-circle" class="w-4 h-4 text-emerald-500"></i>
+        <span>Contacto WhatsApp</span>
+      </a>
+      <% } %>
+
+      <% if (content.construction?.instagramUrl || content.footer?.socialLinks?.instagram) { %>
+      <a href="<%= content.construction?.instagramUrl || content.footer?.socialLinks?.instagram %>" target="_blank" rel="noopener" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-slate-700 dark:text-gray-300 hover:text-pink-600 bg-white dark:bg-gray-900 border border-slate-200 dark:border-gray-800 shadow-sm hover:border-pink-500/50 transition-all flex items-center gap-2">
+        <i data-lucide="instagram" class="w-4 h-4 text-pink-500"></i>
+        <span>Seguir en Instagram</span>
+      </a>
+      <% } %>
+    </div>
+
+  </main>
+
+  <!-- PIE DE PÁGINA SIMPLE -->
+  <footer class="relative z-10 w-full max-w-6xl mx-auto px-4 py-6 border-t border-slate-200 dark:border-gray-800/80 text-center text-xs text-slate-400 dark:text-gray-500">
+    <p><%= content.brand?.name || 'KidsRun 2026' %> • Todos los derechos reservados.</p>
+  </footer>
+
+  <!-- SCRIPTS DE INTERACTIVIDAD Y CONFETI -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      if (window.lucide) window.lucide.createIcons();
+
+      // 1. Selector de Tema
+      const themeBtn = document.getElementById('theme-toggle-btn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          const isDark = document.documentElement.classList.contains('dark');
+          if (isDark) {
+            document.documentElement.classList.remove('dark');
+            localStorage.setItem('kidsrun_theme', 'light');
+          } else {
+            document.documentElement.classList.add('dark');
+            localStorage.setItem('kidsrun_theme', 'dark');
+          }
+        });
+      }
+
+      // 2. Botón de Confeti Atlético
+      const confettiBtn = document.getElementById('btn-fire-confetti');
+      if (confettiBtn && window.confetti) {
+        confettiBtn.addEventListener('click', () => {
+          window.confetti({
+            particleCount: 80,
+            spread: 70,
+            origin: { y: 0.6 },
+            colors: ['#1d4ed8', '#facc15', '#ef4444', '#10b981']
+          });
+        });
+      }
+
+      // 3. Contador Regresivo
+      const timerContainer = document.getElementById('countdown-timer');
+      if (timerContainer) {
+        const targetStr = timerContainer.getAttribute('data-target');
+        const targetDate = new Date(targetStr).getTime();
+
+        const daysEl = document.getElementById('cd-days');
+        const hoursEl = document.getElementById('cd-hours');
+        const minutesEl = document.getElementById('cd-minutes');
+        const secondsEl = document.getElementById('cd-seconds');
+
+        function updateTimer() {
+          const now = new Date().getTime();
+          const distance = targetDate - now;
+
+          if (distance <= 0) {
+            if (daysEl) daysEl.textContent = '00';
+            if (hoursEl) hoursEl.textContent = '00';
+            if (minutesEl) minutesEl.textContent = '00';
+            if (secondsEl) secondsEl.textContent = '00';
+            return;
+          }
+
+          const d = Math.floor(distance / (1000 * 60 * 60 * 24));
+          const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+          const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+          const s = Math.floor((distance % (1000 * 60)) / 1000);
+
+          const pad = n => String(n).padStart(2, '0');
+          if (daysEl) daysEl.textContent = pad(d);
+          if (hoursEl) hoursEl.textContent = pad(h);
+          if (minutesEl) minutesEl.textContent = pad(m);
+          if (secondsEl) secondsEl.textContent = pad(s);
+        }
+
+        updateTimer();
+        setInterval(updateTimer, 1000);
+      }
+
+      // 4. Formulario de Notificación
+      const notifyForm = document.getElementById('notify-form');
+      const feedback = document.getElementById('notify-feedback');
+      const submitBtn = document.getElementById('btn-notify');
+
+      if (notifyForm) {
+        notifyForm.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const contact = document.getElementById('notify-contact').value.trim();
+          if (!contact) return;
+
+          submitBtn.disabled = true;
+          submitBtn.innerHTML = '<span>Enviando...</span>';
+
+          try {
+            const res = await fetch('/api/notify-launch', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ contact })
+            });
+
+            const data = await res.json();
+            if (data.success) {
+              feedback.className = 'text-xs font-bold pt-2 text-emerald-300';
+              feedback.textContent = '✓ ¡Listo! Te avisaremos apenas se abran las inscripciones.';
+              feedback.classList.remove('hidden');
+              notifyForm.reset();
+              if (window.confetti) {
+                window.confetti({ particleCount: 60, spread: 60, origin: { y: 0.7 } });
+              }
+            } else {
+              feedback.className = 'text-xs font-bold pt-2 text-red-200';
+              feedback.textContent = data.error || 'No se pudo registrar. Inténtalo nuevamente.';
+              feedback.classList.remove('hidden');
+            }
+          } catch (err) {
+            feedback.className = 'text-xs font-bold pt-2 text-red-200';
+            feedback.textContent = 'Error de conexión. Inténtalo más tarde.';
+            feedback.classList.remove('hidden');
+          } finally {
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = '<span>Avisarme</span><i data-lucide="send" class="w-3.5 h-3.5"></i>';
+            if (window.lucide) window.lucide.createIcons();
+          }
+        });
+      }
+    });
+  </script>
+</body>
+</html>

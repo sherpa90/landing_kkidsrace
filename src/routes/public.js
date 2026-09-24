@@ -58,10 +58,68 @@ function isValidRut(rut) {
   return dv === expectedDv;
 }
 
+// ─── Modo Construcción & Previsualización ────────────────────────────────────
+
+function renderConstructionView(req, res, content, isPreview = false) {
+  const theme = contentStore.getTheme(content.brand?.accentColor || 'blue_sport');
+  const themeMode = content.brand?.themeMode || 'light';
+  const siteUrl = content.seo?.canonicalUrl || `${req.protocol}://${req.get('host')}`;
+  const isStaff = !!(req.session && (req.session.isAdmin || req.session.isEditor));
+
+  return res.render('construction', {
+    content,
+    theme,
+    themeMode,
+    siteUrl,
+    isStaff,
+    isPreview,
+    csrfToken: req.session?.csrfToken || ''
+  });
+}
+
+// Ruta de previsualización explícita del modo construcción para organizadores
+router.get('/preview-construction', (req, res) => {
+  const content = contentStore.getContent();
+  return renderConstructionView(req, res, content, true);
+});
+
+// Captura de interesados durante el modo construcción
+router.post('/api/notify-launch', (req, res) => {
+  try {
+    const contact = (req.body.contact || '').trim();
+    if (!contact || contact.length < 5) {
+      return res.status(400).json({ success: false, error: 'Por favor ingresa un correo o WhatsApp válido.' });
+    }
+
+    contentStore.addLead({
+      name: 'Interesado Lanzamiento',
+      email: contact.includes('@') ? contact : '',
+      phone: !contact.includes('@') ? contact : '',
+      subject: 'Aviso Pre-Lanzamiento (Modo Construcción)',
+      message: `Contacto registrado desde la pantalla de construcción: ${contact}`
+    });
+
+    return res.json({
+      success: true,
+      message: '¡Excelente! Te avisaremos apenas abran las inscripciones.'
+    });
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
 // ─── Página Principal ────────────────────────────────────────────────────────
 
 router.get('/', (req, res) => {
   const content = contentStore.getContent();
+  const isConstruction = content.construction && content.construction.enabled === true;
+  const isStaff = !!(req.session && (req.session.isAdmin || req.session.isEditor));
+
+  // Si está en modo construcción y el usuario NO es staff, mostrar la vista de construcción
+  if (isConstruction && !isStaff) {
+    return renderConstructionView(req, res, content, false);
+  }
+
   const theme = contentStore.getTheme(content.brand?.accentColor || 'green_yellow');
   const themeMode = content.brand?.themeMode || 'light';
   const siteUrl = content.seo?.canonicalUrl || `${req.protocol}://${req.get('host')}`;
@@ -121,7 +179,8 @@ router.get('/', (req, res) => {
     activeRace,
     races,
     jsonLd: JSON.stringify(jsonLd),
-    csrfToken: req.session?.csrfToken || ''
+    csrfToken: req.session?.csrfToken || '',
+    constructionAdminBypass: isConstruction && isStaff
   });
 });
 
@@ -129,6 +188,14 @@ router.get('/', (req, res) => {
 
 router.get('/inscribir', (req, res) => {
   const content = contentStore.getContent();
+  const isConstruction = content.construction && content.construction.enabled === true;
+  const isStaff = !!(req.session && (req.session.isAdmin || req.session.isEditor));
+
+  // Si está en modo construcción y el usuario NO es staff, mostrar la vista de construcción
+  if (isConstruction && !isStaff) {
+    return renderConstructionView(req, res, content, false);
+  }
+
   const theme = contentStore.getTheme(content.brand?.accentColor || 'green_yellow');
   const themeMode = content.brand?.themeMode || 'light';
   const siteUrl = content.seo?.canonicalUrl || `${req.protocol}://${req.get('host')}`;
@@ -140,7 +207,8 @@ router.get('/inscribir', (req, res) => {
     themeMode,
     siteUrl,
     activeRace,
-    csrfToken: req.session?.csrfToken || ''
+    csrfToken: req.session?.csrfToken || '',
+    constructionAdminBypass: isConstruction && isStaff
   });
 });
 

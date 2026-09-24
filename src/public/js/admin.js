@@ -26,6 +26,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 8. Manejo de Subida y Optimización de Imágenes
   initImageUploadHandlers();
+
+  // 9. Modo Construcción
+  initConstructionManager();
 });
 
 // Sistema de Toasts
@@ -409,6 +412,17 @@ function collectCmsFormData() {
     sponsors,
     venue,
     sections,
+    construction: {
+      enabled: document.getElementById('input-construction-enabled')?.checked || false,
+      badge: getVal('input-construction-badge'),
+      expectedDate: getVal('input-construction-expectedDate'),
+      title: getVal('input-construction-title'),
+      subtitle: getVal('input-construction-subtitle'),
+      targetDate: getVal('input-construction-targetDate'),
+      contactWhatsapp: getVal('input-construction-whatsapp'),
+      showCountdown: document.getElementById('input-construction-showCountdown')?.checked ?? true,
+      notifyForm: document.getElementById('input-construction-notifyForm')?.checked ?? true
+    },
     contact: {
       forwardEmail: getVal('input-contactForwardEmail'),
       email: getVal('input-contactEmail'),
@@ -1431,4 +1445,111 @@ function initUsersManager() {
 document.addEventListener('DOMContentLoaded', () => {
   initUsersManager();
 });
+
+// 9. Modo Construcción / Pre-Lanzamiento
+function initConstructionManager() {
+  const toggle = document.getElementById('input-construction-enabled');
+  const statusPill = document.getElementById('construction-status-pill');
+  const sidebarBadge = document.getElementById('sidebar-construction-badge');
+  const topBadge = document.getElementById('top-construction-badge');
+  const saveSectionBtn = document.getElementById('btn-save-construction-section');
+
+  const updateBadges = (enabled) => {
+    if (statusPill) {
+      statusPill.textContent = enabled ? 'ACTIVADO' : 'DESACTIVADO';
+      if (enabled) {
+        statusPill.className = 'text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 animate-pulse';
+      } else {
+        statusPill.className = 'text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-800 text-slate-400';
+      }
+    }
+    if (sidebarBadge) {
+      sidebarBadge.textContent = enabled ? 'ACTIVO' : 'OFF';
+      if (enabled) {
+        sidebarBadge.className = 'text-[9px] px-1.5 py-0.5 rounded-full font-black bg-amber-500 text-slate-950 animate-pulse';
+      } else {
+        sidebarBadge.className = 'text-[9px] px-1.5 py-0.5 rounded-full font-black bg-slate-800 text-slate-400';
+      }
+    }
+    if (topBadge) {
+      if (enabled) {
+        topBadge.classList.remove('hidden');
+        topBadge.classList.add('flex');
+      } else {
+        topBadge.classList.add('hidden');
+        topBadge.classList.remove('flex');
+      }
+    }
+  };
+
+  if (toggle) {
+    toggle.addEventListener('change', async () => {
+      const isEnabled = toggle.checked;
+      updateBadges(isEnabled);
+
+      try {
+        const res = await cmsFetch('/admin/api/toggle-construction', {
+          method: 'POST',
+          body: JSON.stringify({ enabled: isEnabled })
+        });
+        if (res.success) {
+          showAdminToast(res.message, isEnabled ? 'warning' : 'success');
+        } else {
+          showAdminToast(res.error || 'Error al cambiar estado', 'error');
+          toggle.checked = !isEnabled;
+          updateBadges(!isEnabled);
+        }
+      } catch (err) {
+        showAdminToast(err.message || 'Error de conexión', 'error');
+        toggle.checked = !isEnabled;
+        updateBadges(!isEnabled);
+      }
+    });
+  }
+
+  if (saveSectionBtn) {
+    saveSectionBtn.addEventListener('click', async () => {
+      const originalText = saveSectionBtn.innerHTML;
+      saveSectionBtn.disabled = true;
+      saveSectionBtn.innerHTML = '<span class="inline-block animate-spin mr-1.5">⟳</span> Guardando...';
+
+      const getVal = (id) => {
+        const el = document.getElementById(id);
+        return el ? el.value : '';
+      };
+
+      const construction = {
+        enabled: toggle ? toggle.checked : false,
+        badge: getVal('input-construction-badge'),
+        expectedDate: getVal('input-construction-expectedDate'),
+        title: getVal('input-construction-title'),
+        subtitle: getVal('input-construction-subtitle'),
+        targetDate: getVal('input-construction-targetDate'),
+        contactWhatsapp: getVal('input-construction-whatsapp'),
+        showCountdown: document.getElementById('input-construction-showCountdown')?.checked ?? true,
+        notifyForm: document.getElementById('input-construction-notifyForm')?.checked ?? true
+      };
+
+      try {
+        const res = await cmsFetch('/admin/api/content', {
+          method: 'POST',
+          body: JSON.stringify({ construction })
+        });
+
+        if (res.success) {
+          showAdminToast('¡Configuración de Modo Construcción guardada exitosamente!', 'success');
+          updateBadges(construction.enabled);
+        } else {
+          showAdminToast(res.error || 'No se pudo guardar la configuración', 'error');
+        }
+      } catch (err) {
+        showAdminToast(err.message || 'Error de conexión', 'error');
+      } finally {
+        saveSectionBtn.disabled = false;
+        saveSectionBtn.innerHTML = originalText;
+        if (window.lucide) window.lucide.createIcons();
+      }
+    });
+  }
+}
 

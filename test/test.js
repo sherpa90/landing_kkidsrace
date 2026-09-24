@@ -478,6 +478,57 @@ it('Debe proteger al Administrador impidiendo la auto-eliminación accidental', 
   assert.ok(!selfDeleteRes.success, 'Permitió auto-eliminar la cuenta admin activa');
 });
 
+// ==========================================
+// 10. Pruebas de Modo Construcción y Admin Bypass
+// ==========================================
+console.log('\n🚧 10. Pruebas de Modo Construcción / Pre-Lanzamiento y Admin Bypass:');
+
+it('ContentStore debe contener la configuración de Modo Construcción', () => {
+  const content = contentStore.getContent();
+  assert.ok(content.construction, 'Falta la sección construction en site-content');
+  assert.strictEqual(typeof content.construction.enabled, 'boolean');
+  assert.ok(content.construction.title, 'Falta el título de construcción');
+});
+
+await itAsync('GET /preview-construction debe renderizar la vista de construcción pública', async () => {
+  const res = await makeRequest('/preview-construction');
+  assert.strictEqual(res.status, 200);
+  assert.ok(res.body.includes('MODO CONSTRUCCIÓN'), 'Falta el banner o título de construcción');
+  assert.ok(res.body.includes('KidsRun'), 'Debe incluir la identidad KidsRun');
+  assert.ok(res.body.includes('cd-days'), 'Debe incluir el contador de cuenta regresiva');
+});
+
+await itAsync('Cuando Modo Construcción está ACTIVO, GET / debe mostrar página de construcción al público', async () => {
+  const prev = contentStore.getContent().construction;
+  contentStore.saveContent({ construction: { ...prev, enabled: true } });
+
+  try {
+    const res = await makeRequest('/');
+    assert.strictEqual(res.status, 200);
+    assert.ok(res.body.includes('Pista de Carrera en Preparación') || res.body.includes('MODO CONSTRUCCIÓN'), 'Debe mostrar la vista de construcción al público');
+  } finally {
+    contentStore.saveContent({ construction: prev });
+  }
+});
+
+await itAsync('POST /api/notify-launch debe permitir registrar emails para aviso de lanzamiento', async () => {
+  const payload = JSON.stringify({
+    email: 'padre_interesado@ejemplo.com',
+    whatsapp: '+56999887766'
+  });
+  const res = await makeRequest('/api/notify-launch', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Content-Length': Buffer.byteLength(payload)
+    },
+    body: payload
+  });
+  assert.strictEqual(res.status, 200);
+  const data = JSON.parse(res.body);
+  assert.strictEqual(data.success, true);
+});
+
 console.log(`\n🎯 Resultados: ${passedTests} de ${totalTests} pruebas pasadas con éxito.`);
   console.log(`====================================================\n`);
 

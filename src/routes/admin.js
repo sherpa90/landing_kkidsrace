@@ -125,7 +125,7 @@ router.post('/api/content', auth.requireAdmin, validateCsrf, (req, res) => {
     }
 
     // Whitelist de claves top-level permitidas en el CMS
-    const ALLOWED_KEYS = ['brand', 'hero', 'features', 'pricing', 'testimonials', 'faq', 'contact', 'seo', 'countdown', 'gallery', 'sponsors', 'footer', 'venue', 'sections', 'video'];
+    const ALLOWED_KEYS = ['brand', 'hero', 'features', 'pricing', 'testimonials', 'faq', 'contact', 'seo', 'countdown', 'gallery', 'sponsors', 'footer', 'venue', 'sections', 'video', 'construction'];
     const filtered = {};
     for (const key of ALLOWED_KEYS) {
       if (key in newContent) filtered[key] = newContent[key];
@@ -136,6 +136,37 @@ router.post('/api/content', auth.requireAdmin, validateCsrf, (req, res) => {
       return res.json({
         success: true,
         message: '¡Cambios guardados con éxito! Se reflejan de inmediato en la landing page.'
+      });
+    } else {
+      return res.status(500).json({ success: false, error: result.error });
+    }
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Endpoint rápido para activar/desactivar Modo Construcción
+router.post('/api/toggle-construction', auth.requireAdmin, validateCsrf, (req, res) => {
+  try {
+    const current = contentStore.getContent();
+    const currentConstruction = current.construction || {};
+    const newEnabled = typeof req.body.enabled === 'boolean' 
+      ? req.body.enabled 
+      : !currentConstruction.enabled;
+
+    const updatedConstruction = {
+      ...currentConstruction,
+      enabled: newEnabled
+    };
+
+    const result = contentStore.saveContent({ construction: updatedConstruction });
+    if (result.success) {
+      return res.json({
+        success: true,
+        enabled: newEnabled,
+        message: newEnabled 
+          ? '🚧 Modo Construcción ACTIVADO. El público general verá la página de lanzamiento.' 
+          : '🚀 Modo Construcción DESACTIVADO. La web completa ya está visible para el público.'
       });
     } else {
       return res.status(500).json({ success: false, error: result.error });

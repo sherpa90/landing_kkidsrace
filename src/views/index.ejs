@@ -182,6 +182,27 @@
     </div>
   </header>
 
+  <!-- BANNER FLOTANTE DE AVISO: MODO CONSTRUCCIÓN ACTIVO (SOLO VISIBLE PARA ADMIN) -->
+  <% if (typeof constructionAdminBypass !== 'undefined' && constructionAdminBypass) { %>
+  <div class="fixed top-16 sm:top-20 inset-x-0 z-40 bg-amber-500/95 text-slate-950 backdrop-blur-md px-4 py-2 border-b border-amber-600 shadow-md">
+    <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2 text-xs font-bold text-center sm:text-left">
+      <div class="flex items-center gap-2">
+        <span class="w-2.5 h-2.5 rounded-full bg-red-700 animate-ping shrink-0"></span>
+        <span>🚧 <strong>Modo Construcción Activo:</strong> El público ve la página de lanzamiento. Estás navegando la web completa con permisos de Administrador.</span>
+      </div>
+      <div class="flex items-center gap-2 shrink-0">
+        <a href="/preview-construction" target="_blank" class="px-2.5 py-1 rounded-xl bg-slate-950 text-white hover:bg-slate-800 text-[11px] font-black transition-colors flex items-center gap-1">
+          <i data-lucide="eye" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Ver cómo lo ve el público</span>
+        </a>
+        <a href="/admin" class="px-2.5 py-1 rounded-xl bg-white/30 hover:bg-white/50 text-slate-950 text-[11px] font-black transition-colors">
+          CMS Admin
+        </a>
+      </div>
+    </div>
+  </div>
+  <% } %>
+
   <main class="sections-wrapper">
     <%
       const _sOrder = content.sections?.order || ["hero","countdown","circuits","schedule","gallery","kits","testimonials","faq","sponsors","venue","contact"];

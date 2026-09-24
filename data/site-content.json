@@ -902,7 +902,6 @@
       "circuits",
       "schedule",
       "gallery",
-      "video",
       "kits",
       "testimonials",
       "faq",
@@ -924,5 +923,17 @@
       "venue": true,
       "contact": true
     }
+  },
+  "construction": {
+    "enabled": false,
+    "badge": "🚧 PISTA EN PREPARACIÓN • MUY PRONTO",
+    "title": "¡Estamos Calentando Motores!",
+    "subtitle": "La Gran Corrida Infantil KidsRun 2026 está preparando una pista llena de aventuras, medallas y diversión para toda la familia.",
+    "expectedDate": "Domingo 15 de Noviembre, 2026",
+    "targetDate": "2026-11-15T09:00",
+    "showCountdown": true,
+    "notifyForm": true,
+    "contactWhatsapp": "+56 9 8765 4321",
+    "instagramUrl": "https://instagram.com"
   }
 }
