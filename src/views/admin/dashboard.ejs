@@ -11,7 +11,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@1.47.0"></script>
   <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
-  <link rel="stylesheet" href="/css/custom.css">
+  <link rel="stylesheet" href="/css/custom.css?v=<%= Date.now() %>">
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
 
@@ -61,7 +61,7 @@
       </button>
 
       <!-- Indicador de Modo Construcción -->
-      <div id="top-construction-badge" class="<%= content.construction?.enabled ? '' : 'hidden' %> hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold">
+      <div id="top-construction-badge" class="<%= content.construction?.enabled ? 'sm:flex' : 'hidden' %> items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold">
         <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
         <span>Modo Construcción Activo</span>
       </div>
@@ -1832,6 +1832,6 @@
 
   </div>
 
-  <script src="/js/admin.js"></script>
+  <script src="/js/admin.js?v=<%= Date.now() %>"></script>
 </body>
 </html>

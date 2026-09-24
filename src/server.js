@@ -109,7 +109,11 @@ app.use((req, res) => {
     content: contentStore.getContent(),
     theme: contentStore.getTheme(),
     siteUrl: `${req.protocol}://${req.get('host')}`,
-    jsonLd: '{}'
+    jsonLd: '{}',
+    csrfToken: req.session?.csrfToken || '',
+    activeRace: null,
+    races: [],
+    constructionAdminBypass: false
   });
 });
 

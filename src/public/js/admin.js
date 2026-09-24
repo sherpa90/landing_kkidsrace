@@ -1460,211 +1460,159 @@ function initConstructionManager() {
   const topBadge = document.getElementById('top-construction-badge');
   const saveSectionBtn = document.getElementById('btn-save-construction-section');
 
-  const updateConstructionUI = (enabled) => {
-    // 1. Input checkbox nativo
+  var _programmatic = false;
+  var _toggling = false;
+
+  function setUI(enabled) {
     if (toggle) {
+      _programmatic = true;
       toggle.checked = enabled;
+      _programmatic = false;
     }
-
-    // 2. Track & Thumb CSS
     if (toggleTrack) {
-      if (enabled) {
-        toggleTrack.classList.add('active');
-        toggleTrack.setAttribute('aria-checked', 'true');
-      } else {
-        toggleTrack.classList.remove('active');
-        toggleTrack.setAttribute('aria-checked', 'false');
-      }
+      toggleTrack.classList.toggle('active', enabled);
+      toggleTrack.setAttribute('aria-checked', String(enabled));
     }
-
-    // 3. Status Pill dentro de la pestaña
     if (statusPill) {
       statusPill.textContent = enabled ? 'ACTIVADO' : 'DESACTIVADO';
-      if (enabled) {
-        statusPill.className = 'text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 animate-pulse';
-      } else {
-        statusPill.className = 'text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400';
-      }
+      statusPill.className = enabled
+        ? 'text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 animate-pulse'
+        : 'text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400';
     }
-
-    // 4. Botones directos Activar / Desactivar
     if (btnActivate) {
-      if (enabled) {
-        btnActivate.classList.add('opacity-40', 'pointer-events-none');
-      } else {
-        btnActivate.classList.remove('opacity-40', 'pointer-events-none');
-      }
+      btnActivate.classList.toggle('opacity-40', enabled);
+      btnActivate.classList.toggle('pointer-events-none', enabled);
     }
     if (btnDeactivate) {
-      if (enabled) {
-        btnDeactivate.classList.remove('opacity-40', 'pointer-events-none');
-      } else {
-        btnDeactivate.classList.add('opacity-40', 'pointer-events-none');
-      }
+      btnDeactivate.classList.toggle('opacity-40', !enabled);
+      btnDeactivate.classList.toggle('pointer-events-none', !enabled);
     }
-
-    // 5. Botón de cabecera (Header Toggle)
     if (headerToggleBtn) {
-      if (enabled) {
-        headerToggleBtn.className = 'text-xs font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm bg-amber-500/20 border-amber-500/50 text-amber-300 hover:bg-amber-500/30';
-      } else {
-        headerToggleBtn.className = 'text-xs font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white';
-      }
+      headerToggleBtn.className = enabled
+        ? 'text-xs font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm bg-amber-500/20 border-amber-500/50 text-amber-300 hover:bg-amber-500/30'
+        : 'text-xs font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white';
     }
     if (headerStatusText) {
       headerStatusText.textContent = enabled ? 'ON' : 'OFF';
       headerStatusText.className = enabled ? 'font-black text-amber-400' : 'font-black text-slate-400';
     }
-
-    // 6. Badge en cabecera
     if (topBadge) {
-      if (enabled) {
-        topBadge.classList.remove('hidden');
-        topBadge.classList.add('flex');
-      } else {
-        topBadge.classList.add('hidden');
-        topBadge.classList.remove('flex');
-      }
+      topBadge.classList.toggle('hidden', !enabled);
+      topBadge.classList.toggle('sm:flex', enabled);
     }
-
-    // 7. Badge en barra lateral
     if (sidebarBadge) {
       sidebarBadge.textContent = enabled ? 'ACTIVO' : 'OFF';
-      if (enabled) {
-        sidebarBadge.className = 'text-[9px] px-1.5 py-0.5 rounded-full font-black bg-amber-500 text-slate-950 animate-pulse';
-      } else {
-        sidebarBadge.className = 'text-[9px] px-1.5 py-0.5 rounded-full font-black bg-slate-800 text-slate-400';
-      }
+      sidebarBadge.className = enabled
+        ? 'text-[9px] px-1.5 py-0.5 rounded-full font-black bg-amber-500 text-slate-950 animate-pulse'
+        : 'text-[9px] px-1.5 py-0.5 rounded-full font-black bg-slate-800 text-slate-400';
     }
-  };
+  }
 
-  let isToggling = false;
+  async function doToggle(desiredState) {
+    if (_toggling) return;
+    _toggling = true;
 
-  const executeToggle = async (desiredState) => {
-    if (isToggling) return;
-    isToggling = true;
-
-    const currentState = toggle ? toggle.checked : false;
-    const targetState = (typeof desiredState === 'boolean') ? desiredState : !currentState;
-
-    // Actualización visual inmediata
-    updateConstructionUI(targetState);
+    var current = toggle ? toggle.checked : false;
+    var target = (typeof desiredState === 'boolean') ? desiredState : !current;
+    setUI(target);
 
     try {
-      const res = await cmsFetch('/admin/api/toggle-construction', {
+      var res = await cmsFetch('/admin/api/toggle-construction', {
         method: 'POST',
-        body: JSON.stringify({ enabled: targetState })
+        body: JSON.stringify({ enabled: target })
       });
-
       if (res.success) {
-        showAdminToast(res.message, targetState ? 'warning' : 'success');
-        updateConstructionUI(res.enabled);
+        showAdminToast(res.message, target ? 'warning' : 'success');
+        setUI(!!res.enabled);
       } else {
         showAdminToast(res.error || 'Error al cambiar estado', 'error');
-        updateConstructionUI(currentState);
+        setUI(current);
       }
     } catch (err) {
       showAdminToast(err.message || 'Error de conexión', 'error');
-      updateConstructionUI(currentState);
+      setUI(current);
     } finally {
-      isToggling = false;
+      _toggling = false;
       if (window.lucide) window.lucide.createIcons();
     }
-  };
+  }
 
-  // Clic en el Switch Container
+  function handleSwitchClick(e) {
+    if (e.target === toggle) return;
+    e.preventDefault();
+    e.stopPropagation();
+    var currentState = toggle ? toggle.checked : false;
+    doToggle(!currentState);
+  }
+
   if (switchContainer) {
-    switchContainer.addEventListener('click', (e) => {
-      e.preventDefault();
-      executeToggle();
-    });
+    switchContainer.addEventListener('click', handleSwitchClick);
   }
 
-  // Cambio en el input checkbox
   if (toggle) {
-    toggle.addEventListener('change', () => {
-      executeToggle(toggle.checked);
+    toggle.addEventListener('change', function() {
+      if (_programmatic) return;
+      doToggle(toggle.checked);
     });
   }
 
-  // Clic en botón Activar
   if (btnActivate) {
-    btnActivate.addEventListener('click', () => {
-      executeToggle(true);
+    btnActivate.addEventListener('click', function(e) {
+      e.preventDefault();
+      doToggle(true);
     });
   }
 
-  // Clic en botón Desactivar
   if (btnDeactivate) {
-    btnDeactivate.addEventListener('click', () => {
-      executeToggle(false);
+    btnDeactivate.addEventListener('click', function(e) {
+      e.preventDefault();
+      doToggle(false);
     });
   }
 
-  // Clic en botón de Cabecera
   if (headerToggleBtn) {
-    headerToggleBtn.addEventListener('click', () => {
-      executeToggle();
+    headerToggleBtn.addEventListener('click', function(e) {
+      e.preventDefault();
+      var isCurrentlyOn = toggle ? toggle.checked : (headerStatusText && headerStatusText.textContent.trim() === 'ON');
+      doToggle(!isCurrentlyOn);
     });
   }
 
-  // Guardado de la sección completa
   if (saveSectionBtn) {
-    saveSectionBtn.addEventListener('click', async () => {
-      const originalText = saveSectionBtn.innerHTML;
+    saveSectionBtn.addEventListener('click', async function() {
+      var orig = saveSectionBtn.innerHTML;
       saveSectionBtn.disabled = true;
       saveSectionBtn.innerHTML = '<span class="inline-block animate-spin mr-1.5">⟳</span> Guardando...';
-
-      const getVal = (id) => {
-        const el = document.getElementById(id);
-        return el ? el.value : '';
-      };
-
-      const construction = {
+      function gv(id) { var el = document.getElementById(id); return el ? el.value : ''; }
+      var construction = {
         enabled: toggle ? toggle.checked : false,
-        badge: getVal('input-construction-badge'),
-        expectedDate: getVal('input-construction-expectedDate'),
-        title: getVal('input-construction-title'),
-        subtitle: getVal('input-construction-subtitle'),
-        targetDate: getVal('input-construction-targetDate'),
-        contactWhatsapp: getVal('input-construction-whatsapp'),
-        showCountdown: document.getElementById('input-construction-showCountdown')?.checked ?? true,
-        notifyForm: document.getElementById('input-construction-notifyForm')?.checked ?? true
+        badge: gv('input-construction-badge'),
+        expectedDate: gv('input-construction-expectedDate'),
+        title: gv('input-construction-title'),
+        subtitle: gv('input-construction-subtitle'),
+        targetDate: gv('input-construction-targetDate'),
+        contactWhatsapp: gv('input-construction-whatsapp'),
+        showCountdown: document.getElementById('input-construction-showCountdown') ? document.getElementById('input-construction-showCountdown').checked : true,
+        notifyForm: document.getElementById('input-construction-notifyForm') ? document.getElementById('input-construction-notifyForm').checked : true
       };
-
       try {
-        const res = await cmsFetch('/admin/api/content', {
-          method: 'POST',
-          body: JSON.stringify({ construction })
-        });
-
+        var res = await cmsFetch('/admin/api/content', { method: 'POST', body: JSON.stringify({ construction: construction }) });
         if (res.success) {
           showAdminToast('¡Configuración de Modo Construcción guardada exitosamente!', 'success');
-          updateConstructionUI(construction.enabled);
+          setUI(construction.enabled);
         } else {
-          showAdminToast(res.error || 'No se pudo guardar la configuración', 'error');
+          showAdminToast(res.error || 'No se pudo guardar', 'error');
         }
-      } catch (err) {
+      } catch(err) {
         showAdminToast(err.message || 'Error de conexión', 'error');
       } finally {
         saveSectionBtn.disabled = false;
-        saveSectionBtn.innerHTML = originalText;
+        saveSectionBtn.innerHTML = orig;
         if (window.lucide) window.lucide.createIcons();
       }
     });
   }
 
-  // Sincronizar estado inicial al arrancar
-  if (toggle) {
-    updateConstructionUI(toggle.checked);
-  }
+  if (toggle) { setUI(toggle.checked); }
 }
-
-// Inicialización de respaldo para Modo Construcción
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initConstructionManager);
-} else {
-  initConstructionManager();
-}
-
 
