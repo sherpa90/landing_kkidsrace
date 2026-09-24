@@ -28,12 +28,7 @@ function getUsers() {
       const raw = fs.readFileSync(USERS_FILE, 'utf-8');
       cachedUsers = JSON.parse(raw);
 
-      // Purgar permanentemente al usuario root si todavía existe en users.json
-      const rootIdx = cachedUsers.findIndex(u => u.username.toLowerCase() === 'root');
-      if (rootIdx !== -1) {
-        cachedUsers.splice(rootIdx, 1);
-        saveUsers(cachedUsers);
-      }
+      // Los usuarios registrados en users.json se mantienen intactos
 
       return cachedUsers;
     }
