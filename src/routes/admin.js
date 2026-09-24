@@ -125,7 +125,7 @@ router.post('/api/content', auth.requireAuth, validateCsrf, (req, res) => {
     }
 
     // Whitelist de claves top-level permitidas en el CMS
-    const ALLOWED_KEYS = ['brand', 'hero', 'features', 'pricing', 'testimonials', 'faq', 'faqs', 'contact', 'seo', 'countdown', 'gallery', 'sponsors', 'footer', 'venue', 'sections', 'video', 'construction', 'schedule', 'scheduleSection'];
+    const ALLOWED_KEYS = ['brand', 'hero', 'metrics', 'features', 'pricing', 'testimonials', 'faq', 'faqs', 'contact', 'seo', 'countdown', 'gallery', 'sponsors', 'footer', 'venue', 'sections', 'video', 'construction', 'schedule', 'scheduleSection'];
     const filtered = {};
     for (const key of ALLOWED_KEYS) {
       if (key in newContent) filtered[key] = newContent[key];

@@ -17,7 +17,8 @@ function initAllAdminModules() {
     ['Escáner RUT', initRutScanner],
     ['Usuarios', initUsersManager],
     ['Cronograma', initScheduleManager],
-    ['Preguntas Frecuentes', initFaqsManager]
+    ['Preguntas Frecuentes', initFaqsManager],
+    ['Hero Preview', initHeroLivePreview]
   ];
 
   modules.forEach(([name, fn]) => {
@@ -206,9 +207,76 @@ function initDynamicListManagers() {
   document.addEventListener('click', (e) => {
     const delBtn = e.target.closest('.btn-delete-item');
     if (delBtn) {
-      const item = delBtn.closest('.gallery-admin-item, .testimonial-item, .faq-admin-item, .pricing-item');
+      const item = delBtn.closest('.gallery-admin-item, .testimonial-item, .faq-admin-item, .pricing-item, .metric-admin-item');
       if (item && confirm('¿Deseas eliminar este elemento?')) {
         item.remove();
+      }
+    }
+  });
+
+  // M. Agregar y Gestionar Métricas de Impacto
+  const addMetricBtn = document.getElementById('btn-add-metric');
+  if (addMetricBtn) {
+    addMetricBtn.addEventListener('click', () => {
+      const container = document.getElementById('metrics-container');
+      if (!container) return;
+      const idx = container.querySelectorAll('.metric-admin-item').length + 1;
+      const html = `
+        <div class="metric-admin-item p-4 rounded-3xl bg-gray-900/80 border border-gray-800 relative space-y-3">
+          <div class="flex items-center justify-between pb-2 border-b border-gray-800/80">
+            <div class="flex items-center gap-2">
+              <div class="w-7 h-7 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 metric-icon-preview">
+                <i data-lucide="award" class="w-4 h-4"></i>
+              </div>
+              <span class="text-xs font-bold text-gray-300">Métrica #${idx}</span>
+            </div>
+            <button type="button" class="btn-delete-item text-red-400 hover:text-red-300 p-1.5 bg-red-950/40 rounded-xl transition-all" title="Eliminar Métrica">
+              <i data-lucide="trash-2" class="w-4 h-4"></i>
+            </button>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+            <div class="sm:col-span-4">
+              <label class="block text-[11px] font-semibold text-gray-400 mb-1">Cifra / Valor</label>
+              <input type="text" value="+100" placeholder="+2,500" class="metric-value-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-black tracking-wide focus:outline-none focus:border-amber-400">
+            </div>
+            <div class="sm:col-span-5">
+              <label class="block text-[11px] font-semibold text-gray-400 mb-1">Etiqueta / Descripción</label>
+              <input type="text" value="Nueva Cifra Clave" placeholder="Niños y Familias Corriendo" class="metric-label-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+            </div>
+            <div class="sm:col-span-3">
+              <label class="block text-[11px] font-semibold text-gray-400 mb-1">Ícono</label>
+              <select class="metric-icon-select w-full bg-gray-950 border border-gray-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                <option value="users">users (Familias / Niños)</option>
+                <option value="award" selected>award (Medalla)</option>
+                <option value="flag">flag (Circuitos)</option>
+                <option value="shield-check">shield-check (Seguridad)</option>
+                <option value="trophy">trophy (Trofeo)</option>
+                <option value="heart">heart (Corazón / Salud)</option>
+                <option value="smile">smile (Alegría)</option>
+                <option value="sparkles">sparkles (Magia)</option>
+                <option value="zap">zap (Energía)</option>
+                <option value="star">star (Estrella)</option>
+                <option value="clock">clock (Tiempo)</option>
+                <option value="map-pin">map-pin (Ubicación)</option>
+                <option value="activity">activity (Deporte)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      `;
+      container.insertAdjacentHTML('beforeend', html);
+      if (window.lucide) window.lucide.createIcons();
+    });
+  }
+
+  // Cambio de ícono en tiempo real para métricas
+  document.addEventListener('change', (e) => {
+    if (e.target.matches('.metric-icon-select')) {
+      const parent = e.target.closest('.metric-admin-item');
+      const preview = parent?.querySelector('.metric-icon-preview');
+      if (preview) {
+        preview.innerHTML = `<i data-lucide="${e.target.value}" class="w-4 h-4"></i>`;
+        if (window.lucide) window.lucide.createIcons();
       }
     }
   });
@@ -301,6 +369,17 @@ function collectCmsFormData() {
     secondaryCtaLink: getVal('input-secondaryCtaLink'),
     statsNotice: getVal('input-statsNotice')
   };
+
+  // 4b. Métricas de Impacto
+  const metrics = [];
+  document.querySelectorAll('.metric-admin-item').forEach(item => {
+    const value = item.querySelector('.metric-value-input')?.value.trim() || '';
+    const label = item.querySelector('.metric-label-input')?.value.trim() || '';
+    const icon = item.querySelector('.metric-icon-select')?.value || 'award';
+    if (value || label) {
+      metrics.push({ value, label, icon });
+    }
+  });
 
   // 5. Galería
   const gallery = [];
@@ -430,6 +509,7 @@ function collectCmsFormData() {
     countdown,
     seo,
     hero,
+    metrics,
     gallery,
     categories,
     pricing: { plans },
@@ -2527,3 +2607,43 @@ function initConstructionManager() {
   if (toggle) { setUI(toggle.checked); }
 }
 
+// 18. Vista Previa en Vivo Interactiva de la Portada (Hero)
+function initHeroLivePreview() {
+  const prefixInput = document.getElementById('input-headlinePrefix');
+  const gradientInput = document.getElementById('input-headlineGradient');
+  const subheadlineInput = document.getElementById('input-subheadline');
+  const badgeInput = document.getElementById('input-badgeText');
+  const noticeInput = document.getElementById('input-statsNotice');
+
+  const prefixPreview = document.getElementById('hero-preview-prefix');
+  const gradientPreview = document.getElementById('hero-preview-gradient');
+  const subheadlinePreview = document.getElementById('hero-preview-subheadline');
+  const badgePreview = document.getElementById('hero-preview-badge');
+  const noticePreview = document.getElementById('hero-preview-notice');
+
+  if (prefixInput && prefixPreview) {
+    prefixInput.addEventListener('input', () => {
+      prefixPreview.textContent = prefixInput.value || 'La Carrera Más Alegre del Año para';
+    });
+  }
+  if (gradientInput && gradientPreview) {
+    gradientInput.addEventListener('input', () => {
+      gradientPreview.textContent = gradientInput.value || 'Pequeños Campeones & Familias';
+    });
+  }
+  if (subheadlineInput && subheadlinePreview) {
+    subheadlineInput.addEventListener('input', () => {
+      subheadlinePreview.textContent = subheadlineInput.value || '';
+    });
+  }
+  if (badgeInput && badgePreview) {
+    badgeInput.addEventListener('input', () => {
+      badgePreview.textContent = badgeInput.value || '';
+    });
+  }
+  if (noticeInput && noticePreview) {
+    noticeInput.addEventListener('input', () => {
+      noticePreview.textContent = noticeInput.value || '';
+    });
+  }
+}

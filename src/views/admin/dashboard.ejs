@@ -165,6 +165,14 @@
         <% } %>
 
         <% if (role === 'admin') { %>
+        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="hero">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+            <span>⭐ Portada & Métricas (Hero)</span>
+          </div>
+          <span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-full font-bold">Principal</span>
+        </button>
+
         <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="countdown">
           <i data-lucide="clock" class="w-4 h-4"></i>
           <span>⏰ Cuenta Regresiva</span>
@@ -201,11 +209,6 @@
         <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="sections">
           <i data-lucide="layout-list" class="w-4 h-4"></i>
           <span>🔧 Secciones</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="hero">
-          <i data-lucide="sparkles" class="w-4 h-4"></i>
-          <span>Sección Principal (Hero)</span>
         </button>
 
         <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="testimonials">
@@ -735,66 +738,188 @@
 
         <!-- PESTAÑA: HERO -->
         <div id="tab-hero" class="tab-pane hidden space-y-6">
+          <!-- Vista Previa Visual en Vivo del Hero -->
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800 bg-gradient-to-b from-blue-950/20 via-gray-900/40 to-transparent relative overflow-hidden">
+            <div class="flex items-center justify-between mb-4">
+              <span class="text-[11px] font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Vista Previa en Vivo (Portada de Inicio)
+              </span>
+              <span class="text-[10px] text-gray-500 bg-gray-800/80 px-2 py-0.5 rounded-full">Actualización instantánea</span>
+            </div>
+
+            <div class="text-center py-6 px-4 rounded-2xl bg-gray-950/80 border border-gray-800/80 shadow-2xl relative">
+              <!-- Badge -->
+              <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-blue-500/10 border border-blue-500/20 text-blue-300 mb-4">
+                <span class="w-2 h-2 rounded-full bg-red-500 animate-ping"></span>
+                <span id="hero-preview-badge"><%= content.hero?.badgeText || '👟 ¡INSCRIPCIONES ABIERTAS EDICIÓN 2026!' %></span>
+              </div>
+
+              <!-- Título Dinámico -->
+              <h1 class="text-xl sm:text-3xl font-black text-white leading-tight mb-3">
+                <span id="hero-preview-prefix"><%= content.hero?.headlinePrefix || 'La Carrera Más Alegre del Año para' %></span>
+                <br>
+                <span id="hero-preview-gradient" class="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-300 to-amber-300 font-extrabold">
+                  <%= content.hero?.headlineGradient || 'Pequeños Campeones & Familias' %>
+                </span>
+              </h1>
+
+              <!-- Subtítulo -->
+              <p id="hero-preview-subheadline" class="text-xs sm:text-sm text-gray-300 max-w-xl mx-auto leading-relaxed mb-4">
+                <%= content.hero?.subheadline || 'Un día inolvidable de deporte, risas y diversión en un circuito 100% cerrado y seguro.' %>
+              </p>
+
+              <!-- Aviso -->
+              <div class="text-[11px] text-amber-300/90 font-medium">
+                <span id="hero-preview-notice"><%= content.hero?.statsNotice || '🏅 Medalla finisher garantizada para todos los niños' %></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Formulario: Textos y Botones de Cabecera -->
           <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
             <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
               <i data-lucide="sparkles" class="w-4 h-4 text-emerald-400"></i>
-              Cabecera Principal (Hero)
+              Textos de la Portada Principal (Hero)
             </h2>
-            <p class="text-xs text-gray-400 mb-6">El mensaje principal de bienvenida y llamado a inscripción.</p>
+            <p class="text-xs text-gray-400 mb-6">El título, mensajes de bienvenida y botones de llamado a la acción.</p>
 
             <div class="space-y-4">
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto del Badge</label>
-                  <input type="text" id="input-badgeText" value="<%= content.hero?.badgeText || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto del Badge Superior</label>
+                  <input type="text" id="input-badgeText" value="<%= content.hero?.badgeText || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-gray-300 mb-1.5">Enlace del Badge</label>
-                  <input type="text" id="input-badgeLink" value="<%= content.hero?.badgeLink || '#pricing' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                  <input type="text" id="input-badgeLink" value="<%= content.hero?.badgeLink || '#pricing' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
                 </div>
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título Línea 1</label>
-                <input type="text" id="input-headlinePrefix" value="<%= content.hero?.headlinePrefix || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5 flex items-center justify-between">
+                  <span>Título Principal - Línea 1 (Texto Blanco)</span>
+                  <span class="text-[10px] text-gray-500 font-normal">ej: La Carrera Más Alegre del Año para</span>
+                </label>
+                <input type="text" id="input-headlinePrefix" value="<%= content.hero?.headlinePrefix || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400 font-semibold">
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título con Gradiente (Línea 2)</label>
-                <input type="text" id="input-headlineGradient" value="<%= content.hero?.headlineGradient || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5 flex items-center justify-between">
+                  <span>Título Principal - Línea 2 con Gradiente</span>
+                  <span class="text-[10px] text-amber-400/80 font-normal">ej: Pequeños Campeones & Familias</span>
+                </label>
+                <input type="text" id="input-headlineGradient" value="<%= content.hero?.headlineGradient || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400 font-bold text-amber-300">
               </div>
 
               <div>
                 <label class="block text-xs font-semibold text-gray-300 mb-1.5">Subtítulo Descriptivo</label>
-                <textarea id="input-subheadline" rows="3" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400"><%= content.hero?.subheadline || '' %></textarea>
+                <textarea id="input-subheadline" rows="3" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400 leading-relaxed"><%= content.hero?.subheadline || '' %></textarea>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2">
                 <div>
                   <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto Botón Primario</label>
-                  <input type="text" id="input-primaryCtaText" value="<%= content.hero?.primaryCtaText || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                  <input type="text" id="input-primaryCtaText" value="<%= content.hero?.primaryCtaText || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-gray-300 mb-1.5">Enlace Botón Primario</label>
-                  <input type="text" id="input-primaryCtaLink" value="<%= content.hero?.primaryCtaLink || '#contact' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                  <input type="text" id="input-primaryCtaLink" value="<%= content.hero?.primaryCtaLink || '#contact' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
                 </div>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto Botón Secundario</label>
-                  <input type="text" id="input-secondaryCtaText" value="<%= content.hero?.secondaryCtaText || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                  <input type="text" id="input-secondaryCtaText" value="<%= content.hero?.secondaryCtaText || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
                 </div>
                 <div>
                   <label class="block text-xs font-semibold text-gray-300 mb-1.5">Enlace Botón Secundario</label>
-                  <input type="text" id="input-secondaryCtaLink" value="<%= content.hero?.secondaryCtaLink || '#gallery' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                  <input type="text" id="input-secondaryCtaLink" value="<%= content.hero?.secondaryCtaLink || '#gallery' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
                 </div>
               </div>
 
               <div>
-                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Mensaje de Garantía (Micro-copy)</label>
-                <input type="text" id="input-statsNotice" value="<%= content.hero?.statsNotice || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Mensaje de Garantía / Aviso Inferior</label>
+                <input type="text" id="input-statsNotice" value="<%= content.hero?.statsNotice || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
               </div>
+            </div>
+          </div>
+
+          <!-- Formulario: Cifras y Métricas de Impacto -->
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+              <div>
+                <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+                  <i data-lucide="award" class="w-4 h-4 text-amber-400"></i>
+                  Cifras y Métricas de Impacto (Barra de Estadísticas)
+                </h2>
+                <p class="text-xs text-gray-400">
+                  Cifras destacadas que aparecen horizontalmente en la web justo debajo de la portada (ej: +2,500 Niños y Familias Corriendo, 100% Medallas Aseguradas, etc.).
+                </p>
+              </div>
+              <button type="button" id="btn-add-metric" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs rounded-2xl shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all self-start sm:self-auto cursor-pointer">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>+ Agregar Métrica</span>
+              </button>
+            </div>
+
+            <!-- Contenedor dinámico de Métricas -->
+            <div id="metrics-container" class="space-y-3">
+              <% const metricList = Array.isArray(content.metrics) && content.metrics.length > 0 ? content.metrics : [
+                { value: '+2,500', label: 'Niños y Familias Corriendo', icon: 'users' },
+                { value: '100%', label: 'Medallas Finisher Aseguradas', icon: 'award' },
+                { value: '4', label: 'Circuitos por Edades (500m - 3K)', icon: 'flag' },
+                { value: '0', label: 'Incidentes • Seguridad Máxima', icon: 'shield-check' }
+              ]; %>
+              <% metricList.forEach((metric, idx) => { %>
+              <div class="metric-admin-item p-4 rounded-3xl bg-gray-900/80 border border-gray-800 relative space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b border-gray-800/80">
+                  <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 rounded-xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-amber-400 metric-icon-preview">
+                      <i data-lucide="<%= metric.icon || 'award' %>" class="w-4 h-4"></i>
+                    </div>
+                    <span class="text-xs font-bold text-gray-300">Métrica #<%= idx + 1 %></span>
+                  </div>
+                  <button type="button" class="btn-delete-item text-red-400 hover:text-red-300 p-1.5 bg-red-950/40 rounded-xl transition-all" title="Eliminar Métrica">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-3">
+                  <div class="sm:col-span-4">
+                    <label class="block text-[11px] font-semibold text-gray-400 mb-1">Cifra / Valor</label>
+                    <input type="text" value="<%= metric.value %>" placeholder="+2,500" class="metric-value-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-black tracking-wide focus:outline-none focus:border-amber-400">
+                  </div>
+                  <div class="sm:col-span-5">
+                    <label class="block text-[11px] font-semibold text-gray-400 mb-1">Etiqueta / Descripción</label>
+                    <input type="text" value="<%= metric.label %>" placeholder="Niños y Familias Corriendo" class="metric-label-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                  </div>
+                  <div class="sm:col-span-3">
+                    <label class="block text-[11px] font-semibold text-gray-400 mb-1">Ícono</label>
+                    <select class="metric-icon-select w-full bg-gray-950 border border-gray-800 rounded-xl px-2.5 py-2 text-xs text-white focus:outline-none focus:border-amber-400">
+                      <% const availIcons = [
+                        { id: 'users', label: 'users (Familias / Niños)' },
+                        { id: 'award', label: 'award (Medalla)' },
+                        { id: 'flag', label: 'flag (Circuitos)' },
+                        { id: 'shield-check', label: 'shield-check (Seguridad)' },
+                        { id: 'trophy', label: 'trophy (Trofeo)' },
+                        { id: 'heart', label: 'heart (Corazón / Salud)' },
+                        { id: 'smile', label: 'smile (Alegría)' },
+                        { id: 'sparkles', label: 'sparkles (Magia)' },
+                        { id: 'zap', label: 'zap (Energía)' },
+                        { id: 'star', label: 'star (Estrella)' },
+                        { id: 'clock', label: 'clock (Tiempo)' },
+                        { id: 'map-pin', label: 'map-pin (Ubicación)' },
+                        { id: 'activity', label: 'activity (Deporte)' }
+                      ]; %>
+                      <% availIcons.forEach(ico => { %>
+                      <option value="<%= ico.id %>" <%= (metric.icon === ico.id) ? 'selected' : '' %>><%= ico.label %></option>
+                      <% }); %>
+                    </select>
+                  </div>
+                </div>
+              </div>
+              <% }); %>
             </div>
           </div>
         </div>
