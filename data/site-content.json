@@ -17,7 +17,7 @@
     "badge": "⏰ ¡FALTAN SÓLO!"
   },
   "seo": {
-    "metaTitle": "KidsRun 2026 | La Gran Corrida Infantil y Familiar",
+    "metaTitle": "KidsRace 2026 | La Gran Corrida Infantil y Familiar",
     "metaDescription": "Inscribe a tus hijos en la corrida infantil más alegre, segura y emocionante del año. Circuitos de 500m a 3K, medalla finisher garantizada para todos, polera técnica oficial y actividades familiares.",
     "keywords": "corrida de niños, corrida infantil, maraton infantil, carrera familiar, kids run, running niños, deporte infantil, medallas niños",
     "canonicalUrl": "http://localhost:3000",
@@ -880,8 +880,8 @@
     "badge": "Punto de Largada",
     "title": "¿Dónde es la corrida?",
     "description": "Encuéntranos en el lugar del evento. ¡Llega con tiempo para disfrutar la previa!",
-    "name": "Parque Bicentenario",
-    "address": "Av. Bicentenario 3800, Vitacura, Santiago",
+    "name": "Costanera",
+    "address": "Costanera, Puerto Varas",
     "lat": -33.3975,
     "lng": -70.5787,
     "zoom": 15,
@@ -921,7 +921,7 @@
       "faq": true,
       "sponsors": true,
       "venue": true,
-      "contact": true
+      "contact": false
     }
   },
   "construction": {
@@ -940,5 +940,27 @@
     "badge": "HORARIOS Y ACTIVIDADES",
     "title": "Cronograma de la Gran Jornada",
     "subtitle": "Ven temprano para disfrutar de todas las sorpresas preparadas para la familia."
-  }
+  },
+  "faq": [
+    {
+      "question": "¿Los padres o tutores pueden correr junto a los niños?",
+      "answer": "¡Por supuesto! En la categoría de 500 metros (3 a 5 años) es obligatorio que un adulto acompañe al niño. En 1K, 2K y 3K los padres pueden acompañarlos o alentarlos a lo largo del circuito cerrado."
+    },
+    {
+      "question": "¿Todos los niños reciben medalla al terminar?",
+      "answer": "¡Sí! En KidsRun premiamos la participación y el amor por el movimiento. Cada niño y niña que cruza el arco de meta recibe su hermosa medalla finisher de metal con cinta conmemorativa."
+    },
+    {
+      "question": "¿Cómo funciona la seguridad de los niños en el evento?",
+      "answer": "La seguridad es nuestra prioridad #1. El circuito es completamente cerrado sin tráfico vehicular, contamos con ambulancias y paramédicos certificados, y cada niño recibe una pulsera numerada idéntica a la que se le coloca a su tutor para el control de salida."
+    },
+    {
+      "question": "¿Cuándo y dónde se retiran los kits de corredor (polera y número)?",
+      "answer": "Los kits se pueden retirar los días viernes y sábado previos al evento en el mall auspiciador, o el mismo domingo desde las 08:00 AM en la carpa de acreditaciones del parque."
+    },
+    {
+      "question": "¿Qué incluye el Kit oficial de corredor?",
+      "answer": "Incluye la polera técnica oficial con tejido respirable, número de corredor, chip electrónico (en distancias 2K y 3K), pulseras de seguridad, medalla de metal finisher, morral y snacks saludables de hidratación."
+    }
+  ]
 }

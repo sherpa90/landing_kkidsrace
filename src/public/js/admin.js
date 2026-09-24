@@ -1,55 +1,32 @@
 // Interactividad del Panel de Administración CMS para KidsRun
 
 function initAllAdminModules() {
-  // 1. Iconos del sistema
-  if (window.lucide) {
-    window.lucide.createIcons();
-  }
+  const modules = [
+    ['Iconos Lucide', () => { if (window.lucide) window.lucide.createIcons(); }],
+    ['Pestañas', initAdminTabs],
+    ['Guardado CMS', initCmsSaveForm],
+    ['Tema Color', initColorThemeSelector],
+    ['Listas Dinámicas', initDynamicListManagers],
+    ['Inscripciones Leads', initLeadsManager],
+    ['Cambio Password', initPasswordChange],
+    ['Imágenes', initImageUploadHandlers],
+    ['Modo Construcción', initConstructionManager],
+    ['Corridas', initRacesManager],
+    ['Auspiciadores', initSponsorsManager],
+    ['Secciones', initSectionsManager],
+    ['Escáner RUT', initRutScanner],
+    ['Usuarios', initUsersManager],
+    ['Cronograma', initScheduleManager],
+    ['Preguntas Frecuentes', initFaqsManager]
+  ];
 
-  // 2. Navegación por pestañas
-  initAdminTabs();
-
-  // 3. Manejo del formulario de guardado del CMS
-  initCmsSaveForm();
-
-  // 4. Selector de color de acento
-  initColorThemeSelector();
-
-  // 5. Gestión dinámica de Galería, Testimonios y FAQs
-  initDynamicListManagers();
-
-  // 6. Gestión de Inscripciones (Leads)
-  initLeadsManager();
-
-  // 7. Cambio de contraseña
-  initPasswordChange();
-
-  // 8. Manejo de Subida y Optimización de Imágenes
-  initImageUploadHandlers();
-
-  // 9. Modo Construcción
-  initConstructionManager();
-
-  // 10. Gestión de Corridas
-  initRacesManager();
-
-  // 11. Gestión de Auspiciadores
-  initSponsorsManager();
-
-  // 12. Orden y visibilidad de secciones
-  initSectionsManager();
-
-  // 13. Escáner de cédula
-  initRutScanner();
-
-  // 14. Gestión de Usuarios y Accesos
-  initUsersManager();
-
-  // 15. Cronograma de actividades
-  initScheduleManager();
-
-  // 16. Preguntas Frecuentes (FAQs)
-  initFaqsManager();
+  modules.forEach(([name, fn]) => {
+    try {
+      fn();
+    } catch (err) {
+      console.warn(`[CMS Init Error en ${name}]:`, err);
+    }
+  });
 }
 
 if (document.readyState === 'loading') {
@@ -104,20 +81,22 @@ function initAdminTabs() {
       tabPanes.forEach(pane => {
         if (pane.id === `tab-${targetTab}`) {
           pane.classList.remove('hidden');
-          // Forzar visibilidad inmediata
-          pane.style.display = '';
+          pane.style.display = 'block';
         } else {
           pane.classList.add('hidden');
+          pane.style.display = 'none';
         }
       });
 
       // Si se abre la pestaña de usuarios, refrescar la lista de usuarios inmediatamente
-      if (targetTab === 'users' && window._loadUsersList) {
+      if (targetTab === 'users' && typeof window._loadUsersList === 'function') {
         window._loadUsersList();
       }
 
       // Asegurar que la pantalla suba al inicio para ver de inmediato todo el contenido de la pestaña
-      window.scrollTo({ top: 0, behavior: 'instant' });
+      try {
+        window.scrollTo({ top: 0, behavior: 'auto' });
+      } catch (_) {}
 
       // En móviles, cerrar el drawer lateral al pinchar cualquier tab
       if (window.innerWidth < 768) {
@@ -1527,7 +1506,7 @@ function initRutScanner() {
   }
 }
 
-// 12. Gestor de Usuarios y Accesos (SOLO Administrador)
+// 12. Gestor de Usuarios (SOLO Administrador)
 function initUsersManager() {
   const container = document.getElementById('users-list-container');
   if (!container) return; // Si no existe el contenedor (rol no admin), salir sin error
@@ -1746,7 +1725,7 @@ function initUsersManager() {
     setRole('editor');
 
     if (formTitle) formTitle.textContent = 'Crear Nuevo Usuario';
-    if (formSubtitle) formSubtitle.textContent = 'Ingresa los datos para otorgar acceso al sistema.';
+    if (formSubtitle) formSubtitle.textContent = 'Ingresa los datos para otorgar acceso como Administrador o Lector.';
     if (formHeaderIcon) formHeaderIcon.setAttribute('data-lucide', 'user-plus');
     if (saveBtnText) saveBtnText.textContent = 'Guardar Usuario';
 
@@ -1759,14 +1738,16 @@ function initUsersManager() {
   function openForm(isEdit = false) {
     if (!formCard) return;
     formCard.classList.remove('hidden');
+    formCard.style.display = 'block';
     if (toggleCreateText) toggleCreateText.textContent = '✕ Ocultar Formulario';
-    formCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    try { formCard.scrollIntoView({ behavior: 'smooth', block: 'start' }); } catch (_) {}
     setTimeout(() => { if (nameInput) nameInput.focus(); }, 150);
   }
 
   function closeForm() {
     if (!formCard) return;
     formCard.classList.add('hidden');
+    formCard.style.display = 'none';
     if (toggleCreateText) toggleCreateText.textContent = '+ Agregar Usuario';
     resetForm();
   }
@@ -1803,7 +1784,7 @@ function initUsersManager() {
   function updateCounts(users) {
     const total = users.length;
     const admins = users.filter(u => u.role === 'admin').length;
-    const editors = users.filter(u => u.role === 'editor').length;
+    const editors = users.filter(u => u.role === 'editor' || u.role === 'lector').length;
 
     if (totalBadge) totalBadge.textContent = `${total} cuenta${total === 1 ? '' : 's'} activa${total === 1 ? '' : 's'}`;
     if (adminCountEl) adminCountEl.textContent = admins;
@@ -1846,7 +1827,7 @@ function initUsersManager() {
               <span class="font-bold text-sm text-white">${u.name}</span>
               <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg
                    ${isAdmin ? 'bg-blue-950 text-blue-300 border border-blue-500/40' : 'bg-amber-950 text-amber-300 border border-amber-500/40'}">
-                ${isAdmin ? 'ADMIN' : 'EDITOR'}
+                ${isAdmin ? 'ADMINISTRADOR' : 'LECTOR'}
               </span>
               ${isMe ? `
               <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-950 text-emerald-300 border border-emerald-500/30 flex items-center gap-1">
@@ -1996,7 +1977,7 @@ function initUsersManager() {
       if (confirmContainer) confirmContainer.classList.add('hidden');
 
       if (formTitle) formTitle.textContent = `Editar Usuario: @${username}`;
-      if (formSubtitle) formSubtitle.textContent = 'Puedes actualizar el nombre, el rol de acceso o asignarle una nueva clave.';
+      if (formSubtitle) formSubtitle.textContent = 'Puedes actualizar el nombre, el rol (Administrador o Lector) o asignarle una nueva clave.';
       if (formHeaderIcon) formHeaderIcon.setAttribute('data-lucide', 'edit-3');
       if (saveBtnText) saveBtnText.textContent = 'Guardar Cambios';
 

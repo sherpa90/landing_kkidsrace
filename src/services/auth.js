@@ -304,16 +304,17 @@ function updateUser(userId, { name, role, password }) {
     target.name = name.trim();
   }
 
-  // Si se cambia el rol
-  if (role && (role === 'admin' || role === 'editor')) {
+  // Si se cambia el rol (soporta admin, editor y lector)
+  if (role && (role === 'admin' || role === 'editor' || role === 'lector')) {
+    const finalRole = role === 'admin' ? 'admin' : 'editor';
     // Evitar dejar el sistema sin administradores
-    if (target.role === 'admin' && role === 'editor') {
+    if (target.role === 'admin' && finalRole === 'editor') {
       const adminCount = users.filter(u => u.role === 'admin').length;
       if (adminCount <= 1) {
         return { success: false, error: 'Debe haber al menos un Administrador activo en el sistema.' };
       }
     }
-    target.role = role;
+    target.role = finalRole;
   }
 
   // Si se proporciona nueva contraseña
