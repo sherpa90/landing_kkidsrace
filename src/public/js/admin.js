@@ -47,6 +47,9 @@ function initAllAdminModules() {
 
   // 15. Cronograma de actividades
   initScheduleManager();
+
+  // 16. Preguntas Frecuentes (FAQs)
+  initFaqsManager();
 }
 
 if (document.readyState === 'loading') {
@@ -101,10 +104,17 @@ function initAdminTabs() {
       tabPanes.forEach(pane => {
         if (pane.id === `tab-${targetTab}`) {
           pane.classList.remove('hidden');
+          // Forzar visibilidad inmediata
+          pane.style.display = '';
         } else {
           pane.classList.add('hidden');
         }
       });
+
+      // Si se abre la pestaña de usuarios, refrescar la lista de usuarios inmediatamente
+      if (targetTab === 'users' && window._loadUsersList) {
+        window._loadUsersList();
+      }
 
       // Asegurar que la pantalla suba al inicio para ver de inmediato todo el contenido de la pestaña
       window.scrollTo({ top: 0, behavior: 'instant' });
@@ -373,10 +383,11 @@ function collectCmsFormData() {
   // 9. FAQs
   const faqs = [];
   document.querySelectorAll('.faq-admin-item').forEach(item => {
-    faqs.push({
-      question: item.querySelector('input[name*="[question]"]')?.value || '',
-      answer: item.querySelector('textarea[name*="[answer]"]')?.value || ''
-    });
+    const question = item.querySelector('.faq-question-input')?.value.trim() || item.querySelector('input[name*="[question]"]')?.value.trim() || '';
+    const answer = item.querySelector('.faq-answer-input')?.value.trim() || item.querySelector('textarea[name*="[answer]"]')?.value.trim() || '';
+    if (question || answer) {
+      faqs.push({ question, answer });
+    }
   });
 
   // 10. Footer Social Links (etiquetas corregidas)
@@ -445,6 +456,7 @@ function collectCmsFormData() {
     pricing: { plans },
     testimonials,
     faqs,
+    faq: faqs,
     footer,
     sponsors,
     venue,
@@ -1392,6 +1404,79 @@ function initUsersManager() {
     if (emptyState) emptyState.classList.toggle('hidden', cards.length > 0);
   }
 
+  function renderUsers(users) {
+    if (!container) return;
+    // Quitar cards existentes para refrescar con los datos más recientes
+    container.querySelectorAll('.user-card-item').forEach(el => el.remove());
+
+    if (emptyState) {
+      emptyState.classList.toggle('hidden', users.length > 0);
+    }
+
+    const currentUsername = (document.querySelector('header .text-slate-400.font-mono')?.textContent?.replace(/[()]/g, '') || '').trim().toLowerCase();
+
+    users.forEach(u => {
+      const card = document.createElement('div');
+      card.className = 'user-card-item bg-slate-950/70 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all';
+      card.setAttribute('data-user-id', u.id);
+      card.setAttribute('data-username', u.username);
+      card.setAttribute('data-name', u.name);
+      card.setAttribute('data-role', u.role);
+
+      const isMe = u.username.toLowerCase() === currentUsername;
+      const initial = (u.name || u.username || 'U')[0].toUpperCase();
+      const isAdmin = u.role === 'admin';
+
+      card.innerHTML = `
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 rounded-2xl ${isAdmin ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'bg-amber-600/20 text-amber-400 border border-amber-500/30'} flex items-center justify-center font-bold text-base shrink-0">
+            ${initial}
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <h4 class="font-bold text-sm text-white">${u.name}</h4>
+              <span class="text-[10px] font-mono px-2 py-0.5 rounded-md ${isAdmin ? 'bg-blue-950 text-blue-300 border border-blue-500/40' : 'bg-amber-950 text-amber-300 border border-amber-500/40'}">
+                ${isAdmin ? 'ADMIN' : 'EDITOR'}
+              </span>
+            </div>
+            <p class="text-xs text-slate-400 font-mono mt-0.5">@${u.username}</p>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-2 self-end sm:self-auto">
+          <button type="button" class="btn-edit-user px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors flex items-center gap-1.5 cursor-pointer" data-id="${u.id}" data-username="${u.username}" data-name="${u.name}" data-role="${u.role}">
+            <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+            <span>Editar</span>
+          </button>
+          ${!isMe ? `
+          <button type="button" class="btn-delete-user px-3 py-1.5 rounded-xl bg-red-950/60 hover:bg-red-900 border border-red-500/30 text-xs font-semibold text-red-300 transition-colors flex items-center gap-1.5 cursor-pointer" data-id="${u.id}" data-username="${u.username}">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>Eliminar</span>
+          </button>
+          ` : ''}
+        </div>
+      `;
+      container.appendChild(card);
+    });
+
+    if (usersBadge) usersBadge.textContent = users.length;
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  async function loadUsersList() {
+    if (!container) return;
+    try {
+      const res = await cmsFetch('/admin/api/users');
+      if (res && res.success && Array.isArray(res.users)) {
+        renderUsers(res.users);
+      }
+    } catch (err) {
+      console.warn('[users] No se pudo cargar lista via API:', err);
+    }
+  }
+
+  window._loadUsersList = loadUsersList;
+
   // Guardar (Crear o Actualizar)
   if (saveBtn) {
     saveBtn.addEventListener('click', async () => {
@@ -1437,7 +1522,9 @@ function initUsersManager() {
 
         if (res.success) {
           showAdminToast(res.message || 'Usuario guardado exitosamente', 'success');
-          setTimeout(() => window.location.reload(), 800);
+          resetForm();
+          if (formPanel) formPanel.classList.add('hidden');
+          await loadUsersList();
         } else {
           showAdminToast(res.error || 'No se pudo guardar el usuario', 'error');
         }
@@ -1519,6 +1606,10 @@ function initUsersManager() {
   }
 
   updateUsersCount();
+  // Cargar usuarios vía API si el contenedor está vacío
+  if (!container.querySelector('.user-card-item')) {
+    loadUsersList();
+  }
 }
 
 // 13. Gestor de Cronograma de Actividades (SOLO Administrador)
@@ -1693,6 +1784,164 @@ function initScheduleManager() {
   }
 
   updateItemNumbers();
+}
+
+// 16. Gestor de Preguntas Frecuentes (FAQs)
+function initFaqsManager() {
+  const container = document.getElementById('faqs-container');
+  const addBtn = document.getElementById('btn-add-faq');
+  const addBottomBtn = document.getElementById('btn-add-faq-bottom');
+  const saveSectionBtn = document.getElementById('btn-save-faqs-section');
+  const countBadge = document.getElementById('faqs-count-badge');
+  const emptyState = document.getElementById('faqs-empty-state');
+
+  if (!container) return;
+
+  function updateFaqNumbers() {
+    const items = container.querySelectorAll('.faq-admin-item');
+    items.forEach((item, idx) => {
+      const numEl = item.querySelector('.faq-item-number');
+      const textEl = item.querySelector('.faq-item-num-text');
+      if (numEl) numEl.textContent = idx + 1;
+      if (textEl) textEl.textContent = idx + 1;
+
+      const qInput = item.querySelector('.faq-question-input');
+      const aInput = item.querySelector('.faq-answer-input');
+      if (qInput) qInput.name = `faqs[${idx}][question]`;
+      if (aInput) aInput.name = `faqs[${idx}][answer]`;
+    });
+
+    if (countBadge) countBadge.textContent = items.length;
+    if (emptyState) {
+      emptyState.classList.toggle('hidden', items.length > 0);
+    }
+  }
+
+  function createFaqItem(idx, defaultQ = '', defaultA = '') {
+    const div = document.createElement('div');
+    div.className = 'faq-admin-item p-4 sm:p-5 rounded-3xl bg-gray-900/60 border border-gray-800 space-y-3 hover:border-gray-700 transition-all';
+    div.style.animation = 'fadeInUp 0.25s ease forwards';
+    div.innerHTML = `
+      <div class="flex items-center justify-between pb-2 border-b border-gray-800/80">
+        <div class="flex items-center gap-2">
+          <span class="faq-item-number w-6 h-6 rounded-lg bg-emerald-600/20 text-emerald-400 font-mono text-xs font-bold flex items-center justify-center">
+            ${idx + 1}
+          </span>
+          <span class="text-xs font-bold text-slate-300">Pregunta #<span class="faq-item-num-text">${idx + 1}</span></span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button type="button" class="btn-move-up-faq p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer" title="Mover arriba">
+            <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
+          </button>
+          <button type="button" class="btn-move-down-faq p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer" title="Mover abajo">
+            <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+          </button>
+          <button type="button" class="btn-remove-faq p-1.5 rounded-lg bg-red-950/60 hover:bg-red-900 border border-red-500/30 text-red-300 transition-all ml-1 cursor-pointer" title="Eliminar pregunta">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs text-gray-400 mb-1 font-semibold">Pregunta *</label>
+        <input type="text" name="faqs[${idx}][question]" value="${defaultQ}" placeholder="Ej: ¿Qué incluye el kit de corredor?" class="faq-question-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2 text-sm text-white font-bold focus:outline-none focus:border-emerald-500">
+      </div>
+      <div>
+        <label class="block text-xs text-gray-400 mb-1 font-semibold">Respuesta *</label>
+        <textarea name="faqs[${idx}][answer]" rows="2" placeholder="Detalle claro y tranquilizador para los padres..." class="faq-answer-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">${defaultA}</textarea>
+      </div>
+    `;
+    return div;
+  }
+
+  function handleAddFaq() {
+    const currentCount = container.querySelectorAll('.faq-admin-item').length;
+    const newItem = createFaqItem(currentCount);
+    container.appendChild(newItem);
+    updateFaqNumbers();
+    if (window.lucide) window.lucide.createIcons();
+    newItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const qInput = newItem.querySelector('.faq-question-input');
+    if (qInput) qInput.focus();
+  }
+
+  if (addBtn) addBtn.addEventListener('click', handleAddFaq);
+  if (addBottomBtn) addBottomBtn.addEventListener('click', handleAddFaq);
+
+  // Delegación para mover y eliminar FAQs
+  container.addEventListener('click', (e) => {
+    const removeBtn = e.target.closest('.btn-remove-faq');
+    if (removeBtn) {
+      const item = removeBtn.closest('.faq-admin-item');
+      if (item) {
+        item.style.animation = 'fadeOut 0.2s ease forwards';
+        setTimeout(() => {
+          item.remove();
+          updateFaqNumbers();
+        }, 200);
+      }
+      return;
+    }
+
+    const moveUpBtn = e.target.closest('.btn-move-up-faq');
+    if (moveUpBtn) {
+      const item = moveUpBtn.closest('.faq-admin-item');
+      if (item && item.previousElementSibling && item.previousElementSibling.classList.contains('faq-admin-item')) {
+        item.parentNode.insertBefore(item, item.previousElementSibling);
+        updateFaqNumbers();
+      }
+      return;
+    }
+
+    const moveDownBtn = e.target.closest('.btn-move-down-faq');
+    if (moveDownBtn) {
+      const item = moveDownBtn.closest('.faq-admin-item');
+      if (item && item.nextElementSibling && item.nextElementSibling.classList.contains('faq-admin-item')) {
+        item.parentNode.insertBefore(item.nextElementSibling, item);
+        updateFaqNumbers();
+      }
+      return;
+    }
+  });
+
+  // Guardar solo FAQs directamente
+  if (saveSectionBtn) {
+    saveSectionBtn.addEventListener('click', async () => {
+      const orig = saveSectionBtn.innerHTML;
+      saveSectionBtn.disabled = true;
+      saveSectionBtn.innerHTML = '<span class="inline-block animate-spin mr-1.5">⟳</span> Guardando...';
+
+      const faqs = [];
+      container.querySelectorAll('.faq-admin-item').forEach(item => {
+        const question = item.querySelector('.faq-question-input')?.value.trim() || item.querySelector('input[name*="[question]"]')?.value.trim() || '';
+        const answer = item.querySelector('.faq-answer-input')?.value.trim() || item.querySelector('textarea[name*="[answer]"]')?.value.trim() || '';
+        if (question || answer) {
+          faqs.push({ question, answer });
+        }
+      });
+
+      try {
+        const res = await cmsFetch('/admin/api/content', {
+          method: 'POST',
+          body: JSON.stringify({ faqs, faq: faqs })
+        });
+        if (res.success) {
+          showAdminToast('¡Preguntas Frecuentes guardadas exitosamente!', 'success');
+          updateFaqNumbers();
+        } else {
+          showAdminToast(res.error || 'Error al guardar', 'error');
+        }
+      } catch (err) {
+        showAdminToast(err.message || 'Error de conexión', 'error');
+      } finally {
+        saveSectionBtn.disabled = false;
+        saveSectionBtn.innerHTML = orig;
+        if (window.lucide) window.lucide.createIcons();
+      }
+    });
+  }
+
+  updateFaqNumbers();
 }
 
 // 9. Modo Construcción / Pre-Lanzamiento
