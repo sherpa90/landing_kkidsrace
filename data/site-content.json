@@ -935,5 +935,10 @@
     "notifyForm": true,
     "contactWhatsapp": "+56 9 8765 4321",
     "instagramUrl": "https://instagram.com"
+  },
+  "scheduleSection": {
+    "badge": "HORARIOS Y ACTIVIDADES",
+    "title": "Cronograma de la Gran Jornada",
+    "subtitle": "Ven temprano para disfrutar de todas las sorpresas preparadas para la familia."
   }
 }

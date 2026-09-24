@@ -1,7 +1,7 @@
 // Interactividad del Panel de Administración CMS para KidsRun
 
-document.addEventListener('DOMContentLoaded', () => {
-  // 1. Inicializar iconos
+function initAllAdminModules() {
+  // 1. Iconos del sistema
   if (window.lucide) {
     window.lucide.createIcons();
   }
@@ -29,9 +29,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 9. Modo Construcción
   initConstructionManager();
-});
 
-// Sistema de Toasts
+  // 10. Gestión de Corridas
+  initRacesManager();
+
+  // 11. Gestión de Auspiciadores
+  initSponsorsManager();
+
+  // 12. Orden y visibilidad de secciones
+  initSectionsManager();
+
+  // 13. Escáner de cédula
+  initRutScanner();
+
+  // 14. Gestión de Usuarios y Accesos
+  initUsersManager();
+
+  // 15. Cronograma de actividades
+  initScheduleManager();
+}
+
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAllAdminModules);
+} else {
+  initAllAdminModules();
+}
+
+// Sistema de Notificaciones Toast
 function showAdminToast(message, type = 'success') {
   let container = document.getElementById('toast-container');
   if (!container) {
@@ -65,6 +89,7 @@ function initAdminTabs() {
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const targetTab = btn.getAttribute('data-tab');
+      if (!targetTab) return;
 
       tabButtons.forEach(b => {
         b.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
@@ -80,6 +105,18 @@ function initAdminTabs() {
           pane.classList.add('hidden');
         }
       });
+
+      // Asegurar que la pantalla suba al inicio para ver de inmediato todo el contenido de la pestaña
+      window.scrollTo({ top: 0, behavior: 'instant' });
+
+      // En móviles, cerrar el drawer lateral al pinchar cualquier tab
+      if (window.innerWidth < 768) {
+        const sidebarNav = document.getElementById('sidebar-nav');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        if (sidebarNav) sidebarNav.classList.add('-translate-x-full');
+        if (sidebarBackdrop) sidebarBackdrop.classList.add('hidden');
+        document.body.style.overflow = '';
+      }
 
       if (window.lucide) window.lucide.createIcons();
     });
@@ -430,6 +467,17 @@ function collectCmsFormData() {
       location: getVal('input-contactLocation'),
       resendApiKey: getVal('input-contactResendApiKey'),
       resendFromEmail: getVal('input-contactResendFromEmail')
+    },
+    // 14. Cronograma de actividades y cabecera
+    schedule: Array.from(document.querySelectorAll('.schedule-admin-item')).map(item => ({
+      time: item.querySelector('.schedule-time-input')?.value.trim() || '',
+      title: item.querySelector('.schedule-title-input')?.value.trim() || '',
+      desc: item.querySelector('.schedule-desc-input')?.value.trim() || ''
+    })).filter(it => it.time || it.title || it.desc),
+    scheduleSection: {
+      badge: getVal('input-scheduleBadge') || 'HORARIOS Y ACTIVIDADES',
+      title: getVal('input-scheduleTitle') || 'Cronograma de la Gran Jornada',
+      subtitle: getVal('input-scheduleSubtitle') || 'Ven temprano para disfrutar de todas las sorpresas preparadas para la familia.'
     }
   };
 }
@@ -707,11 +755,6 @@ function initPasswordChange() {
   });
 }
 
-// Registrar initRacesManager al cargar DOM
-document.addEventListener('DOMContentLoaded', () => {
-  initRacesManager();
-});
-
 // 8. Gestor de Subida Asíncrona y Optimización con Sharp (WebP)
 function initImageUploadHandlers() {
   document.addEventListener('change', async (e) => {
@@ -904,10 +947,6 @@ function initSponsorsManager() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  initSponsorsManager();
-});
-
 // 10. Gestor de Orden y Visibilidad de Secciones (Drag and Drop nativo)
 function initSectionsManager() {
   const list = document.getElementById('sections-sortable-list');
@@ -967,10 +1006,6 @@ function initSectionsManager() {
     }
   });
 }
-
-document.addEventListener('DOMContentLoaded', () => {
-  initSectionsManager();
-});
 
 // 11. Escáner de Cédula de Identidad (HTML5 QR/Barcode Scanner)
 function initRutScanner() {
@@ -1289,13 +1324,10 @@ function initRutScanner() {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  initRutScanner();
-});
-
 // 12. Gestor de Usuarios y Accesos (SOLO Administrador)
 function initUsersManager() {
   const openCreateBtn = document.getElementById('btn-open-create-user');
+  const emptyCreateBtn = document.getElementById('btn-empty-create-user');
   const cancelBtn = document.getElementById('btn-cancel-user-form');
   const formPanel = document.getElementById('user-form-panel');
   const saveBtn = document.getElementById('btn-save-user');
@@ -1308,81 +1340,116 @@ function initUsersManager() {
   const passwordLabel = document.getElementById('user-label-password');
   const passwordHint = document.getElementById('user-hint-password');
   const container = document.getElementById('users-list-container');
+  const usersBadge = document.getElementById('users-count-badge');
+  const emptyState = document.getElementById('users-empty-state');
 
-  if (!openCreateBtn || !formPanel) return;
+  if (!container && !openCreateBtn) return;
 
   function resetForm() {
-    editIdInput.value = '';
-    nameInput.value = '';
-    usernameInput.value = '';
-    usernameInput.disabled = false;
-    roleInput.value = 'editor';
-    passwordInput.value = '';
-    passwordLabel.textContent = 'Contraseña *';
-    passwordHint.classList.add('hidden');
-    formTitle.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i><span>Crear Nuevo Usuario</span>`;
+    if (editIdInput) editIdInput.value = '';
+    if (nameInput) nameInput.value = '';
+    if (usernameInput) {
+      usernameInput.value = '';
+      usernameInput.disabled = false;
+    }
+    if (roleInput) roleInput.value = 'editor';
+    if (passwordInput) passwordInput.value = '';
+    if (passwordLabel) passwordLabel.textContent = 'Contraseña *';
+    if (passwordHint) passwordHint.classList.add('hidden');
+    if (formTitle) {
+      formTitle.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i><span>Crear Nuevo Usuario</span>`;
+    }
     if (window.lucide) window.lucide.createIcons();
   }
 
-  openCreateBtn.addEventListener('click', () => {
-    resetForm();
-    formPanel.classList.remove('hidden');
-    formPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-  });
+  function toggleCreateForm() {
+    if (!formPanel) return;
+    const isHidden = formPanel.classList.contains('hidden');
+    if (isHidden || (editIdInput && editIdInput.value)) {
+      resetForm();
+      formPanel.classList.remove('hidden');
+      formPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      if (nameInput) nameInput.focus();
+    } else {
+      formPanel.classList.add('hidden');
+    }
+  }
 
-  cancelBtn.addEventListener('click', () => {
-    formPanel.classList.add('hidden');
-    resetForm();
-  });
+  if (openCreateBtn) openCreateBtn.addEventListener('click', toggleCreateForm);
+  if (emptyCreateBtn) emptyCreateBtn.addEventListener('click', toggleCreateForm);
+
+  if (cancelBtn && formPanel) {
+    cancelBtn.addEventListener('click', () => {
+      formPanel.classList.add('hidden');
+      resetForm();
+    });
+  }
+
+  function updateUsersCount() {
+    if (!container) return;
+    const cards = container.querySelectorAll('.user-card-item');
+    if (usersBadge) usersBadge.textContent = cards.length;
+    if (emptyState) emptyState.classList.toggle('hidden', cards.length > 0);
+  }
 
   // Guardar (Crear o Actualizar)
-  saveBtn.addEventListener('click', async () => {
-    const isEdit = !!editIdInput.value;
-    const name = nameInput.value.trim();
-    const username = usernameInput.value.trim();
-    const role = roleInput.value;
-    const password = passwordInput.value;
+  if (saveBtn) {
+    saveBtn.addEventListener('click', async () => {
+      const isEdit = editIdInput ? !!editIdInput.value : false;
+      const name = nameInput ? nameInput.value.trim() : '';
+      const username = usernameInput ? usernameInput.value.trim() : '';
+      const role = roleInput ? roleInput.value : 'editor';
+      const password = passwordInput ? passwordInput.value : '';
 
-    if (!name) {
-      return showAdminToast('Por favor ingresa el nombre de la persona', 'error');
-    }
-    if (!isEdit && (!username || username.length < 3)) {
-      return showAdminToast('El usuario debe tener al menos 3 caracteres', 'error');
-    }
-    if (!isEdit && (!password || password.length < 12)) {
-      return showAdminToast('La contraseña debe tener al menos 12 caracteres', 'error');
-    }
-    if (isEdit && password && password.length < 12) {
-      return showAdminToast('La nueva contraseña debe tener al menos 12 caracteres', 'error');
-    }
-
-    try {
-      let url = '/admin/api/users';
-      let method = 'POST';
-      let body = { name, username, role, password };
-
-      if (isEdit) {
-        url = `/admin/api/users/${editIdInput.value}`;
-        method = 'PUT';
-        body = { name, role };
-        if (password) body.password = password;
+      if (!name) {
+        return showAdminToast('Por favor ingresa el nombre de la persona', 'error');
+      }
+      if (!isEdit && (!username || username.length < 3)) {
+        return showAdminToast('El usuario debe tener al menos 3 caracteres', 'error');
+      }
+      if (!isEdit && (!password || password.length < 12)) {
+        return showAdminToast('La contraseña debe tener al menos 12 caracteres', 'error');
+      }
+      if (isEdit && password && password.length < 12) {
+        return showAdminToast('La nueva contraseña debe tener al menos 12 caracteres', 'error');
       }
 
-      const res = await cmsFetch(url, {
-        method,
-        body: JSON.stringify(body)
-      });
+      saveBtn.disabled = true;
+      const origText = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<span class="inline-block animate-spin mr-1.5">⟳</span> Guardando...';
 
-      if (res.success) {
-        showAdminToast(res.message || 'Usuario guardado exitosamente', 'success');
-        setTimeout(() => window.location.reload(), 1000);
-      } else {
-        showAdminToast(res.error || 'No se pudo guardar el usuario', 'error');
+      try {
+        let url = '/admin/api/users';
+        let method = 'POST';
+        let body = { name, username, role, password };
+
+        if (isEdit) {
+          url = `/admin/api/users/${editIdInput.value}`;
+          method = 'PUT';
+          body = { name, role };
+          if (password) body.password = password;
+        }
+
+        const res = await cmsFetch(url, {
+          method,
+          body: JSON.stringify(body)
+        });
+
+        if (res.success) {
+          showAdminToast(res.message || 'Usuario guardado exitosamente', 'success');
+          setTimeout(() => window.location.reload(), 800);
+        } else {
+          showAdminToast(res.error || 'No se pudo guardar el usuario', 'error');
+        }
+      } catch (err) {
+        showAdminToast(err.message || 'Error de conexión', 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = origText;
+        if (window.lucide) window.lucide.createIcons();
       }
-    } catch (err) {
-      showAdminToast(err.message || 'Error de conexión', 'error');
-    }
-  });
+    });
+  }
 
   // Delegación para Editar y Eliminar
   if (container) {
@@ -1395,20 +1462,27 @@ function initUsersManager() {
         const name = editBtn.getAttribute('data-name');
         const role = editBtn.getAttribute('data-role');
 
-        editIdInput.value = id;
-        nameInput.value = name;
-        usernameInput.value = username;
-        usernameInput.disabled = true; // El username es identificador único
-        roleInput.value = role;
-        passwordInput.value = '';
-        passwordLabel.textContent = 'Nueva Contraseña (Opcional)';
-        passwordHint.classList.remove('hidden');
+        if (editIdInput) editIdInput.value = id;
+        if (nameInput) nameInput.value = name;
+        if (usernameInput) {
+          usernameInput.value = username;
+          usernameInput.disabled = true;
+        }
+        if (roleInput) roleInput.value = role;
+        if (passwordInput) passwordInput.value = '';
+        if (passwordLabel) passwordLabel.textContent = 'Nueva Contraseña (Opcional)';
+        if (passwordHint) passwordHint.classList.remove('hidden');
 
-        formTitle.innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-emerald-400"></i><span>Editar Usuario: @${username}</span>`;
+        if (formTitle) {
+          formTitle.innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-emerald-400"></i><span>Editar Usuario: @${username}</span>`;
+        }
         if (window.lucide) window.lucide.createIcons();
 
-        formPanel.classList.remove('hidden');
-        formPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        if (formPanel) {
+          formPanel.classList.remove('hidden');
+          formPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        if (nameInput) nameInput.focus();
         return;
       }
 
@@ -1430,7 +1504,10 @@ function initUsersManager() {
           if (res.success) {
             showAdminToast(`Usuario "@${username}" eliminado correctamente`, 'success');
             const card = deleteBtn.closest('.user-card-item');
-            if (card) card.remove();
+            if (card) {
+              card.remove();
+              updateUsersCount();
+            }
           } else {
             showAdminToast(res.error || 'Error al eliminar usuario', 'error');
           }
@@ -1440,11 +1517,183 @@ function initUsersManager() {
       }
     });
   }
+
+  updateUsersCount();
 }
 
-document.addEventListener('DOMContentLoaded', () => {
-  initUsersManager();
-});
+// 13. Gestor de Cronograma de Actividades (SOLO Administrador)
+function initScheduleManager() {
+  const container = document.getElementById('schedule-admin-container');
+  const addBtn = document.getElementById('btn-add-schedule-item');
+  const addBottomBtn = document.getElementById('btn-add-schedule-item-bottom');
+  const saveSectionBtn = document.getElementById('btn-save-schedule-section');
+  const countBadge = document.getElementById('schedule-count-badge');
+  const emptyState = document.getElementById('schedule-empty-state');
+
+  if (!container) return;
+
+  function updateItemNumbers() {
+    const items = container.querySelectorAll('.schedule-admin-item');
+    items.forEach((item, idx) => {
+      const numEl = item.querySelector('.schedule-item-number');
+      const textEl = item.querySelector('.schedule-item-num-text');
+      if (numEl) numEl.textContent = idx + 1;
+      if (textEl) textEl.textContent = idx + 1;
+
+      const timeInput = item.querySelector('.schedule-time-input');
+      const titleInput = item.querySelector('.schedule-title-input');
+      const descInput = item.querySelector('.schedule-desc-input');
+      if (timeInput) timeInput.name = `schedule[${idx}][time]`;
+      if (titleInput) titleInput.name = `schedule[${idx}][title]`;
+      if (descInput) descInput.name = `schedule[${idx}][desc]`;
+    });
+
+    if (countBadge) countBadge.textContent = items.length;
+    if (emptyState) {
+      emptyState.classList.toggle('hidden', items.length > 0);
+    }
+  }
+
+  function createScheduleItem(idx, defaultTime = '09:00 AM', defaultTitle = '', defaultDesc = '') {
+    const div = document.createElement('div');
+    div.className = 'schedule-admin-item p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-3 group hover:border-gray-700 transition-all';
+    div.style.animation = 'fadeInUp 0.25s ease forwards';
+    div.innerHTML = `
+      <div class="flex items-center justify-between gap-3 pb-2 border-b border-gray-800/80">
+        <div class="flex items-center gap-2">
+          <span class="schedule-item-number w-6 h-6 rounded-lg bg-blue-600/20 text-blue-400 font-mono text-xs font-bold flex items-center justify-center">
+            ${idx + 1}
+          </span>
+          <span class="text-xs font-bold text-slate-300">Actividad #<span class="schedule-item-num-text">${idx + 1}</span></span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button type="button" class="btn-move-up-schedule p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer" title="Mover arriba">
+            <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
+          </button>
+          <button type="button" class="btn-move-down-schedule p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer" title="Mover abajo">
+            <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+          </button>
+          <button type="button" class="btn-remove-schedule p-1.5 rounded-lg bg-red-950/60 hover:bg-red-900 border border-red-500/30 text-red-300 transition-all ml-1 cursor-pointer" title="Quitar actividad">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Horario / Hora (ej: 08:30 AM)</label>
+          <input type="text" name="schedule[${idx}][time]" value="${defaultTime}" placeholder="08:30 AM" class="schedule-time-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-mono font-bold focus:outline-none focus:border-blue-500">
+        </div>
+        <div class="sm:col-span-2">
+          <label class="block text-xs text-gray-400 mb-1">Nombre / Título de la Actividad</label>
+          <input type="text" name="schedule[${idx}][title]" value="${defaultTitle}" placeholder="Ej: Largada Mini Runners 500m" class="schedule-title-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-blue-500">
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Descripción / Detalles para los Asistentes</label>
+        <textarea name="schedule[${idx}][desc]" rows="2" placeholder="Detalles de la actividad, quiénes participan, recomendaciones..." class="schedule-desc-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-blue-500">${defaultDesc}</textarea>
+      </div>
+    `;
+    return div;
+  }
+
+  function handleAdd() {
+    const idx = container.querySelectorAll('.schedule-admin-item').length;
+    const newItem = createScheduleItem(idx, '09:00 AM', '', '');
+    container.appendChild(newItem);
+    updateItemNumbers();
+    newItem.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    const titleInput = newItem.querySelector('.schedule-title-input');
+    if (titleInput) titleInput.focus();
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  if (addBtn) addBtn.addEventListener('click', handleAdd);
+  if (addBottomBtn) addBottomBtn.addEventListener('click', handleAdd);
+
+  // Delegación de eventos para mover o eliminar items
+  container.addEventListener('click', (e) => {
+    const removeBtn = e.target.closest('.btn-remove-schedule');
+    if (removeBtn) {
+      const item = removeBtn.closest('.schedule-admin-item');
+      if (item) {
+        item.style.animation = 'fadeOut 0.2s ease forwards';
+        setTimeout(() => {
+          item.remove();
+          updateItemNumbers();
+        }, 200);
+      }
+      return;
+    }
+
+    const moveUpBtn = e.target.closest('.btn-move-up-schedule');
+    if (moveUpBtn) {
+      const item = moveUpBtn.closest('.schedule-admin-item');
+      if (item && item.previousElementSibling && item.previousElementSibling.classList.contains('schedule-admin-item')) {
+        item.parentNode.insertBefore(item, item.previousElementSibling);
+        updateItemNumbers();
+      }
+      return;
+    }
+
+    const moveDownBtn = e.target.closest('.btn-move-down-schedule');
+    if (moveDownBtn) {
+      const item = moveDownBtn.closest('.schedule-admin-item');
+      if (item && item.nextElementSibling && item.nextElementSibling.classList.contains('schedule-admin-item')) {
+        item.parentNode.insertBefore(item.nextElementSibling, item);
+        updateItemNumbers();
+      }
+      return;
+    }
+  });
+
+  // Guardar solo cronograma
+  if (saveSectionBtn) {
+    saveSectionBtn.addEventListener('click', async () => {
+      const orig = saveSectionBtn.innerHTML;
+      saveSectionBtn.disabled = true;
+      saveSectionBtn.innerHTML = '<span class="inline-block animate-spin mr-1.5">⟳</span> Guardando...';
+
+      const schedule = [];
+      container.querySelectorAll('.schedule-admin-item').forEach(item => {
+        const time = item.querySelector('.schedule-time-input')?.value.trim() || '';
+        const title = item.querySelector('.schedule-title-input')?.value.trim() || '';
+        const desc = item.querySelector('.schedule-desc-input')?.value.trim() || '';
+        if (time || title || desc) {
+          schedule.push({ time, title, desc });
+        }
+      });
+
+      const getVal = id => document.getElementById(id)?.value || '';
+      const scheduleSection = {
+        badge: getVal('input-scheduleBadge') || 'HORARIOS Y ACTIVIDADES',
+        title: getVal('input-scheduleTitle') || 'Cronograma de la Gran Jornada',
+        subtitle: getVal('input-scheduleSubtitle') || 'Ven temprano para disfrutar de todas las sorpresas preparadas para la familia.'
+      };
+
+      try {
+        const res = await cmsFetch('/admin/api/content', {
+          method: 'POST',
+          body: JSON.stringify({ schedule, scheduleSection })
+        });
+        if (res.success) {
+          showAdminToast('¡Cronograma guardado exitosamente!', 'success');
+        } else {
+          showAdminToast(res.error || 'No se pudo guardar el cronograma', 'error');
+        }
+      } catch (err) {
+        showAdminToast(err.message || 'Error de conexión', 'error');
+      } finally {
+        saveSectionBtn.disabled = false;
+        saveSectionBtn.innerHTML = orig;
+        if (window.lucide) window.lucide.createIcons();
+      }
+    });
+  }
+
+  updateItemNumbers();
+}
 
 // 9. Modo Construcción / Pre-Lanzamiento
 function initConstructionManager() {

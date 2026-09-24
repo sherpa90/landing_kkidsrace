@@ -403,11 +403,11 @@
     <section id="schedule" style="<%- sStyle('schedule') %>" class="py-20 bg-slate-50/70 dark:bg-gray-900/40 relative z-10 border-t border-slate-100 dark:border-white/5">
       <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="text-center mb-16">
-          <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">HORARIOS Y ACTIVIDADES</span>
+          <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block"><%= content.scheduleSection?.badge || 'HORARIOS Y ACTIVIDADES' %></span>
           <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-            Cronograma de la Gran Jornada
+            <%= content.scheduleSection?.title || 'Cronograma de la Gran Jornada' %>
           </h2>
-          <p class="text-slate-600 dark:text-gray-400 text-sm mt-2">Ven temprano para disfrutar de todas las sorpresas preparadas para la familia.</p>
+          <p class="text-slate-600 dark:text-gray-400 text-sm mt-2"><%= content.scheduleSection?.subtitle || 'Ven temprano para disfrutar de todas las sorpresas preparadas para la familia.' %></p>
         </div>
 
         <div class="space-y-4">
