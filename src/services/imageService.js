@@ -20,12 +20,17 @@ try {
 
 const path = require('path');
 const fs = require('fs');
+const crypto = require('crypto');
 
 const UPLOAD_DIR = path.resolve(__dirname, '../../data/uploads');
+const PRIVATE_UPLOAD_DIR = path.resolve(__dirname, '../../data/private_uploads');
 
-// Asegurar existencia del directorio de uploads
+// Asegurar existencia de los directorios de uploads
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
+}
+if (!fs.existsSync(PRIVATE_UPLOAD_DIR)) {
+  fs.mkdirSync(PRIVATE_UPLOAD_DIR, { recursive: true });
 }
 
 // Configuración de almacenamiento en memoria para procesar con Sharp antes de escribir al disco
@@ -67,8 +72,10 @@ function validateMagicBytes(buffer, mimetype) {
            buffer.slice(8, 12).toString('ascii') === 'WEBP';
   }
   if (mimetype === 'image/avif') {
-    // ftyp en offset 4
-    return buffer.slice(4, 8).toString('ascii') === 'ftyp';
+    // ftyp box en offset 4, con major_brand avif/avis/mif1 en offset 8
+    if (buffer.slice(4, 8).toString('ascii') !== 'ftyp') return false;
+    const brand = buffer.slice(8, 12).toString('ascii');
+    return brand === 'avif' || brand === 'avis' || brand === 'mif1';
   }
   return false;
 }
@@ -105,21 +112,35 @@ async function processAndSaveImage(buffer, originalName, type = 'standard') {
   const isJpeg = buffer[0] === 0xFF && buffer[1] === 0xD8 && buffer[2] === 0xFF;
   const isGif  = buffer[0] === 0x47 && buffer[1] === 0x49 && buffer[2] === 0x46 && buffer[3] === 0x38;
   const isWebp = buffer.length >= 12 && buffer.slice(0, 4).toString('ascii') === 'RIFF' && buffer.slice(8, 12).toString('ascii') === 'WEBP';
-  const isAvif = buffer.length >= 8 && buffer.slice(4, 8).toString('ascii') === 'ftyp';
+  const isAvif = buffer.length >= 12 && buffer.slice(4, 8).toString('ascii') === 'ftyp' &&
+    ['avif', 'avis', 'mif1'].includes(buffer.slice(8, 12).toString('ascii'));
 
   if (!isPng && !isJpeg && !isGif && !isWebp && !isAvif) {
     throw new Error('El archivo no es una imagen válida. Solo se permiten JPG, PNG, WebP, GIF o AVIF.');
   }
 
-  // Limpiar nombre base seguro
-  const cleanBaseName = path
-    .parse(originalName)
-    .name.toLowerCase()
-    .replace(/[^a-z0-9_-]/g, '-')
-    .substring(0, 30);
-  const timestamp = Date.now();
-  const filename = `${cleanBaseName}-${timestamp}.webp`;
-  const targetPath = path.join(UPLOAD_DIR, filename);
+  // Generar nombre y ruta destino: comprobantes de pago van a directorio privado con UUID
+  const isPaymentProof = type === 'payment_proof';
+  let filename;
+  let targetPath;
+  let publicUrl;
+
+  if (isPaymentProof) {
+    const randomId = crypto.randomUUID ? crypto.randomUUID() : crypto.randomBytes(16).toString('hex');
+    filename = `proof-${randomId}.webp`;
+    targetPath = path.join(PRIVATE_UPLOAD_DIR, filename);
+    publicUrl = `/admin/api/proofs/${filename}`;
+  } else {
+    const cleanBaseName = path
+      .parse(originalName)
+      .name.toLowerCase()
+      .replace(/[^a-z0-9_-]/g, '-')
+      .substring(0, 30);
+    const timestamp = Date.now();
+    filename = `${cleanBaseName}-${timestamp}.webp`;
+    targetPath = path.join(UPLOAD_DIR, filename);
+    publicUrl = `/uploads/${filename}`;
+  }
 
   let sharpInstance = sharp(buffer).rotate(); // auto-rotar según orientación EXIF si existe
 
@@ -177,7 +198,7 @@ async function processAndSaveImage(buffer, originalName, type = 'standard') {
 
   return {
     filename,
-    url: `/uploads/${filename}`,
+    url: publicUrl,
     sizeBytes: info.size,
     format: info.format,
     width: info.width,
@@ -188,5 +209,6 @@ async function processAndSaveImage(buffer, originalName, type = 'standard') {
 module.exports = {
   upload,
   processAndSaveImage,
-  UPLOAD_DIR
+  UPLOAD_DIR,
+  PRIVATE_UPLOAD_DIR
 };

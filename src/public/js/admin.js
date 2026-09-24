@@ -669,6 +669,11 @@ function initPasswordChange() {
       return;
     }
 
+    if (newPassword.length < 12) {
+      showAdminToast('La nueva contraseña debe tener al menos 12 caracteres', 'error');
+      return;
+    }
+
     try {
       const json = await cmsFetch('/admin/api/change-password', {
         method: 'POST',
@@ -951,5 +956,479 @@ function initSectionsManager() {
 
 document.addEventListener('DOMContentLoaded', () => {
   initSectionsManager();
+});
+
+// 11. Escáner de Cédula de Identidad (HTML5 QR/Barcode Scanner)
+function initRutScanner() {
+  const openBtn = document.getElementById('btn-open-scanner');
+  const closeBtn = document.getElementById('btn-close-scanner');
+  const modal = document.getElementById('scanner-modal');
+  const statusText = document.getElementById('scanner-status-text');
+  const resultsContainer = document.getElementById('scanner-results-container');
+  const resultHeader = document.getElementById('scanner-result-header');
+  const pupilsList = document.getElementById('scanner-pupils-list');
+  const cameraContainer = document.getElementById('scanner-camera-container');
+  const switchCameraBtn = document.getElementById('btn-switch-camera');
+  const scanAgainBtn = document.getElementById('btn-scan-again');
+  const filterTableBtn = document.getElementById('btn-filter-table-with-rut');
+  const manualRutInput = document.getElementById('manual-rut-input');
+  const searchManualBtn = document.getElementById('btn-search-manual-rut');
+  const searchInput = document.getElementById('filter-search-input');
+
+  if (!openBtn || !modal) return;
+
+  let html5QrCode = null;
+  let currentCameraFacing = "environment"; // trasera por defecto en móviles
+  let lastScannedRut = '';
+
+  // Función para extraer el RUT desde el texto escaneado
+  // Las cédulas chilenas codifican strings como:
+  // "RUN=12345678-9" o URLs como "https://portal.sidiv.registrocivil.cl/...&run=12345678-9" o texto crudo "12345678-9"
+  function extractRutFromBarcode(text) {
+    if (!text) return null;
+    const clean = text.trim();
+
+    // 1. Caso parámetro RUN o RUT en URL/texto
+    const matchParam = clean.match(/(?:RUN|RUT|run|rut)[=:\s]*([0-9]{7,8}-?[0-9kK])/);
+    if (matchParam && matchParam[1]) return matchParam[1].toUpperCase();
+
+    // 2. Caso formato directo con o sin puntos (ej: 12.345.678-9 o 12345678-9 o 123456789)
+    const matchDirect = clean.match(/([0-9]{1,2}(?:\.?[0-9]{3}){2}-?[0-9kK])/);
+    if (matchDirect && matchDirect[1]) return matchDirect[1].toUpperCase();
+
+    // 3. Caso números de 8 o 9 dígitos continuos
+    const matchRaw = clean.match(/([0-9]{7,8}[0-9kK])/);
+    if (matchRaw && matchRaw[1]) {
+      const r = matchRaw[1].toUpperCase();
+      return r.slice(0, -1) + '-' + r.slice(-1);
+    }
+
+    return clean;
+  }
+
+  // Reproducir un sonido sutil de confirmación (bip) usando Web Audio API
+  function playSuccessBeep() {
+    try {
+      const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime); // Nota La5 (880Hz)
+      gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
+      osc.connect(gain);
+      gain.connect(audioCtx.destination);
+      osc.start();
+      osc.stop(audioCtx.currentTime + 0.15);
+    } catch (_) {}
+  }
+
+  // Buscar registros correspondientes en la tabla de participantes
+  function searchParticipantByRut(rut) {
+    lastScannedRut = rut;
+    const normalizedRut = rut.replace(/[.\-]/g, '').toLowerCase();
+
+    // Buscar entre las filas de participantes del DOM
+        // Buscar entre las filas o tarjetas de participantes del DOM
+    const allCards = Array.from(document.querySelectorAll('#participants-mobile-list .participant-row'));
+    const allRows = Array.from(document.querySelectorAll('#participants-tbody tr.participant-row'));
+    const matchedPupils = [];
+    let tutorName = '';
+
+    // Priorizamos tarjetas móviles si existen (o filas de escritorio)
+    const elementsToScan = allCards.length > 0 ? allCards : allRows;
+
+    elementsToScan.forEach(el => {
+      const searchData = (el.getAttribute('data-search') || '').toLowerCase();
+      const cleanSearchData = searchData.replace(/[.\-]/g, '');
+
+      if (cleanSearchData.includes(normalizedRut)) {
+        let kidName = 'Pupilo';
+        let kidAge = '';
+        let distance = 'General';
+        let bibNumber = '#---';
+        const paymentProofBtn = el.querySelector('.btn-view-proof');
+
+        if (el.tagName.toLowerCase() === 'tr') {
+          kidName = el.querySelector('td:nth-child(2)')?.textContent?.trim() || 'Pupilo';
+          kidAge = el.querySelector('td:nth-child(3)')?.textContent?.trim() || '';
+          distance = el.querySelector('td:nth-child(4)')?.textContent?.trim() || 'General';
+          bibNumber = el.querySelector('td:nth-child(1)')?.textContent?.trim() || '#---';
+          const tutorRaw = el.querySelector('td:nth-child(5)')?.textContent?.trim() || '';
+          tutorName = tutorRaw.split('\\n')[0] || tutorName;
+        } else {
+          // Tarjeta móvil
+          kidName = el.querySelector('h3')?.textContent?.trim() || 'Pupilo';
+          const ageEl = el.querySelector('.bg-slate-950\\/60 span.text-xs');
+          kidAge = ageEl ? ageEl.textContent.trim() : '';
+          const distEl = el.querySelector('.bg-blue-950\\/80 span');
+          distance = distEl ? distEl.textContent.trim() : 'General';
+          const bibEl = el.querySelector('.bg-amber-950\\/80 span:last-child');
+          bibNumber = bibEl ? '#' + bibEl.textContent.trim() : '#---';
+          const tutorProof = el.querySelector('.btn-view-proof');
+          if (tutorProof) tutorName = tutorProof.getAttribute('data-tutor') || tutorName;
+        }
+
+        matchedPupils.push({
+          kidName,
+          kidAge,
+          distance,
+          bibNumber,
+          tutorName: tutorName || 'Apoderado',
+          tutorRut: rut,
+          hasProof: !!paymentProofBtn
+        });
+      }
+    });
+
+    renderResults(rut, matchedPupils, tutorName);
+  }
+
+  function renderResults(rut, pupils, tutorName) {
+    cameraContainer.classList.add('hidden');
+    resultsContainer.classList.remove('hidden');
+
+    if (pupils.length > 0) {
+      playSuccessBeep();
+      resultHeader.className = 'p-3.5 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300';
+      resultHeader.innerHTML = `
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+          <div>
+            <div class="font-bold text-sm text-white flex items-center gap-2">
+              <span>${tutorName || 'Apoderado Registrado'}</span>
+              <span class="text-xs font-mono bg-emerald-900/60 text-emerald-300 px-2 py-0.5 rounded-lg border border-emerald-500/30">${rut}</span>
+            </div>
+            <div class="text-xs text-emerald-400 mt-0.5">
+              ${pupils.length} pupilo(s) inscrito(s) en la base de datos
+            </div>
+          </div>
+        </div>
+      `;
+
+      pupilsList.innerHTML = pupils.map(p => `
+        <div class="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-2">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-black text-xs text-amber-400 bg-amber-950 px-2 py-0.5 rounded-lg border border-amber-500/30">${p.bibNumber}</span>
+              <span class="font-bold text-sm text-white">${p.kidName}</span>
+              ${p.kidAge ? `<span class="text-xs text-slate-400">(${p.kidAge})</span>` : ''}
+            </div>
+            <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-500/40">${p.distance}</span>
+          </div>
+          <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-700/60 text-slate-300">
+            <span class="flex items-center gap-1 text-[11px] ${p.hasProof ? 'text-emerald-400' : 'text-amber-400'}">
+              <i data-lucide="${p.hasProof ? 'check' : 'alert-circle'}" class="w-3.5 h-3.5"></i>
+              ${p.hasProof ? 'Comprobante Acreditado' : 'Pago en revisión'}
+            </span>
+            <span class="text-xs font-bold text-blue-400">Listo para entrega de Kit ✅</span>
+          </div>
+        </div>
+      `).join('');
+    } else {
+      resultHeader.className = 'p-3.5 rounded-2xl bg-red-950/80 border border-red-500/40 text-red-300';
+      resultHeader.innerHTML = `
+        <div class="flex items-center gap-2.5">
+          <i data-lucide="alert-triangle" class="w-5 h-5 text-red-400 shrink-0"></i>
+          <div>
+            <div class="font-bold text-sm text-white">No Encontrado en la Base de Datos</div>
+            <div class="text-xs text-red-400 mt-0.5">El RUT <span class="font-mono font-bold">${rut}</span> no registra inscripciones activas.</div>
+          </div>
+        </div>
+      `;
+      pupilsList.innerHTML = `
+        <div class="p-4 rounded-2xl bg-slate-950/50 border border-slate-800 text-center text-xs text-slate-400 space-y-1">
+          <p>Verifica si el apoderado se inscribió con otro RUT o si el participante fue ingresado con un número de carnet distinto.</p>
+        </div>
+      `;
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  async function startScanner() {
+    resultsContainer.classList.add('hidden');
+    cameraContainer.classList.remove('hidden');
+    statusText.innerHTML = `
+      <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
+      Cámara activa lista para escanear
+    `;
+
+    if (!window.Html5Qrcode) {
+      statusText.textContent = 'Librería de escáner no disponible';
+      return;
+    }
+
+    try {
+      if (html5QrCode) {
+        try { await html5QrCode.stop(); } catch (_) {}
+      }
+
+      html5QrCode = new Html5Qrcode("reader-qr-view");
+
+      const config = {
+        fps: 15,
+        qrbox: (viewfinderWidth, viewfinderHeight) => {
+          return {
+            width: Math.floor(viewfinderWidth * 0.85),
+            height: Math.floor(viewfinderHeight * 0.6)
+          };
+        },
+        aspectRatio: 1.333334
+      };
+
+      await html5QrCode.start(
+        { facingMode: currentCameraFacing },
+        config,
+        (decodedText) => {
+          console.log('[Scanner] Texto detectado:', decodedText);
+          const rut = extractRutFromBarcode(decodedText);
+          if (rut) {
+            html5QrCode.stop().then(() => {
+              searchParticipantByRut(rut);
+            }).catch(() => {
+              searchParticipantByRut(rut);
+            });
+          }
+        },
+        (errorMessage) => {
+          // Ignorar frames sin código detectado
+        }
+      );
+    } catch (err) {
+      console.warn('[Scanner] Error iniciando cámara:', err.message);
+      statusText.innerHTML = `
+        <span class="text-amber-400">Permiso de cámara no concedido o no disponible. Puedes ingresar el RUT abajo.</span>
+      `;
+    }
+  }
+
+  async function stopScanner() {
+    if (html5QrCode) {
+      try {
+        await html5QrCode.stop();
+        html5QrCode = null;
+      } catch (_) {}
+    }
+  }
+
+  // Abrir Modal y arrancar escáner
+  openBtn.addEventListener('click', () => {
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    startScanner();
+  });
+
+  // Cerrar Modal
+  function closeModal() {
+    stopScanner();
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  closeBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
+  });
+
+  // Cambiar cámara frontal / trasera
+  switchCameraBtn.addEventListener('click', async () => {
+    currentCameraFacing = currentCameraFacing === "environment" ? "user" : "environment";
+    await stopScanner();
+    startScanner();
+  });
+
+  // Escanear otra cédula
+  scanAgainBtn.addEventListener('click', () => {
+    startScanner();
+  });
+
+  // Ver en la tabla principal
+  filterTableBtn.addEventListener('click', () => {
+    closeModal();
+    if (searchInput && lastScannedRut) {
+      searchInput.value = lastScannedRut;
+      searchInput.dispatchEvent(new Event('input'));
+      searchInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }
+  });
+
+  // Búsqueda manual
+  function executeManualSearch() {
+    const val = (manualRutInput?.value || '').trim();
+    if (val) {
+      searchParticipantByRut(val);
+    }
+  }
+
+  if (searchManualBtn) searchManualBtn.addEventListener('click', executeManualSearch);
+  if (manualRutInput) {
+    manualRutInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        executeManualSearch();
+      }
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initRutScanner();
+});
+
+// 12. Gestor de Usuarios y Accesos (SOLO Administrador)
+function initUsersManager() {
+  const openCreateBtn = document.getElementById('btn-open-create-user');
+  const cancelBtn = document.getElementById('btn-cancel-user-form');
+  const formPanel = document.getElementById('user-form-panel');
+  const saveBtn = document.getElementById('btn-save-user');
+  const formTitle = document.getElementById('user-form-title');
+  const editIdInput = document.getElementById('user-edit-id');
+  const nameInput = document.getElementById('user-input-name');
+  const usernameInput = document.getElementById('user-input-username');
+  const roleInput = document.getElementById('user-input-role');
+  const passwordInput = document.getElementById('user-input-password');
+  const passwordLabel = document.getElementById('user-label-password');
+  const passwordHint = document.getElementById('user-hint-password');
+  const container = document.getElementById('users-list-container');
+
+  if (!openCreateBtn || !formPanel) return;
+
+  function resetForm() {
+    editIdInput.value = '';
+    nameInput.value = '';
+    usernameInput.value = '';
+    usernameInput.disabled = false;
+    roleInput.value = 'editor';
+    passwordInput.value = '';
+    passwordLabel.textContent = 'Contraseña *';
+    passwordHint.classList.add('hidden');
+    formTitle.innerHTML = `<i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i><span>Crear Nuevo Usuario</span>`;
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  openCreateBtn.addEventListener('click', () => {
+    resetForm();
+    formPanel.classList.remove('hidden');
+    formPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  });
+
+  cancelBtn.addEventListener('click', () => {
+    formPanel.classList.add('hidden');
+    resetForm();
+  });
+
+  // Guardar (Crear o Actualizar)
+  saveBtn.addEventListener('click', async () => {
+    const isEdit = !!editIdInput.value;
+    const name = nameInput.value.trim();
+    const username = usernameInput.value.trim();
+    const role = roleInput.value;
+    const password = passwordInput.value;
+
+    if (!name) {
+      return showAdminToast('Por favor ingresa el nombre de la persona', 'error');
+    }
+    if (!isEdit && (!username || username.length < 3)) {
+      return showAdminToast('El usuario debe tener al menos 3 caracteres', 'error');
+    }
+    if (!isEdit && (!password || password.length < 12)) {
+      return showAdminToast('La contraseña debe tener al menos 12 caracteres', 'error');
+    }
+    if (isEdit && password && password.length < 12) {
+      return showAdminToast('La nueva contraseña debe tener al menos 12 caracteres', 'error');
+    }
+
+    try {
+      let url = '/admin/api/users';
+      let method = 'POST';
+      let body = { name, username, role, password };
+
+      if (isEdit) {
+        url = `/admin/api/users/${editIdInput.value}`;
+        method = 'PUT';
+        body = { name, role };
+        if (password) body.password = password;
+      }
+
+      const res = await cmsFetch(url, {
+        method,
+        body: JSON.stringify(body)
+      });
+
+      if (res.success) {
+        showAdminToast(res.message || 'Usuario guardado exitosamente', 'success');
+        setTimeout(() => window.location.reload(), 1000);
+      } else {
+        showAdminToast(res.error || 'No se pudo guardar el usuario', 'error');
+      }
+    } catch (err) {
+      showAdminToast(err.message || 'Error de conexión', 'error');
+    }
+  });
+
+  // Delegación para Editar y Eliminar
+  if (container) {
+    container.addEventListener('click', async (e) => {
+      // Editar
+      const editBtn = e.target.closest('.btn-edit-user');
+      if (editBtn) {
+        const id = editBtn.getAttribute('data-id');
+        const username = editBtn.getAttribute('data-username');
+        const name = editBtn.getAttribute('data-name');
+        const role = editBtn.getAttribute('data-role');
+
+        editIdInput.value = id;
+        nameInput.value = name;
+        usernameInput.value = username;
+        usernameInput.disabled = true; // El username es identificador único
+        roleInput.value = role;
+        passwordInput.value = '';
+        passwordLabel.textContent = 'Nueva Contraseña (Opcional)';
+        passwordHint.classList.remove('hidden');
+
+        formTitle.innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-emerald-400"></i><span>Editar Usuario: @${username}</span>`;
+        if (window.lucide) window.lucide.createIcons();
+
+        formPanel.classList.remove('hidden');
+        formPanel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        return;
+      }
+
+      // Eliminar
+      const deleteBtn = e.target.closest('.btn-delete-user');
+      if (deleteBtn) {
+        const id = deleteBtn.getAttribute('data-id');
+        const username = deleteBtn.getAttribute('data-username');
+
+        if (!confirm(`¿Estás seguro de eliminar el usuario "@${username}"? Esta acción revocará su acceso de inmediato.`)) {
+          return;
+        }
+
+        try {
+          const res = await cmsFetch(`/admin/api/users/${id}`, {
+            method: 'DELETE'
+          });
+
+          if (res.success) {
+            showAdminToast(`Usuario "@${username}" eliminado correctamente`, 'success');
+            const card = deleteBtn.closest('.user-card-item');
+            if (card) card.remove();
+          } else {
+            showAdminToast(res.error || 'Error al eliminar usuario', 'error');
+          }
+        } catch (err) {
+          showAdminToast(err.message || 'Error de conexión', 'error');
+        }
+      }
+    });
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  initUsersManager();
 });
 

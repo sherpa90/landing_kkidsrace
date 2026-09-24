@@ -404,64 +404,139 @@
       </div>
     </section>
 
-    <!-- SECCIÓN GALERÍA DE IMÁGENES INTERACTIVA (CON LIGHTBOX) -->
-    <section id="gallery" style="<%- sStyle('gallery') %>" class="py-24 relative z-10 bg-white dark:bg-gray-950">
+    <!-- SECCIÓN GALERÍA DE IMÁGENES INTERACTIVA (CON CARRUSEL Y LIGHTBOX) -->
+    <section id="gallery" style="<%- sStyle('gallery') %>" class="py-24 relative z-10 bg-white dark:bg-gray-950 overflow-hidden">
       <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
-        <div class="text-center max-w-3xl mx-auto mb-12">
-          <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">RECUERDOS INOLVIDABLES</span>
-          <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-4">
-            Galería de Ediciones Anteriores
-          </h2>
-          <p class="text-slate-600 dark:text-gray-400 text-sm">Haz clic en cualquier imagen para verla en tamaño completo.</p>
+        <div class="flex flex-col md:flex-row md:items-end justify-between mb-10 gap-6">
+          <div class="max-w-2xl">
+            <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block">RECUERDOS INOLVIDABLES</span>
+            <h2 class="text-3xl sm:text-4xl lg:text-5xl font-black text-slate-900 dark:text-white tracking-tight mb-3">
+              Galería de Ediciones Anteriores
+            </h2>
+            <p class="text-slate-600 dark:text-gray-400 text-sm">
+              Desliza por nuestro carrusel de momentos épicos o haz clic en cualquier imagen para abrir el visor interactivo.
+            </p>
+          </div>
+
+          <!-- Controles de Carrusel y Vista -->
+          <div class="flex items-center gap-3 shrink-0 self-start md:self-end">
+            <!-- Indicador de Diapositiva -->
+            <div id="gallery-counter-badge" class="px-3.5 py-2 rounded-2xl bg-slate-100 dark:bg-gray-900 border border-slate-200 dark:border-white/10 text-xs font-mono font-bold text-slate-700 dark:text-gray-300">
+              <span id="gallery-current-slide">1</span> / <span id="gallery-total-slides"><%= (content.gallery || []).length %></span>
+            </div>
+
+            <!-- Botones Prev / Next del Carrusel -->
+            <div class="flex items-center gap-2">
+              <button id="gallery-prev-btn" 
+                      type="button" 
+                      class="w-11 h-11 rounded-2xl bg-slate-100 hover:bg-blue-600 dark:bg-gray-900 dark:hover:bg-blue-600 text-slate-700 hover:text-white dark:text-gray-300 dark:hover:text-white border border-slate-200 dark:border-white/10 flex items-center justify-center transition-all active:scale-95 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer" 
+                      aria-label="Foto anterior">
+                <i data-lucide="chevron-left" class="w-5 h-5"></i>
+              </button>
+              <button id="gallery-next-btn" 
+                      type="button" 
+                      class="w-11 h-11 rounded-2xl bg-slate-100 hover:bg-blue-600 dark:bg-gray-900 dark:hover:bg-blue-600 text-slate-700 hover:text-white dark:text-gray-300 dark:hover:text-white border border-slate-200 dark:border-white/10 flex items-center justify-center transition-all active:scale-95 shadow-sm disabled:opacity-30 disabled:cursor-not-allowed cursor-pointer" 
+                      aria-label="Foto siguiente">
+                <i data-lucide="chevron-right" class="w-5 h-5"></i>
+              </button>
+            </div>
+
+            <!-- Botón Alternar Modo Cuadrícula / Carrusel -->
+            <button id="gallery-view-toggle"
+                    type="button"
+                    class="hidden sm:inline-flex items-center gap-1.5 px-3.5 py-2.5 rounded-2xl text-xs font-bold text-slate-700 dark:text-gray-200 bg-slate-100 hover:bg-slate-200 dark:bg-gray-900 dark:hover:bg-gray-800 border border-slate-200 dark:border-white/10 transition-colors cursor-pointer"
+                    title="Alternar entre carrusel y cuadrícula">
+              <i data-lucide="layout-grid" class="w-4 h-4"></i>
+              <span id="gallery-toggle-label">Ver cuadrícula</span>
+            </button>
+          </div>
         </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          <% (content.gallery || []).forEach((photo, idx) => { %>
-          <div class="gallery-item group relative rounded-3xl overflow-hidden bg-white dark:bg-gray-900 border border-slate-200 dark:border-white/10 cursor-pointer shadow-md hover:shadow-2xl transition-all"
-               data-img-src="<%= photo.url %>"
-               data-img-title="<%= photo.title %>"
-               data-img-caption="<%= photo.caption %>">
-            
-            <div class="aspect-w-16 aspect-h-11 w-full h-64 overflow-hidden bg-slate-100 dark:bg-gray-900">
-              <img src="<%= photo.url %>" 
-                   alt="<%= photo.title %>" 
-                   class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out" 
-                   loading="lazy">
-            </div>
+        <!-- TRACK DEL CARRUSEL DE IMÁGENES -->
+        <div id="gallery-track-container" class="relative">
+          <div id="gallery-track" 
+               class="flex gap-6 overflow-x-auto no-scrollbar scroll-smooth snap-x snap-mandatory pb-4 select-none cursor-grab active:cursor-grabbing">
+            <% (content.gallery || []).forEach((photo, idx) => { %>
+            <div class="gallery-item group relative rounded-3xl overflow-hidden bg-white dark:bg-gray-900 border border-slate-200 dark:border-white/10 cursor-pointer shadow-md hover:shadow-2xl transition-all shrink-0 w-[85vw] sm:w-[45vw] lg:w-[calc(33.333%-16px)] snap-start"
+                 data-idx="<%= idx %>"
+                 data-img-src="<%= photo.url %>"
+                 data-img-title="<%= photo.title %>"
+                 data-img-caption="<%= photo.caption %>"
+                 data-img-category="<%= photo.category || 'KidsRun' %>">
+              
+              <div class="aspect-w-16 aspect-h-11 w-full h-72 sm:h-80 overflow-hidden bg-slate-100 dark:bg-gray-900">
+                <img src="<%= photo.url %>" 
+                     alt="<%= photo.title %>" 
+                     class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500 ease-out" 
+                     loading="lazy">
+              </div>
 
-            <!-- Overlay dinámico -->
-            <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent opacity-80 group-hover:opacity-95 transition-opacity flex flex-col justify-between p-5 text-white">
-              <div class="flex justify-end">
-                <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-600/90 text-white border border-blue-400/40 backdrop-blur-md">
-                  <%= photo.category || 'KidsRun' %>
-                </span>
-              </div>
-              <div>
-                <h4 class="text-base font-bold text-white group-hover:text-amber-300 transition-colors flex items-center justify-between">
-                  <span><%= photo.title %></span>
-                  <i data-lucide="maximize-2" class="w-4 h-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-                </h4>
-                <p class="text-xs text-gray-200 mt-1 line-clamp-2"><%= photo.caption %></p>
+              <!-- Overlay dinámico -->
+              <div class="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent opacity-85 group-hover:opacity-95 transition-opacity flex flex-col justify-between p-6 text-white">
+                <div class="flex justify-between items-center">
+                  <span class="text-[11px] font-mono font-bold text-white/80 bg-black/40 px-2.5 py-0.5 rounded-full border border-white/10">#<%= String(idx + 1).padStart(2, '0') %></span>
+                  <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-600/90 text-white border border-blue-400/40 backdrop-blur-md">
+                    <%= photo.category || 'KidsRun' %>
+                  </span>
+                </div>
+                <div>
+                  <h4 class="text-base sm:text-lg font-bold text-white group-hover:text-amber-300 transition-colors flex items-center justify-between">
+                    <span><%= photo.title %></span>
+                    <i data-lucide="maximize-2" class="w-4 h-4 text-amber-400 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                  </h4>
+                  <p class="text-xs text-gray-200 mt-1.5 line-clamp-2 leading-relaxed"><%= photo.caption %></p>
+                </div>
               </div>
             </div>
+            <% }); %>
           </div>
+        </div>
+
+        <!-- Indicadores (Dots) debajo del carrusel -->
+        <div id="gallery-dots" class="flex justify-center items-center gap-2 mt-6">
+          <% (content.gallery || []).forEach((_, idx) => { %>
+          <button type="button" 
+                  class="gallery-dot h-2 rounded-full transition-all duration-300 cursor-pointer <%= idx === 0 ? 'w-8 bg-blue-600 dark:bg-yellow-400' : 'w-2.5 bg-slate-300 dark:bg-gray-700 hover:bg-slate-400' %>" 
+                  data-slide-to="<%= idx %>" 
+                  aria-label="Ir a foto <%= idx + 1 %>"></button>
           <% }); %>
         </div>
 
       </div>
     </section>
 
-    <!-- MODAL LIGHTBOX PARA LA GALERÍA -->
-    <div id="lightbox-modal" class="fixed inset-0 z-50 bg-black/90 backdrop-blur-md hidden flex items-center justify-center p-4">
-      <button id="lightbox-close" class="absolute top-6 right-6 text-gray-400 hover:text-white p-2 rounded-full bg-gray-900/80 border border-white/10 transition-colors" aria-label="Cerrar visor">
+    <!-- MODAL LIGHTBOX / CARRUSEL PANTALLA COMPLETA -->
+    <div id="lightbox-modal" class="fixed inset-0 z-50 bg-black/95 backdrop-blur-xl hidden flex items-center justify-center p-3 sm:p-6 transition-all duration-300">
+      
+      <!-- Botón Cerrar -->
+      <button id="lightbox-close" class="absolute top-4 right-4 sm:top-6 sm:right-6 text-gray-300 hover:text-white p-3 rounded-full bg-gray-900/80 hover:bg-gray-800 border border-white/10 transition-colors z-20 cursor-pointer" aria-label="Cerrar visor">
         <i data-lucide="x" class="w-6 h-6"></i>
       </button>
-      <div class="max-w-4xl w-full flex flex-col items-center">
-        <img id="lightbox-img" src="" alt="Vista ampliada" class="max-h-[75vh] w-auto rounded-3xl shadow-2xl border border-white/20 object-contain">
-        <div class="text-center mt-4">
-          <h3 id="lightbox-title" class="text-lg font-bold text-white"></h3>
-          <p id="lightbox-caption" class="text-sm text-gray-300 mt-1"></p>
+
+      <!-- Botón Anterior (Lightbox) -->
+      <button id="lightbox-prev" class="absolute left-2 sm:left-6 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-3 sm:p-4 rounded-full bg-black/60 hover:bg-blue-600 border border-white/20 backdrop-blur-md transition-all active:scale-90 z-20 cursor-pointer" aria-label="Foto anterior">
+        <i data-lucide="chevron-left" class="w-6 h-6 sm:w-7 sm:h-7"></i>
+      </button>
+
+      <!-- Botón Siguiente (Lightbox) -->
+      <button id="lightbox-next" class="absolute right-2 sm:right-6 top-1/2 -translate-y-1/2 text-white/80 hover:text-white p-3 sm:p-4 rounded-full bg-black/60 hover:bg-blue-600 border border-white/20 backdrop-blur-md transition-all active:scale-90 z-20 cursor-pointer" aria-label="Foto siguiente">
+        <i data-lucide="chevron-right" class="w-6 h-6 sm:w-7 sm:h-7"></i>
+      </button>
+
+      <!-- Contenedor de la Imagen y Datos -->
+      <div class="max-w-5xl w-full flex flex-col items-center select-none relative z-10">
+        <div class="relative w-full flex justify-center items-center">
+          <img id="lightbox-img" src="" alt="Vista ampliada" class="max-h-[72vh] sm:max-h-[76vh] w-auto max-w-full rounded-2xl sm:rounded-3xl shadow-2xl border border-white/15 object-contain transition-all duration-200">
+        </div>
+        
+        <div class="text-center mt-4 max-w-xl px-4">
+          <div class="flex items-center justify-center gap-2 mb-2">
+            <span id="lightbox-counter" class="text-[11px] font-mono font-bold text-gray-300 bg-white/10 px-3 py-1 rounded-full border border-white/10">Foto 1 de 6</span>
+            <span id="lightbox-category" class="text-[11px] font-bold text-blue-300 bg-blue-500/20 px-3 py-1 rounded-full border border-blue-400/30">Carrera</span>
+          </div>
+          <h3 id="lightbox-title" class="text-lg sm:text-xl font-black text-white tracking-tight"></h3>
+          <p id="lightbox-caption" class="text-xs sm:text-sm text-gray-300 mt-1 leading-relaxed"></p>
         </div>
       </div>
     </div>
@@ -861,6 +936,24 @@
     </div>
   </footer>
 
+  <!-- BARRA DE ACCIÓN FLOTANTE MÓVIL (STICKY BOTTOM CTA) -->
+  <div id="mobile-sticky-cta" class="fixed bottom-0 left-0 right-0 z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md border-t border-slate-200 dark:border-white/10 px-4 py-3 md:hidden transition-transform duration-300 translate-y-full shadow-[0_-4px_20px_rgba(0,0,0,0.1)] pb-[calc(0.75rem+env(safe-area-inset-bottom,0px))]">
+    <div class="flex items-center justify-between gap-3 max-w-md mx-auto">
+      <div class="flex flex-col min-w-0">
+        <span class="text-[11px] font-black uppercase text-blue-600 dark:text-yellow-400 tracking-wider truncate">
+          <%= activeRace ? activeRace.name : (content.brand?.name || 'KidsRun 2026') %>
+        </span>
+        <span class="text-[10px] text-slate-500 dark:text-gray-400 font-medium truncate">
+          🏅 Medalla finisher & kit incluido
+        </span>
+      </div>
+      <a href="/inscribir" class="flex-shrink-0 px-5 py-2.5 rounded-2xl text-xs font-black <%= theme.solidBtn %> shadow-md shadow-blue-600/30 flex items-center gap-1.5 active:scale-95 transition-transform">
+        <span>Inscribir</span>
+        <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+      </a>
+    </div>
+  </div>
+
   <!-- Scripts de la Landing Page -->
   <script src="/js/landing.js"></script>
   <!-- Leaflet.js + inicialización del mapa del evento -->
@@ -876,7 +969,13 @@
       const mapEl = document.getElementById('venue-map');
       if (!mapEl) return;
 
-      const map = L.map('venue-map', { zoomControl: true, scrollWheelZoom: false }).setView([lat, lng], zoom);
+      const isMobile = window.innerWidth < 768;
+      const map = L.map('venue-map', {
+        zoomControl: true,
+        scrollWheelZoom: false,
+        dragging: !isMobile, // Prevenir trampa de scroll táctil en pantallas móviles
+        tap: !isMobile
+      }).setView([lat, lng], zoom);
 
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',

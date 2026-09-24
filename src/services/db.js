@@ -152,7 +152,7 @@ async function getInscriptions() {
     try {
       const sql = `SELECT * FROM inscriptions ORDER BY created_at DESC;`;
       const result = await pool.query(sql);
-      return result.rows.map(row => ({
+      const pgInscriptions = result.rows.map(row => ({
         id: row.id,
         raceId: row.race_id,
         raceName: row.race_name,
@@ -173,6 +173,18 @@ async function getInscriptions() {
         read: row.read,
         source: 'postgresql'
       }));
+
+      // Incluir también inscripciones guardadas en el respaldo local durante caídas de BD
+      const localLeads = contentStore.getLeads();
+      if (localLeads.length > 0) {
+        const pgIds = new Set(pgInscriptions.map(i => i.id));
+        const localPending = localLeads.filter(l => !pgIds.has(l.id)).map(l => ({ ...l, source: 'local_backup' }));
+        if (localPending.length > 0) {
+          return [...pgInscriptions, ...localPending];
+        }
+      }
+
+      return pgInscriptions;
     } catch (err) {
       console.warn('Fallo consulta a PostgreSQL, usando respaldo local:', err.message);
     }
@@ -189,11 +201,11 @@ async function deleteInscription(id) {
     await initPromise;
   }
 
-  contentStore.deleteLead(id);
-
   if (pool && isConnected) {
     try {
       await pool.query('DELETE FROM inscriptions WHERE id = $1;', [id]);
+      // Solo eliminar del store local tras éxito en PostgreSQL
+      contentStore.deleteLead(id);
       return { success: true };
     } catch (err) {
       console.error('Error eliminando en PostgreSQL:', err.message);
@@ -201,6 +213,8 @@ async function deleteInscription(id) {
     }
   }
 
+  // Sin PostgreSQL: eliminar del store local
+  contentStore.deleteLead(id);
   return { success: true };
 }
 

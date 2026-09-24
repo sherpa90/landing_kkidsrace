@@ -326,7 +326,7 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
   }
 
   // Validar que paymentProof sea una URL propia del servidor si fue proporcionada
-  if (paymentProof && !paymentProof.startsWith('/uploads/')) {
+  if (paymentProof && !paymentProof.startsWith('/admin/api/proofs/') && !paymentProof.startsWith('/uploads/')) {
     return res.status(400).json({
       success: false,
       error: 'El comprobante de pago no es válido. Por favor sube el archivo nuevamente.'

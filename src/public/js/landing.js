@@ -18,8 +18,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // 5. Contador Regresivo en Vivo
   initCountdownTimer();
 
-  // 6. Visor Lightbox para la Galería de Imágenes
+  // 6. Visor Lightbox y Carrusel para la Galería de Imágenes
   initLightbox();
+  initGalleryCarousel();
 
   // 7. Acordeón de FAQs
   initFaqAccordion();
@@ -32,6 +33,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // 10. Conmutador de Modo Claro / Oscuro (White Mode)
   initThemeToggle();
+
+  // 11. Barra flotante táctil inferior para móviles (Sticky Bottom CTA)
+  initMobileStickyCta();
 });
 
 // 10. Alternar Tema Claro y Oscuro
@@ -124,31 +128,205 @@ function initCountdownTimer() {
   setInterval(update, 1000);
 }
 
-// 6. Visor Lightbox para la Galería de Imágenes
+// 6. Carrusel Interactivo de Galería de Imágenes
+function initGalleryCarousel() {
+  const track = document.getElementById('gallery-track');
+  const prevBtn = document.getElementById('gallery-prev-btn');
+  const nextBtn = document.getElementById('gallery-next-btn');
+  const counterSlide = document.getElementById('gallery-current-slide');
+  const totalSlide = document.getElementById('gallery-total-slides');
+  const dots = document.querySelectorAll('.gallery-dot');
+  const viewToggle = document.getElementById('gallery-view-toggle');
+  const toggleLabel = document.getElementById('gallery-toggle-label');
+
+  if (!track) return;
+
+  const items = track.querySelectorAll('.gallery-item');
+  if (totalSlide) totalSlide.textContent = items.length;
+
+  function getStep() {
+    const firstItem = track.querySelector('.gallery-item');
+    if (!firstItem) return 320;
+    return firstItem.offsetWidth + 24; // ancho + gap
+  }
+
+  function updateActiveState() {
+    const step = getStep();
+    if (!step) return;
+    const scrollLeft = track.scrollLeft;
+    const currentIndex = Math.min(items.length - 1, Math.max(0, Math.round(scrollLeft / step)));
+
+    if (counterSlide) counterSlide.textContent = currentIndex + 1;
+
+    // Actualizar dots
+    dots.forEach((dot, idx) => {
+      if (idx === currentIndex) {
+        dot.classList.add('w-8', 'bg-blue-600', 'dark:bg-yellow-400');
+        dot.classList.remove('w-2.5', 'bg-slate-300', 'dark:bg-gray-700');
+      } else {
+        dot.classList.remove('w-8', 'bg-blue-600', 'dark:bg-yellow-400');
+        dot.classList.add('w-2.5', 'bg-slate-300', 'dark:bg-gray-700');
+      }
+    });
+
+    // Deshabilitar botones en límites
+    if (prevBtn) prevBtn.disabled = scrollLeft <= 10;
+    if (nextBtn) {
+      const maxScroll = track.scrollWidth - track.clientWidth - 10;
+      nextBtn.disabled = scrollLeft >= maxScroll;
+    }
+  }
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', () => {
+      track.scrollBy({ left: -getStep(), behavior: 'smooth' });
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', () => {
+      track.scrollBy({ left: getStep(), behavior: 'smooth' });
+    });
+  }
+
+  dots.forEach(dot => {
+    dot.addEventListener('click', () => {
+      const targetIdx = parseInt(dot.getAttribute('data-slide-to'), 10) || 0;
+      track.scrollTo({ left: targetIdx * getStep(), behavior: 'smooth' });
+    });
+  });
+
+  let scrollTimeout;
+  track.addEventListener('scroll', () => {
+    clearTimeout(scrollTimeout);
+    scrollTimeout = setTimeout(updateActiveState, 50);
+  });
+
+  // Soporte de arrastre táctil y con mouse (Drag-to-Scroll)
+  let isDown = false;
+  let startX = 0;
+  let scrollStart = 0;
+
+  track.addEventListener('mousedown', (e) => {
+    isDown = true;
+    startX = e.pageX - track.offsetLeft;
+    scrollStart = track.scrollLeft;
+  });
+
+  window.addEventListener('mouseup', () => {
+    if (isDown) {
+      isDown = false;
+      updateActiveState();
+    }
+  });
+
+  track.addEventListener('mousemove', (e) => {
+    if (!isDown) return;
+    e.preventDefault();
+    const x = e.pageX - track.offsetLeft;
+    const walk = (x - startX) * 1.5;
+    track.scrollLeft = scrollStart - walk;
+  });
+
+  // Alternar entre modo carrusel y modo cuadrícula
+  let isGrid = false;
+  if (viewToggle) {
+    viewToggle.addEventListener('click', () => {
+      isGrid = !isGrid;
+      const dotsContainer = document.getElementById('gallery-dots');
+      const counterBadge = document.getElementById('gallery-counter-badge');
+      const prevNextGroup = prevBtn?.parentElement;
+
+      if (isGrid) {
+        track.classList.remove('flex', 'overflow-x-auto', 'no-scrollbar', 'snap-x', 'snap-mandatory', 'cursor-grab');
+        track.classList.add('grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+        items.forEach(it => {
+          it.classList.remove('shrink-0', 'w-[85vw]', 'sm:w-[45vw]', 'lg:w-[calc(33.333%-16px)]', 'snap-start');
+        });
+        if (dotsContainer) dotsContainer.classList.add('hidden');
+        if (counterBadge) counterBadge.classList.add('hidden');
+        if (prevNextGroup) prevNextGroup.classList.add('hidden');
+        viewToggle.innerHTML = '<i data-lucide="sliders-horizontal" class="w-4 h-4"></i><span id="gallery-toggle-label">Ver en carrusel</span>';
+      } else {
+        track.classList.add('flex', 'overflow-x-auto', 'no-scrollbar', 'snap-x', 'snap-mandatory', 'cursor-grab');
+        track.classList.remove('grid', 'grid-cols-1', 'sm:grid-cols-2', 'lg:grid-cols-3', 'gap-6');
+        items.forEach(it => {
+          it.classList.add('shrink-0', 'w-[85vw]', 'sm:w-[45vw]', 'lg:w-[calc(33.333%-16px)]', 'snap-start');
+        });
+        if (dotsContainer) dotsContainer.classList.remove('hidden');
+        if (counterBadge) counterBadge.classList.remove('hidden');
+        if (prevNextGroup) prevNextGroup.classList.remove('hidden');
+        viewToggle.innerHTML = '<i data-lucide="layout-grid" class="w-4 h-4"></i><span id="gallery-toggle-label">Ver cuadrícula</span>';
+        updateActiveState();
+      }
+      if (window.lucide) window.lucide.createIcons();
+    });
+  }
+
+  updateActiveState();
+}
+
+// 7. Visor Lightbox con Navegación de Carrusel Completa
 function initLightbox() {
   const modal = document.getElementById('lightbox-modal');
   const modalImg = document.getElementById('lightbox-img');
   const modalTitle = document.getElementById('lightbox-title');
   const modalCaption = document.getElementById('lightbox-caption');
+  const modalCounter = document.getElementById('lightbox-counter');
+  const modalCategory = document.getElementById('lightbox-category');
   const closeBtn = document.getElementById('lightbox-close');
+  const prevBtn = document.getElementById('lightbox-prev');
+  const nextBtn = document.getElementById('lightbox-next');
 
   if (!modal || !modalImg) return;
 
-  document.querySelectorAll('.gallery-item').forEach(item => {
+  const galleryItems = Array.from(document.querySelectorAll('.gallery-item'));
+  let currentIndex = 0;
+
+  function renderSlide(idx) {
+    if (galleryItems.length === 0) return;
+    if (idx < 0) idx = galleryItems.length - 1;
+    if (idx >= galleryItems.length) idx = 0;
+    currentIndex = idx;
+
+    const item = galleryItems[currentIndex];
+    const src = item.getAttribute('data-img-src');
+    const title = item.getAttribute('data-img-title') || '';
+    const caption = item.getAttribute('data-img-caption') || '';
+    const category = item.getAttribute('data-img-category') || 'KidsRun';
+
+    modalImg.style.opacity = '0.3';
+    modalImg.src = src;
+    modalImg.onload = () => { modalImg.style.opacity = '1'; };
+    modalImg.alt = title;
+
+    if (modalTitle) modalTitle.textContent = title;
+    if (modalCaption) modalCaption.textContent = caption;
+    if (modalCategory) modalCategory.textContent = category;
+    if (modalCounter) modalCounter.textContent = `Foto ${currentIndex + 1} de ${galleryItems.length}`;
+  }
+
+  galleryItems.forEach((item, idx) => {
     item.addEventListener('click', () => {
-      const src = item.getAttribute('data-img-src');
-      const title = item.getAttribute('data-img-title');
-      const caption = item.getAttribute('data-img-caption');
-
-      modalImg.src = src;
-      modalImg.alt = title;
-      if (modalTitle) modalTitle.textContent = title;
-      if (modalCaption) modalCaption.textContent = caption;
-
+      renderSlide(idx);
       modal.classList.remove('hidden');
       document.body.style.overflow = 'hidden';
     });
   });
+
+  if (prevBtn) {
+    prevBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      renderSlide(currentIndex - 1);
+    });
+  }
+
+  if (nextBtn) {
+    nextBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      renderSlide(currentIndex + 1);
+    });
+  }
 
   function closeModal() {
     modal.classList.add('hidden');
@@ -159,14 +337,41 @@ function initLightbox() {
   if (closeBtn) closeBtn.addEventListener('click', closeModal);
 
   modal.addEventListener('click', (e) => {
-    if (e.target === modal) closeModal();
+    if (e.target === modal || e.target.id === 'lightbox-modal') closeModal();
   });
 
+  // Navegación por teclado (Flechas Izquierda / Derecha / Escape)
   document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+    if (modal.classList.contains('hidden')) return;
+
+    if (e.key === 'ArrowLeft') {
+      renderSlide(currentIndex - 1);
+    } else if (e.key === 'ArrowRight') {
+      renderSlide(currentIndex + 1);
+    } else if (e.key === 'Escape') {
       closeModal();
     }
   });
+
+  // Soporte de gestos táctiles Swipe en el visor de pantalla completa
+  let touchStartX = 0;
+  let touchEndX = 0;
+
+  modal.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+  }, { passive: true });
+
+  modal.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    const diff = touchEndX - touchStartX;
+    if (Math.abs(diff) > 45) {
+      if (diff > 0) {
+        renderSlide(currentIndex - 1); // Deslizó a la derecha -> anterior
+      } else {
+        renderSlide(currentIndex + 1); // Deslizó a la izquierda -> siguiente
+      }
+    }
+  }, { passive: true });
 }
 
 // 2. Canvas interactivo de confeti y partículas deportivas
@@ -282,7 +487,8 @@ function initMobileMenu() {
   const menu = document.getElementById('mobile-menu');
   if (!btn || !menu) return;
 
-  btn.addEventListener('click', () => {
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
     menu.classList.toggle('hidden');
   });
 
@@ -291,6 +497,51 @@ function initMobileMenu() {
       menu.classList.add('hidden');
     });
   });
+
+  // Cerrar al pulsar fuera del menú
+  document.addEventListener('click', (e) => {
+    if (!menu.classList.contains('hidden') && !menu.contains(e.target) && !btn.contains(e.target)) {
+      menu.classList.add('hidden');
+    }
+  });
+}
+
+// 11. Barra flotante táctil inferior para móviles (Sticky Bottom CTA)
+function initMobileStickyCta() {
+  const ctaBar = document.getElementById('mobile-sticky-cta');
+  if (!ctaBar) return;
+
+  const hero = document.getElementById('hero');
+  let threshold = 350;
+
+  function calculateThreshold() {
+    if (hero) {
+      threshold = hero.offsetTop + (hero.offsetHeight * 0.4);
+    }
+  }
+
+  calculateThreshold();
+  window.addEventListener('resize', calculateThreshold, { passive: true });
+
+  let ticking = false;
+  function onScroll() {
+    if (!ticking) {
+      window.requestAnimationFrame(() => {
+        if (window.scrollY > threshold) {
+          ctaBar.classList.remove('translate-y-full');
+          ctaBar.classList.add('translate-y-0');
+        } else {
+          ctaBar.classList.add('translate-y-full');
+          ctaBar.classList.remove('translate-y-0');
+        }
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }
+
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onScroll();
 }
 
 // 7. Acordeón de FAQs

@@ -41,8 +41,8 @@ services:
     volumes:
       # Volumen persistente para contenido CMS (imágenes, textos, configuración)
       - ./data:/app/data
-      # Montar código fuente para reflejo en vivo y desarrollo
-      - ./src:/app/src
+      # NOTA: No montar código fuente en producción — usar solo para desarrollo local
+      # - ./src:/app/src
 
 volumes:
   postgres_data:

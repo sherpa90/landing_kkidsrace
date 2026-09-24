@@ -16,42 +16,26 @@ if (!fs.existsSync(DATA_DIR)) {
   fs.mkdirSync(DATA_DIR, { recursive: true });
 }
 
+// Cache en memoria — se sincroniza una sola vez al arrancar
+let cachedUsers = null;
+
 // Cargar o inicializar la lista de usuarios con roles (admin y editor)
 function getUsers() {
+  if (cachedUsers) return cachedUsers;
+
   try {
     if (fs.existsSync(USERS_FILE)) {
       const raw = fs.readFileSync(USERS_FILE, 'utf-8');
-      const list = JSON.parse(raw);
-
-      // Sincronizar usuario definido en variables de entorno (sin guardar en texto plano)
-      const envUser = (process.env.ADMIN_USERNAME || '').trim();
-      const envPass = (process.env.ADMIN_PASSWORD || '').trim();
-      if (envUser && envPass) {
-        const existingIdx = list.findIndex(u => u.username.toLowerCase() === envUser.toLowerCase());
-        if (existingIdx !== -1) {
-          list[existingIdx].passwordHash = bcrypt.hashSync(envPass, 12);
-          list[existingIdx].role = 'admin';
-        } else {
-          list.push({
-            id: `usr_${Date.now()}`,
-            username: envUser,
-            name: 'Administrador Principal',
-            role: 'admin',
-            passwordHash: bcrypt.hashSync(envPass, 12),
-            createdAt: new Date().toISOString()
-          });
-        }
-        saveUsers(list);
-      }
+      cachedUsers = JSON.parse(raw);
 
       // Purgar permanentemente al usuario root si todavía existe en users.json
-      const rootIdx = list.findIndex(u => u.username.toLowerCase() === 'root');
+      const rootIdx = cachedUsers.findIndex(u => u.username.toLowerCase() === 'root');
       if (rootIdx !== -1) {
-        list.splice(rootIdx, 1);
-        saveUsers(list);
+        cachedUsers.splice(rootIdx, 1);
+        saveUsers(cachedUsers);
       }
 
-      return list;
+      return cachedUsers;
     }
   } catch (err) {
     console.error('[auth] Error leyendo users.json:', err.message);
@@ -93,7 +77,36 @@ function getUsers() {
     console.error('[auth] Error inicializando users.json:', err.message);
   }
 
-  return defaultUsers;
+  cachedUsers = defaultUsers;
+  return cachedUsers;
+}
+
+// Sincronizar usuario de variables de entorno una sola vez al arrancar (sin bloquear en cada request)
+function syncEnvAdmin() {
+  const envUser = (process.env.ADMIN_USERNAME || '').trim();
+  const envPass = (process.env.ADMIN_PASSWORD || '').trim();
+  if (!envUser || !envPass) return;
+
+  const users = getUsers();
+  const existingIdx = users.findIndex(u => u.username.toLowerCase() === envUser.toLowerCase());
+  if (existingIdx !== -1) {
+    // Solo re-hashear si la contraseña actual no coincide
+    if (!bcrypt.compareSync(envPass, users[existingIdx].passwordHash)) {
+      users[existingIdx].passwordHash = bcrypt.hashSync(envPass, 12);
+      users[existingIdx].role = 'admin';
+      saveUsers(users);
+    }
+  } else {
+    users.push({
+      id: `usr_${Date.now()}`,
+      username: envUser,
+      name: 'Administrador Principal',
+      role: 'admin',
+      passwordHash: bcrypt.hashSync(envPass, 12),
+      createdAt: new Date().toISOString()
+    });
+    saveUsers(users);
+  }
 }
 
 function saveUsers(users) {
@@ -101,6 +114,7 @@ function saveUsers(users) {
     const tempFile = `${USERS_FILE}.tmp`;
     fs.writeFileSync(tempFile, JSON.stringify(users, null, 2), 'utf-8');
     fs.renameSync(tempFile, USERS_FILE);
+    cachedUsers = users; // Actualizar cache en memoria
     return true;
   } catch (err) {
     console.error('[auth] Error guardando users.json:', err.message);
@@ -234,8 +248,128 @@ function requireAdmin(req, res, next) {
   });
 }
 
+
+// --- Funciones de Gestión de Usuarios (CRUD para Administrador) ---
+
+function createUser({ username, name, role, password }) {
+  const cleanUser = (username || '').trim().toLowerCase();
+  const cleanName = (name || '').trim();
+  const cleanRole = role === 'admin' ? 'admin' : 'editor';
+
+  if (!cleanUser || cleanUser.length < 3) {
+    return { success: false, error: 'El nombre de usuario debe tener al menos 3 caracteres.' };
+  }
+  if (!cleanName) {
+    return { success: false, error: 'El nombre de la persona es obligatorio.' };
+  }
+  if (!password || password.length < 12) {
+    return { success: false, error: 'La contraseña debe tener al menos 12 caracteres.' };
+  }
+
+  const users = getUsers();
+  if (users.some(u => u.username.toLowerCase() === cleanUser)) {
+    return { success: false, error: `El usuario "${cleanUser}" ya existe.` };
+  }
+
+  const newUser = {
+    id: 'usr_' + Date.now() + '_' + Math.random().toString(36).substring(2, 6),
+    username: cleanUser,
+    name: cleanName,
+    role: cleanRole,
+    passwordHash: bcrypt.hashSync(password, 12),
+    createdAt: new Date().toISOString()
+  };
+
+  users.push(newUser);
+  if (saveUsers(users)) {
+    return {
+      success: true,
+      user: { id: newUser.id, username: newUser.username, name: newUser.name, role: newUser.role, createdAt: newUser.createdAt }
+    };
+  }
+  return { success: false, error: 'No se pudo guardar el usuario en disco.' };
+}
+
+function updateUser(userId, { name, role, password }) {
+  const users = getUsers();
+  const idx = users.findIndex(u => u.id === userId);
+  if (idx === -1) {
+    return { success: false, error: 'Usuario no encontrado.' };
+  }
+
+  const target = users[idx];
+
+  // Si se cambia el nombre
+  if (name && name.trim()) {
+    target.name = name.trim();
+  }
+
+  // Si se cambia el rol
+  if (role && (role === 'admin' || role === 'editor')) {
+    // Evitar dejar el sistema sin administradores
+    if (target.role === 'admin' && role === 'editor') {
+      const adminCount = users.filter(u => u.role === 'admin').length;
+      if (adminCount <= 1) {
+        return { success: false, error: 'Debe haber al menos un Administrador activo en el sistema.' };
+      }
+    }
+    target.role = role;
+  }
+
+  // Si se proporciona nueva contraseña
+  if (password && password.trim()) {
+    if (password.trim().length < 12) {
+      return { success: false, error: 'La nueva contraseña debe tener al menos 12 caracteres.' };
+    }
+    target.passwordHash = bcrypt.hashSync(password.trim(), 12);
+  }
+
+  target.updatedAt = new Date().toISOString();
+
+  if (saveUsers(users)) {
+    return {
+      success: true,
+      user: { id: target.id, username: target.username, name: target.name, role: target.role }
+    };
+  }
+  return { success: false, error: 'Error al actualizar el usuario.' };
+}
+
+function deleteUser(userId, currentAdminUsername) {
+  const users = getUsers();
+  const idx = users.findIndex(u => u.id === userId);
+  if (idx === -1) {
+    return { success: false, error: 'Usuario no encontrado.' };
+  }
+
+  const target = users[idx];
+  // No permitir auto-eliminarse
+  if (target.username.toLowerCase() === (currentAdminUsername || '').toLowerCase()) {
+    return { success: false, error: 'No puedes eliminar tu propia cuenta de Administrador activa.' };
+  }
+
+  // Asegurar que quede al menos un admin
+  if (target.role === 'admin') {
+    const adminCount = users.filter(u => u.role === 'admin').length;
+    if (adminCount <= 1) {
+      return { success: false, error: 'No puedes eliminar al único Administrador del sistema.' };
+    }
+  }
+
+  users.splice(idx, 1);
+  if (saveUsers(users)) {
+    return { success: true, message: `Usuario "${target.username}" eliminado con éxito.` };
+  }
+  return { success: false, error: 'Error al eliminar usuario en disco.' };
+}
+
+
 module.exports = {
   getUsers,
+  syncEnvAdmin,
+  createUser,
+  updateUser,
+  deleteUser,
   verifyCredentials,
   changePassword,
   requireAuth,

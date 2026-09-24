@@ -1,5 +1,7 @@
 const express = require('express');
 const router = express.Router();
+const path = require('path');
+const fs = require('fs');
 const contentStore = require('../services/contentStore');
 const auth = require('../services/auth');
 const db = require('../services/db');
@@ -7,8 +9,8 @@ const { rateLimit } = require('../middleware/rateLimit');
 const { validateCsrf } = require('../middleware/csrf');
 const imageService = require('../services/imageService');
 
-// Asegurar que la base de datos de usuarios (Admin/Editor) esté inicializada
-auth.getUsers();
+// Sincronizar usuario de variables de entorno una sola vez al arrancar
+auth.syncEnvAdmin();
 
 // Rate limiting para login: 10 intentos cada 15 minutos por IP
 const loginLimiter = rateLimit({
@@ -91,6 +93,14 @@ router.get('/', auth.requireAuth, async (req, res) => {
   const isPostgres = db.isPostgresConnected();
   const csrfToken = req.session?.csrfToken || '';
 
+  const usersList = auth.getUsers().map(u => ({
+    id: u.id,
+    username: u.username,
+    name: u.name,
+    role: u.role,
+    createdAt: u.createdAt
+  }));
+
   res.render('admin/dashboard', {
     content,
     leads,
@@ -101,12 +111,13 @@ router.get('/', auth.requireAuth, async (req, res) => {
     role,
     name,
     isPostgres,
-    csrfToken
+    csrfToken,
+    usersList
   });
 });
 
 // Guardar Actualizaciones de Contenido desde el CMS (CSRF protegido)
-router.post('/api/content', auth.requireAuth, validateCsrf, (req, res) => {
+router.post('/api/content', auth.requireAdmin, validateCsrf, (req, res) => {
   try {
     const newContent = req.body;
     if (!newContent || typeof newContent !== 'object' || Array.isArray(newContent)) {
@@ -114,7 +125,7 @@ router.post('/api/content', auth.requireAuth, validateCsrf, (req, res) => {
     }
 
     // Whitelist de claves top-level permitidas en el CMS
-    const ALLOWED_KEYS = ['brand', 'hero', 'features', 'pricing', 'testimonials', 'faq', 'contact', 'seo', 'countdown', 'gallery', 'sponsors', 'footer', 'venue', 'sections'];
+    const ALLOWED_KEYS = ['brand', 'hero', 'features', 'pricing', 'testimonials', 'faq', 'contact', 'seo', 'countdown', 'gallery', 'sponsors', 'footer', 'venue', 'sections', 'video'];
     const filtered = {};
     for (const key of ALLOWED_KEYS) {
       if (key in newContent) filtered[key] = newContent[key];
@@ -135,7 +146,7 @@ router.post('/api/content', auth.requireAuth, validateCsrf, (req, res) => {
 });
 
 // Endpoint para subir y optimizar imágenes automáticamente con Sharp (WebP)
-router.post('/api/upload', auth.requireAuth, validateCsrf, imageService.upload.single('image'), async (req, res) => {
+router.post('/api/upload', auth.requireAdmin, validateCsrf, imageService.upload.single('image'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: 'No se ha proporcionado ningún archivo de imagen.' });
@@ -158,7 +169,52 @@ router.post('/api/upload', auth.requireAuth, validateCsrf, imageService.upload.s
   }
 });
 
-// Crear o Actualizar Corridas (Permitido SOLO para rol Administrador)
+// Endpoint para subir videos cortos (MP4 / WebM) para la sección de video autoplay
+const multer = require('multer');
+const ALLOWED_VIDEO_TYPES = ['video/mp4', 'video/webm', 'video/ogg'];
+const VIDEO_MAX_BYTES = 200 * 1024 * 1024; // 200 MB
+
+const videoUpload = multer({
+  storage: multer.diskStorage({
+    destination: (req, file, cb) => {
+      const dir = imageService.UPLOAD_DIR;
+      fs.mkdirSync(dir, { recursive: true });
+      cb(null, dir);
+    },
+    filename: (req, file, cb) => {
+      const ext = path.extname(file.originalname).toLowerCase().replace(/[^.a-z0-9]/g, '') || '.mp4';
+      const safe = `video_${Date.now()}_${Math.random().toString(36).slice(2, 8)}${ext}`;
+      cb(null, safe);
+    }
+  }),
+  limits: { fileSize: VIDEO_MAX_BYTES },
+  fileFilter: (req, file, cb) => {
+    if (ALLOWED_VIDEO_TYPES.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Formato de video no permitido. Solo se aceptan MP4, WebM y OGG.'));
+    }
+  }
+});
+
+router.post('/api/upload-video', auth.requireAdmin, validateCsrf, videoUpload.single('video'), (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No se ha proporcionado ningún archivo de video.' });
+    }
+    const publicUrl = `/uploads/${req.file.filename}`;
+    return res.json({
+      success: true,
+      message: 'Video subido correctamente.',
+      data: { url: publicUrl, filename: req.file.filename, sizeBytes: req.file.size }
+    });
+  } catch (err) {
+    console.error('Error subiendo video:', err);
+    return res.status(500).json({ success: false, error: err.message || 'Error al subir el video.' });
+  }
+});
+
+// Crear/Editar Corrida (Permitido SOLO para rol Administrador)
 router.post('/api/races', auth.requireAdmin, validateCsrf, (req, res) => {
   try {
     const { id, name, date, time, location, city, status, circuits, maxParticipants } = req.body;
@@ -240,6 +296,15 @@ router.get('/api/leads', auth.requireAuth, async (req, res) => {
   res.json({ success: true, leads });
 });
 
+// Helper para mitigar CSV Formula Injection (neutralizar =, +, -, @, tab, cr)
+function sanitizeCsvCell(val) {
+  if (val === null || val === undefined) return '""';
+  const str = String(val);
+  const dangerousChars = ['=', '+', '-', '@', '\t', '\r'];
+  const sanitized = (str.length > 0 && dangerousChars.includes(str.charAt(0))) ? `'${str}` : str;
+  return `"${sanitized.replace(/"/g, '""')}"`;
+}
+
 // Exportar Base de Datos de Participantes a CSV (Para Acreditación / Mesa del Evento)
 router.get('/api/inscriptions/export', auth.requireAuth, async (req, res) => {
   const leads = await db.getInscriptions();
@@ -248,17 +313,17 @@ router.get('/api/inscriptions/export', auth.requireAuth, async (req, res) => {
   const headers = ['Dorsal', 'Corrida', 'Nombre Pupilo/a', 'Edad', 'Distancia/Circuito', 'Nombre Tutor', 'Email Contacto', 'Telefono Emergencia', 'Comprobante URL', 'Consentimiento', 'Fecha Registro'];
   
   const rows = leads.map(l => [
-    `"${l.bibNumber || ''}"`,
-    `"${(l.raceName || 'KidsRun 2026').replace(/"/g, '""')}"`,
-    `"${(l.kidName || '').replace(/"/g, '""')}"`,
-    `"${l.kidAge || ''}"`,
-    `"${(l.distance || '').replace(/"/g, '""')}"`,
-    `"${(l.name || '').replace(/"/g, '""')}"`,
-    `"${(l.email || '').replace(/"/g, '""')}"`,
-    `"${(l.phone || l.emergencyContact || '').replace(/"/g, '""')}"`,
-    `"${(l.paymentProof || '').replace(/"/g, '""')}"`,
-    `"${l.consentGiven ? 'SI' : 'NO'}"`,
-    `"${new Date(l.createdAt).toLocaleString('es-ES')}"`
+    sanitizeCsvCell(l.bibNumber || ''),
+    sanitizeCsvCell(l.raceName || 'KidsRun 2026'),
+    sanitizeCsvCell(l.kidName || ''),
+    sanitizeCsvCell(l.kidAge || ''),
+    sanitizeCsvCell(l.distance || ''),
+    sanitizeCsvCell(l.name || ''),
+    sanitizeCsvCell(l.email || ''),
+    sanitizeCsvCell(l.phone || l.emergencyContact || ''),
+    sanitizeCsvCell(l.paymentProof || ''),
+    sanitizeCsvCell(l.consentGiven ? 'SI' : 'NO'),
+    sanitizeCsvCell(new Date(l.createdAt).toLocaleString('es-ES'))
   ]);
 
   const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
@@ -266,6 +331,36 @@ router.get('/api/inscriptions/export', auth.requireAuth, async (req, res) => {
   res.header('Content-Type', 'text/csv; charset=utf-8');
   res.attachment(`inscripciones_kidsrun_${new Date().toISOString().split('T')[0]}.csv`);
   res.send(csvContent);
+});
+
+// Servir Comprobantes de Pago de forma Segura (SOLO Administradores y Editores autenticados)
+router.get('/api/proofs/:filename', auth.requireAuth, (req, res) => {
+  const { filename } = req.params;
+
+  // Whitelist estricta contra Path Traversal: solo alfanuméricos, guiones y extensión .webp
+  if (!filename || !/^[a-zA-Z0-9_-]+\.webp$/.test(filename)) {
+    return res.status(400).send('Nombre de archivo inválido.');
+  }
+
+  // Buscar primero en el directorio privado, con fallback al directorio de uploads para retrocompatibilidad
+  const privatePath = path.join(imageService.PRIVATE_UPLOAD_DIR, filename);
+  const publicFallbackPath = path.join(imageService.UPLOAD_DIR, filename);
+
+  let targetPath = null;
+  if (fs.existsSync(privatePath)) {
+    targetPath = privatePath;
+  } else if (fs.existsSync(publicFallbackPath)) {
+    targetPath = publicFallbackPath;
+  }
+
+  if (!targetPath) {
+    return res.status(404).send('Comprobante no encontrado.');
+  }
+
+  res.setHeader('Content-Type', 'image/webp');
+  res.setHeader('Cache-Control', 'private, no-store, max-age=0');
+  res.setHeader('X-Content-Type-Options', 'nosniff');
+  return res.sendFile(targetPath);
 });
 
 // Eliminar un Registro de Inscripción (SOLO Administrador por resguardo y trazabilidad)
@@ -286,6 +381,56 @@ router.post('/api/change-password', auth.requireAuth, validateCsrf, (req, res) =
   const result = auth.changePassword(username, currentPassword, newPassword);
   if (result.success) {
     res.json({ success: true, message: 'Contraseña actualizada con éxito.' });
+  } else {
+    res.status(400).json({ success: false, error: result.error });
+  }
+});
+
+
+// ─── Gestión de Usuarios y Accesos (SOLO Administrador) ───────────────────────
+
+// Listar usuarios (JSON)
+router.get('/api/users', auth.requireAdmin, (req, res) => {
+  const users = auth.getUsers().map(u => ({
+    id: u.id,
+    username: u.username,
+    name: u.name,
+    role: u.role,
+    createdAt: u.createdAt
+  }));
+  res.json({ success: true, users });
+});
+
+// Crear nuevo usuario (Admin o Editor)
+router.post('/api/users', auth.requireAdmin, validateCsrf, (req, res) => {
+  const { username, name, role, password } = req.body;
+  const result = auth.createUser({ username, name, role, password });
+  if (result.success) {
+    res.json({ success: true, message: 'Usuario creado exitosamente.', user: result.user });
+  } else {
+    res.status(400).json({ success: false, error: result.error });
+  }
+});
+
+// Modificar usuario existente
+router.put('/api/users/:id', auth.requireAdmin, validateCsrf, (req, res) => {
+  const { id } = req.params;
+  const { name, role, password } = req.body;
+  const result = auth.updateUser(id, { name, role, password });
+  if (result.success) {
+    res.json({ success: true, message: 'Usuario actualizado exitosamente.', user: result.user });
+  } else {
+    res.status(400).json({ success: false, error: result.error });
+  }
+});
+
+// Eliminar usuario
+router.delete('/api/users/:id', auth.requireAdmin, validateCsrf, (req, res) => {
+  const { id } = req.params;
+  const currentAdmin = req.session.username;
+  const result = auth.deleteUser(id, currentAdmin);
+  if (result.success) {
+    res.json({ success: true, message: result.message });
   } else {
     res.status(400).json({ success: false, error: result.error });
   }

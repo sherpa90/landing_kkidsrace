@@ -138,6 +138,34 @@
       "category": "Fiesta",
       "url": "https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=800&q=80",
       "caption": "El cierre más divertido con espectáculos infantiles y sorteos de bicicletas."
+    },
+    {
+      "id": "gal-7",
+      "title": "La Gran Largada de Corredores",
+      "category": "Largada",
+      "url": "https://images.unsplash.com/photo-1461896836934-ffe607ba8211?auto=format&fit=crop&w=800&q=80",
+      "caption": "Cientos de niños listos y concentrados al escuchar la cuenta regresiva oficial."
+    },
+    {
+      "id": "gal-8",
+      "title": "Puntos de Hidratación y Fruta Fresca",
+      "category": "Circuito",
+      "url": "https://images.unsplash.com/photo-1517838277536-f5f99be501cd?auto=format&fit=crop&w=800&q=80",
+      "caption": "Estaciones seguras con agua purificada y colaciones saludables a lo largo del circuito."
+    },
+    {
+      "id": "gal-9",
+      "title": "Abrazos de Victoria en Familia",
+      "category": "Familia",
+      "url": "https://images.unsplash.com/photo-1502086223501-7ea6ecd79368?auto=format&fit=crop&w=800&q=80",
+      "caption": "El orgullo y felicidad de compartir un logro deportivo memorable junto a papá y mamá."
+    },
+    {
+      "id": "gal-10",
+      "title": "Premiación en el Podio y Sorteos",
+      "category": "Premios",
+      "url": "https://images.unsplash.com/photo-1569517282132-25d22f4573e6?auto=format&fit=crop&w=800&q=80",
+      "caption": "Reconocimiento a la participación, compañerismo y esfuerzo de todas las categorías."
     }
   ],
   "schedule": [
@@ -336,7 +364,7 @@
   },
   "races": [
     {
-      "id": "race-1790120503455-7hg0",
+      "id": "race-1790214610537-bkga",
       "name": "KidsRun 2026 - Primavera",
       "year": 2026,
       "date": "2026-10-18T09:00:00",
@@ -345,6 +373,196 @@
       "location": "Parque Bicentenario",
       "city": "Santiago",
       "status": "active",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-24T01:50:10.537Z"
+    },
+    {
+      "id": "race-1790214548320-jwhs",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-24T01:49:08.320Z"
+    },
+    {
+      "id": "race-1790213696861-lara",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-24T01:34:56.861Z"
+    },
+    {
+      "id": "race-1790213659522-okqv",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-24T01:34:19.522Z"
+    },
+    {
+      "id": "race-1790213634073-7hsm",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-24T01:33:54.073Z"
+    },
+    {
+      "id": "race-1790213557366-m8hc",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-24T01:32:37.366Z"
+    },
+    {
+      "id": "race-1790213225978-snmj",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-24T01:27:05.979Z"
+    },
+    {
+      "id": "race-1790212596032-lwjn",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-24T01:16:36.033Z"
+    },
+    {
+      "id": "race-1790212183807-fa9a",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-24T01:09:43.808Z"
+    },
+    {
+      "id": "race-1790211763995-jxfq",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-09-24T01:02:43.996Z"
+    },
+    {
+      "id": "race-1790120503455-7hg0",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "inactive",
       "circuits": [
         "500m",
         "1K",
@@ -671,6 +889,12 @@
     "parking": "Estacionamiento disponible en los alrededores del parque.",
     "transit": "Acceso en Metro (L1, estación Tobalaba) y buses del Transantiago."
   },
+  "video": {
+    "url": "",
+    "title": "¡Así vivimos KidsRun!",
+    "subtitle": "Un resumen del ambiente, la emoción y la alegría de ediciones anteriores.",
+    "badge": "VIDEO OFICIAL"
+  },
   "sections": {
     "order": [
       "hero",
@@ -678,6 +902,7 @@
       "circuits",
       "schedule",
       "gallery",
+      "video",
       "kits",
       "testimonials",
       "faq",
@@ -691,6 +916,7 @@
       "circuits": true,
       "schedule": true,
       "gallery": true,
+      "video": true,
       "kits": true,
       "testimonials": true,
       "faq": true,

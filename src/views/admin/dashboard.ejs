@@ -10,6 +10,7 @@
   <!-- Tailwind CSS & Lucide -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@1.47.0"></script>
+  <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
   <link rel="stylesheet" href="/css/custom.css">
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-screen flex flex-col antialiased selection:bg-blue-600 selection:text-white">
@@ -55,10 +56,12 @@
         <span class="hidden sm:inline">Web</span>
       </a>
 
+      <% if (role === 'admin') { %>
       <button type="button" id="btn-save-cms" class="text-xs font-black px-3.5 sm:px-4 py-2 rounded-xl text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 shadow-md shadow-blue-600/30 transition-all flex items-center gap-1.5">
         <i data-lucide="save" class="w-3.5 h-3.5"></i>
         <span>Guardar</span>
       </button>
+      <% } %>
 
       <a href="/admin/logout" class="p-2 text-slate-400 hover:text-red-400 rounded-xl hover:bg-slate-800 transition-all" title="Cerrar Sesión">
         <i data-lucide="log-out" class="w-4 h-4"></i>
@@ -118,7 +121,18 @@
           <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full"><%= leads.length %></span>
           <% } %>
         </button>
+        <!-- Gestión de Usuarios y Accesos (Solo Administrador) -->
+        <% if (role === 'admin') { %>
+        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="users">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="user-cog" class="w-4 h-4 text-emerald-400"></i>
+            <span>👥 Usuarios & Accesos</span>
+          </div>
+          <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-bold" id="users-count-badge"><%= (typeof usersList !== 'undefined' ? usersList.length : 2) %></span>
+        </button>
+        <% } %>
 
+        <% if (role === 'admin') { %>
         <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="countdown">
           <i data-lucide="clock" class="w-4 h-4"></i>
           <span>⏰ Cuenta Regresiva</span>
@@ -183,6 +197,7 @@
           <i data-lucide="search" class="w-4 h-4"></i>
           <span>SEO & Google Events</span>
         </button>
+        <% } %>
 
         <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="security">
           <i data-lucide="shield" class="w-4 h-4"></i>
@@ -1100,11 +1115,16 @@
                 </p>
               </div>
 
-              <!-- Acciones de Cabecera: Exportar CSV + Estado DB -->
-              <div class="flex flex-wrap items-center gap-2.5">
-                <a href="/admin/api/inscriptions/export" class="px-3.5 py-2 rounded-xl text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 shadow-md shadow-amber-400/20 active:scale-95 transition-all flex items-center gap-1.5">
+              <!-- Acciones de Cabecera: Escanear Cédula + Exportar CSV + Estado DB -->
+              <div class="flex items-center gap-2 w-full sm:w-auto">
+                <button type="button" id="btn-open-scanner" class="flex-1 sm:flex-initial px-4 py-2.5 rounded-2xl text-xs font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-lg shadow-blue-600/30 active:scale-95 transition-all flex items-center justify-center gap-2">
+                  <i data-lucide="scan-line" class="w-4 h-4 text-white"></i>
+                  <span>Escanear Cédula</span>
+                </button>
+
+                <a href="/admin/api/inscriptions/export" class="px-3.5 py-2.5 rounded-2xl text-xs font-bold text-slate-950 bg-amber-400 hover:bg-amber-300 shadow-md shadow-amber-400/20 active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0" title="Descargar planilla Excel/CSV">
                   <i data-lucide="download" class="w-4 h-4"></i>
-                  <span>Exportar CSV</span>
+                  <span class="hidden sm:inline">Exportar CSV</span>
                 </a>
 
                 <% if (isPostgres) { %>
@@ -1148,77 +1168,118 @@
             </div>
 
             <!-- VISTA MÓVIL (CARDS RESPONSIVE - MOBILE FIRST) -->
-            <div class="block lg:hidden space-y-3" id="participants-mobile-list">
+            <div class="block lg:hidden space-y-3.5" id="participants-mobile-list">
               <% if (!leads || leads.length === 0) { %>
-              <div class="text-center py-10 bg-slate-950/60 rounded-2xl border border-slate-800 text-slate-400 space-y-2">
-                <i data-lucide="user-x" class="w-8 h-8 mx-auto opacity-50 text-slate-500"></i>
-                <p class="text-sm font-bold text-slate-300">Aún no hay inscripciones registradas.</p>
-                <p class="text-xs text-slate-500">Las inscripciones web aparecerán aquí al instante.</p>
+              <div class="text-center py-12 bg-slate-950/60 rounded-3xl border border-slate-800 text-slate-400 space-y-3 p-6">
+                <div class="w-14 h-14 rounded-3xl bg-blue-600/10 border border-blue-500/20 text-blue-400 flex items-center justify-center mx-auto">
+                  <i data-lucide="user-x" class="w-7 h-7"></i>
+                </div>
+                <p class="text-base font-bold text-white">Aún no hay inscripciones registradas</p>
+                <p class="text-xs text-slate-400 max-w-xs mx-auto">Las personas que se registren en la web aparecerán aquí en tiempo real para ser acreditadas.</p>
               </div>
               <% } else { %>
                 <% leads.forEach(lead => { %>
-                <div class="participant-row bg-slate-950/80 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 space-y-3 transition-colors shadow-sm"
+                <div class="participant-row bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-slate-800/90 hover:border-blue-500/40 rounded-3xl p-4.5 sm:p-5 space-y-3.5 transition-all shadow-lg shadow-black/20 relative overflow-hidden"
                      data-search="<%= ((lead.tutorRut || '') + ' ' + (lead.name || '') + ' ' + (lead.kidName || '') + ' ' + (lead.email || '') + ' ' + (lead.phone || '') + ' ' + (lead.emergencyContact || '') + ' ' + (lead.bibNumber || '')).toLowerCase() %>"
                      data-distance="<%= (lead.distance || '').toLowerCase() %>">
                   
-                  <div class="flex items-start justify-between gap-2">
+                  <!-- Cabecera de la tarjeta: Dorsal + Circuito -->
+                  <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
-                      <span class="font-mono font-black text-amber-400 text-xs bg-amber-950/80 border border-amber-500/30 px-2 py-0.5 rounded-lg">
-                        #<%= lead.bibNumber || '----' %>
+                      <span class="inline-flex items-center gap-1 font-mono font-black text-sm text-amber-300 bg-amber-950/80 border border-amber-500/40 px-2.5 py-1 rounded-xl shadow-sm">
+                        <i data-lucide="hash" class="w-3.5 h-3.5 text-amber-400"></i>
+                        <span><%= lead.bibNumber || '----' %></span>
                       </span>
-                      <div>
-                        <h3 class="font-bold text-white text-sm flex items-center gap-1">
-                          <i data-lucide="smile" class="w-3.5 h-3.5 text-blue-400"></i>
-                          <span><%= lead.kidName || 'Sin nombre' %></span>
-                        </h3>
-                        <span class="text-[11px] text-slate-400"><%= lead.kidAge ? lead.kidAge + ' años' : 'Edad no indicada' %></span>
-                      </div>
+                      <span class="text-[11px] font-semibold text-slate-400">Dorsal</span>
                     </div>
 
-                    <span class="px-2.5 py-1 rounded-full text-[10px] font-black bg-blue-900/60 text-blue-300 border border-blue-500/30">
-                      <%= lead.distance || 'General' %>
+                    <span class="px-3 py-1 rounded-full text-xs font-black bg-blue-950/80 text-blue-300 border border-blue-500/40 flex items-center gap-1.5 shadow-sm">
+                      <i data-lucide="map-pin" class="w-3 h-3 text-blue-400"></i>
+                      <span><%= lead.distance || 'General' %></span>
                     </span>
                   </div>
 
-                  <!-- Datos del Tutor Legal -->
-                  <div class="p-2.5 rounded-xl bg-slate-900/90 border border-slate-800 text-xs space-y-1">
-                    <div class="flex items-center justify-between">
-                      <span class="text-slate-400 text-[11px]">Tutor Legal:</span>
-                      <span class="font-bold text-white"><%= lead.name %></span>
+                  <!-- Datos Destacados del Pupilo/a -->
+                  <div class="bg-slate-950/60 rounded-2xl p-3.5 border border-slate-800/80 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 min-w-0">
+                      <div class="w-10 h-10 rounded-2xl bg-blue-600/20 text-blue-400 border border-blue-500/30 flex items-center justify-center shrink-0">
+                        <i data-lucide="smile" class="w-5 h-5"></i>
+                      </div>
+                      <div class="min-w-0">
+                        <div class="text-[10px] font-bold uppercase tracking-wider text-slate-400">Corredor/a Infantil</div>
+                        <h3 class="font-black text-white text-base truncate leading-snug"><%= lead.kidName || 'Sin nombre' %></h3>
+                      </div>
                     </div>
+                    <% if (lead.kidAge) { %>
+                    <span class="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold shrink-0 border border-slate-700">
+                      <%= lead.kidAge %> años
+                    </span>
+                    <% } %>
+                  </div>
+
+                  <!-- Ficha de Datos del Apoderado / Tutor -->
+                  <div class="p-3.5 rounded-2xl bg-slate-900/60 border border-slate-800/70 text-xs space-y-2">
+                    <div class="flex items-start justify-between gap-2">
+                      <span class="text-slate-400 font-medium text-[11px] flex items-center gap-1.5">
+                        <i data-lucide="user" class="w-3.5 h-3.5 text-slate-500"></i>
+                        <span>Apoderado/a:</span>
+                      </span>
+                      <span class="font-bold text-white text-right text-xs"><%= lead.name %></span>
+                    </div>
+
                     <% if (lead.tutorRut) { %>
-                    <div class="flex items-center justify-between">
-                      <span class="text-slate-400 text-[11px]">RUT Tutor:</span>
-                      <span class="font-mono font-bold text-amber-300"><%= lead.tutorRut %></span>
+                    <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-800/50">
+                      <span class="text-slate-400 font-medium text-[11px] flex items-center gap-1.5">
+                        <i data-lucide="credit-card" class="w-3.5 h-3.5 text-amber-400"></i>
+                        <span>Cédula / RUN:</span>
+                      </span>
+                      <span class="font-mono font-bold text-amber-300 bg-amber-950/40 px-2 py-0.5 rounded-lg border border-amber-500/20 text-xs">
+                        <%= lead.tutorRut %>
+                      </span>
                     </div>
                     <% } %>
-                    <div class="flex items-center justify-between">
-                      <span class="text-slate-400 text-[11px]">Contacto:</span>
-                      <span class="font-mono text-slate-300"><%= lead.emergencyContact || lead.phone || lead.email %></span>
+
+                    <div class="flex items-center justify-between gap-2 pt-1 border-t border-slate-800/50">
+                      <span class="text-slate-400 font-medium text-[11px] flex items-center gap-1.5">
+                        <i data-lucide="phone" class="w-3.5 h-3.5 text-emerald-400"></i>
+                        <span>Emergencia:</span>
+                      </span>
+                      <span class="font-mono text-slate-200 font-semibold"><%= lead.emergencyContact || lead.phone || 'No indicado' %></span>
                     </div>
                   </div>
 
-                  <!-- Comprobante y Acciones Móvil -->
-                  <div class="flex items-center justify-between pt-1">
+                  <!-- Barra de Estado de Pago y Acciones -->
+                  <div class="flex items-center justify-between pt-1 gap-2">
                     <div>
                       <% if (lead.paymentProof) { %>
-                      <button type="button" class="btn-view-proof inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-900 transition-colors text-xs font-bold" data-proof-url="<%= lead.paymentProof %>" data-pupil="<%= lead.kidName || 'Pupilo' %>" data-tutor="<%= lead.name || 'Tutor' %>">
+                      <button type="button" class="btn-view-proof inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-900 active:scale-95 transition-all text-xs font-bold shadow-sm" data-proof-url="<%= lead.paymentProof %>" data-pupil="<%= lead.kidName || 'Pupilo' %>" data-tutor="<%= lead.name || 'Tutor' %>">
                         <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
                         <span>Ver Comprobante</span>
                       </button>
                       <% } else { %>
-                      <span class="text-slate-500 text-xs italic flex items-center gap-1">
-                        <i data-lucide="clock" class="w-3.5 h-3.5"></i> Comprobante Pendiente
+                      <span class="text-amber-400/90 bg-amber-950/40 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5">
+                        <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
+                        <span>Comprobante Pendiente</span>
                       </span>
                       <% } %>
                     </div>
 
-                    <% if (role === 'admin') { %>
-                    <button type="button" data-lead-id="<%= lead.id %>" class="btn-delete-lead p-2 text-red-400 hover:text-white hover:bg-red-950/80 rounded-xl transition-all" title="Eliminar registro">
-                      <i data-lucide="trash-2" class="w-4 h-4"></i>
-                    </button>
-                    <% } %>
-                  </div>
+                    <div class="flex items-center gap-1.5">
+                      <% const cleanPhone = (lead.phone || lead.emergencyContact || '').replace(/[^0-9]/g, ''); %>
+                      <% if (cleanPhone) { %>
+                      <a href="https://wa.me/<%= cleanPhone %>" target="_blank" rel="noopener" class="px-2.5 py-1.5 text-emerald-400 hover:text-white hover:bg-emerald-950/90 border border-emerald-500/30 rounded-xl transition-all inline-flex items-center gap-1 text-[11px] font-bold" title="Contactar por WhatsApp">
+                        <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                        <span class="hidden sm:inline">WhatsApp</span>
+                      </a>
+                      <% } %>
+
+                      <% if (role === 'admin') { %>
+                      <button type="button" data-lead-id="<%= lead.id %>" class="btn-delete-lead p-2 text-red-400 hover:text-white hover:bg-red-950/90 border border-transparent hover:border-red-500/30 rounded-xl transition-all" title="Eliminar registro">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                      </button>
+                      <% } %>
+                    </div>
+
                 </div>
                 <% }); %>
               <% } %>
@@ -1341,6 +1402,88 @@
           </div>
         </div>
 
+        <!-- MODAL ESCÁNER DE CÉDULA DE IDENTIDAD (ACREDITACIÓN EN TERRENO) -->
+        <div id="scanner-modal" class="fixed inset-0 z-50 hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
+          <div class="relative max-w-xl w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl p-4 sm:p-6 space-y-4 my-auto">
+            
+            <!-- Cabecera del Escáner -->
+            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
+              <div class="flex items-center gap-2.5">
+                <div class="w-9 h-9 rounded-2xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
+                  <i data-lucide="scan-face" class="w-5 h-5"></i>
+                </div>
+                <div>
+                  <h3 class="text-sm font-black text-white">Escáner de Cédula de Identidad</h3>
+                  <p class="text-[11px] text-slate-400">Acreditación y búsqueda de pupilos en terreno</p>
+                </div>
+              </div>
+              <button type="button" id="btn-close-scanner" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors">
+                ✕
+              </button>
+            </div>
+
+            <!-- Visor de Cámara y Lector -->
+            <div id="scanner-camera-container" class="space-y-3">
+              <div class="relative w-full aspect-video sm:aspect-[4/3] bg-black rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
+                <div id="reader-qr-view" class="w-full h-full"></div>
+                <!-- Guía visual superpuesta -->
+                <div class="absolute inset-0 pointer-events-none flex items-center justify-center p-6">
+                  <div class="w-full h-36 border-2 border-dashed border-blue-400/80 rounded-2xl flex flex-col items-center justify-center bg-blue-500/5 text-center px-4">
+                    <span class="text-xs font-bold text-blue-300 drop-shadow">Apunta al código de barras trasero (PDF417) o QR de la cédula</span>
+                    <span class="text-[10px] text-slate-300 mt-1 opacity-80">El RUT se detectará automáticamente</span>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Selector de cámara (frontal / trasera) & Estado -->
+              <div class="flex items-center justify-between text-xs text-slate-400 px-1">
+                <span id="scanner-status-text" class="flex items-center gap-1.5 text-blue-400 font-semibold">
+                  <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
+                  Cámara activa lista para escanear
+                </span>
+                <button type="button" id="btn-switch-camera" class="hover:text-white transition-colors underline flex items-center gap-1">
+                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+                  <span>Cambiar Cámara</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Opción alternativa: Entrada manual rápida -->
+            <div class="pt-2 border-t border-slate-800 flex gap-2">
+              <input type="text" id="manual-rut-input" placeholder="O ingresa el RUT manualmente (ej: 12.345.678-9)..." class="admin-input flex-1 px-3 py-2 text-xs text-white placeholder-slate-500 font-mono">
+              <button type="button" id="btn-search-manual-rut" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white transition-all flex items-center gap-1.5 shrink-0">
+                <i data-lucide="search" class="w-3.5 h-3.5"></i>
+                <span>Buscar</span>
+              </button>
+            </div>
+
+            <!-- Panel de Resultados de Acreditación (Aparece tras escanear) -->
+            <div id="scanner-results-container" class="hidden space-y-3 pt-2">
+              <!-- Estado / Mensaje de coincidencia -->
+              <div id="scanner-result-header" class="p-3 rounded-2xl flex items-center justify-between">
+                <!-- Rellenado dinámicamente -->
+              </div>
+
+              <!-- Lista de pupilos encontrados -->
+              <div id="scanner-pupils-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+                <!-- Rellenado dinámicamente -->
+              </div>
+
+              <div class="flex gap-2 pt-2">
+                <button type="button" id="btn-scan-again" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-1.5">
+                  <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+                  <span>Escanear Otra Cédula</span>
+                </button>
+                <button type="button" id="btn-filter-table-with-rut" class="py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all flex items-center justify-center gap-1.5" title="Ver en la tabla principal">
+                  <i data-lucide="table" class="w-3.5 h-3.5"></i>
+                  <span>Ver en Tabla</span>
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
         <!-- MODAL LIGHTBOX PARA VER COMPROBANTE DE PAGO EN GRANDE -->
         <div id="proof-lightbox-modal" class="fixed inset-0 z-50 hidden proof-modal-backdrop bg-slate-950/90 flex items-center justify-center p-3 sm:p-6">
           <div class="relative max-w-2xl w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl space-y-4 p-4 sm:p-6 animate-in fade-in zoom-in-95 duration-150">
@@ -1370,6 +1513,118 @@
           </div>
         </div>
 
+        <!-- PESTAÑA: GESTIÓN DE USUARIOS Y ACCESOS (SOLO ADMINISTRADOR) -->
+        <% if (role === 'admin') { %>
+        <div id="tab-users" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-4 sm:p-7 rounded-3xl border border-gray-800 space-y-6">
+            
+            <!-- Cabecera de Usuarios -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-800">
+              <div>
+                <div class="flex items-center gap-2 mb-1">
+                  <div class="w-8 h-8 rounded-xl bg-emerald-600/20 text-emerald-400 flex items-center justify-center">
+                    <i data-lucide="user-cog" class="w-4 h-4"></i>
+                  </div>
+                  <h2 class="text-lg sm:text-xl font-black text-white">Gestión de Usuarios del Sistema</h2>
+                </div>
+                <p class="text-xs text-gray-400">
+                  Crea, edita o elimina cuentas de acceso. Administra roles (Administrador o Editor para terreno).
+                </p>
+              </div>
+
+              <button type="button" id="btn-open-create-user" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/20 active:scale-95 transition-all flex items-center justify-center gap-2">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                <span>Crear Nuevo Usuario</span>
+              </button>
+            </div>
+
+            <!-- Formulario Desplegable para Crear / Editar Usuario -->
+            <div id="user-form-panel" class="hidden p-5 rounded-2xl bg-gray-900 border border-emerald-500/40 shadow-xl space-y-4">
+              <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2" id="user-form-title">
+                  <i data-lucide="user-plus" class="w-4 h-4 text-emerald-400"></i>
+                  <span>Crear Nuevo Usuario</span>
+                </h3>
+                <button type="button" id="btn-cancel-user-form" class="text-xs text-gray-400 hover:text-white">✕ Cancelar</button>
+              </div>
+
+              <input type="hidden" id="user-edit-id" value="">
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1">Nombre Completo *</label>
+                  <input type="text" id="user-input-name" placeholder="Ej: Carlos Silva" class="admin-input w-full px-3.5 py-2 text-xs text-white">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1">Nombre de Usuario (Login) *</label>
+                  <input type="text" id="user-input-username" placeholder="Ej: carlossilva" class="admin-input w-full px-3.5 py-2 text-xs text-white font-mono">
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1">Rol de Acceso *</label>
+                  <select id="user-input-role" class="admin-input w-full px-3.5 py-2 text-xs text-white">
+                    <option value="editor">Editor (Acceso a Scanner y Base de Datos)</option>
+                    <option value="admin">Administrador (Control total del CMS)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1" id="user-label-password">Contraseña *</label>
+                  <input type="password" id="user-input-password" placeholder="Mínimo 12 caracteres" minlength="12" class="admin-input w-full px-3.5 py-2 text-xs text-white">
+                  <span class="text-[10px] text-gray-500 hidden" id="user-hint-password">Deja en blanco para mantener la contraseña actual.</span>
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-2">
+                <button type="button" id="btn-save-user" class="px-5 py-2.5 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/30 transition-all flex items-center gap-1.5">
+                  <i data-lucide="check" class="w-4 h-4"></i>
+                  <span>Guardar Usuario</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Lista de Usuarios Existentes (Diseño Mobile-First) -->
+            <div class="space-y-3" id="users-list-container">
+              <% (typeof usersList !== 'undefined' ? usersList : []).forEach(u => { %>
+              <div class="user-card-item bg-slate-950/70 border border-slate-800 hover:border-slate-700 rounded-2xl p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 transition-all" data-user-id="<%= u.id %>" data-username="<%= u.username %>" data-name="<%= u.name %>" data-role="<%= u.role %>">
+                <div class="flex items-center gap-3">
+                  <div class="w-10 h-10 rounded-2xl <%= u.role === 'admin' ? 'bg-blue-600/20 text-blue-400 border border-blue-500/30' : 'bg-amber-600/20 text-amber-400 border border-amber-500/30' %> flex items-center justify-center font-bold text-base shrink-0">
+                    <%= (u.name || u.username)[0].toUpperCase() %>
+                  </div>
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <h4 class="font-bold text-sm text-white"><%= u.name %></h4>
+                      <span class="text-[10px] font-mono px-2 py-0.5 rounded-md <%= u.role === 'admin' ? 'bg-blue-950 text-blue-300 border border-blue-500/40' : 'bg-amber-950 text-amber-300 border border-amber-500/40' %>">
+                        <%= u.role === 'admin' ? 'ADMIN' : 'EDITOR' %>
+                      </span>
+                    </div>
+                    <p class="text-xs text-slate-400 font-mono mt-0.5">@<%= u.username %></p>
+                  </div>
+                </div>
+
+                <!-- Acciones de Usuario -->
+                <div class="flex items-center gap-2 self-end sm:self-auto">
+                  <button type="button" class="btn-edit-user px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 transition-colors flex items-center gap-1.5" data-id="<%= u.id %>" data-username="<%= u.username %>" data-name="<%= u.name %>" data-role="<%= u.role %>">
+                    <i data-lucide="edit-3" class="w-3.5 h-3.5"></i>
+                    <span>Editar</span>
+                  </button>
+
+                  <% if (u.username !== username) { %>
+                  <button type="button" class="btn-delete-user px-3 py-1.5 rounded-xl bg-red-950/60 hover:bg-red-900 border border-red-500/30 text-xs font-semibold text-red-300 transition-colors flex items-center gap-1.5" data-id="<%= u.id %>" data-username="<%= u.username %>">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    <span>Eliminar</span>
+                  </button>
+                  <% } %>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+
+          </div>
+        </div>
+        <% } %>
+
         <!-- PESTAÑA: SEGURIDAD -->
         <div id="tab-security" class="tab-pane hidden space-y-6">
           <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800 max-w-md">
@@ -1385,8 +1640,8 @@
                 <input type="password" id="input-currentPassword" required class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
               </div>
               <div>
-                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nueva Contraseña (mínimo 6 caracteres)</label>
-                <input type="password" id="input-newPassword" required minlength="6" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nueva Contraseña (mínimo 12 caracteres)</label>
+                <input type="password" id="input-newPassword" required minlength="12" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-400">
               </div>
               <button type="button" id="btn-submit-change-password" class="px-5 py-2.5 rounded-3xl text-xs font-bold text-white bg-yellow-500 hover:bg-yellow-400 transition-all">
                 Actualizar Clave

@@ -10,7 +10,6 @@ const { rateLimit } = require('./middleware/rateLimit');
 
 const publicRoutes = require('./routes/public');
 const adminRoutes = require('./routes/admin');
-const db = require('./services/db');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -53,7 +52,7 @@ app.use(
 
 // Permissions-Policy: deshabilitar APIs sensibles no requeridas
 app.use((req, res, next) => {
-  res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=()');
+  res.setHeader('Permissions-Policy', 'camera=(self), microphone=(), geolocation=(), payment=()');
   next();
 });
 
@@ -64,18 +63,24 @@ if (process.env.NODE_ENV === 'production') {
   app.use(morgan('dev'));
 }
 
+// Configurar trust proxy para obtener la IP real del cliente detrás de reverse proxies / Docker
+app.set('trust proxy', 1);
+
 // Procesamiento de datos de formularios y JSON
 app.use(express.json({ limit: '1mb' }));
 app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
 // Gestión de sesiones — 8 horas de vida, no 7 días
+// secure: solo sobre HTTPS (activar COOKIE_SECURE=true en producción detrás de SSL/TLS)
+const isSecureCookie = process.env.COOKIE_SECURE === 'true';
 app.use(
   cookieSession({
     name: 'landing_cms_session',
     keys: [process.env.SESSION_SECRET || 'modern_cms_default_secret_key_change_me'],
     maxAge: 8 * 60 * 60 * 1000, // 8 horas
     httpOnly: true,
-    sameSite: 'lax'
+    sameSite: 'lax',
+    secure: isSecureCookie
   })
 );
 
@@ -90,8 +95,7 @@ app.set('views', path.join(__dirname, 'views'));
 app.use(express.static(path.join(__dirname, 'public')));
 // Servir uploads persistentes optimizados del CMS con caché eficiente
 app.use('/uploads', express.static(path.resolve(__dirname, '../data/uploads'), {
-  maxAge: '7d',
-  immutable: true
+  maxAge: '1d'
 }));
 
 // Rutas
@@ -100,9 +104,10 @@ app.use('/admin', adminRoutes);
 
 // Manejo de Error 404
 app.use((req, res) => {
+  const contentStore = require('./services/contentStore');
   res.status(404).render('index', {
-    content: require('./services/contentStore').getContent(),
-    theme: require('./services/contentStore').getTheme(),
+    content: contentStore.getContent(),
+    theme: contentStore.getTheme(),
     siteUrl: `${req.protocol}://${req.get('host')}`,
     jsonLd: '{}'
   });
@@ -133,11 +138,19 @@ if (require.main === module) {
     console.warn('====================================================');
   }
 
+  const sessionSecret = process.env.SESSION_SECRET;
+  if (!sessionSecret || sessionSecret === 'kidsrun_cms_super_secret_key_change_in_production' || sessionSecret === 'modern_cms_default_secret_key_change_me') {
+    console.warn('⚠️  ADVERTENCIA DE SEGURIDAD (SESSION_SECRET):');
+    console.warn('   SESSION_SECRET no está configurado o usa el valor predeterminado.');
+    console.warn('   Para un entorno seguro en producción, define SESSION_SECRET con una clave única.');
+    console.warn('====================================================');
+  }
+
   app.listen(PORT, () => {
     console.log('====================================================');
     console.log(`🚀 Landing Page & CMS corriendo en http://localhost:${PORT}`);
     console.log(`🔑 Panel de Administración: http://localhost:${PORT}/admin`);
-    console.log(`⚡ Modo: ${process.env.NODE_ENV || 'production'}`);
+    console.log(`⚡ Modo: ${process.env.NODE_ENV || 'development (default)'}`);
     console.log('====================================================');
   });
 }

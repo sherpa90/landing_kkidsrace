@@ -1,6 +1,13 @@
 node_modules/
 .env
+.env.*
+!.env.example
 data/leads.json
+data/users.json
+data/admin-auth.json
+data/*.tmp
+data/uploads/
+data/private_uploads/
 npm-debug.log*
 .DS_Store
 Thumbs.db

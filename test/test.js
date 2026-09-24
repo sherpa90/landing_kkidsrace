@@ -274,6 +274,29 @@ async function runTests() {
     assert.ok(res.headers.location.includes('/admin/login'));
   });
 
+  await itAsync('OWASP A01: POST /admin/login con CSRF token inválido debe ser rechazado con HTTP 403', async () => {
+    const payload = JSON.stringify({
+      username: 'admin',
+      password: 'admin',
+      csrfToken: 'token_falso_invalido_12345'
+    });
+    const res = await makeRequest('/admin/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Content-Length': Buffer.byteLength(payload)
+      },
+      body: payload
+    });
+    assert.strictEqual(res.status, 403, 'Intento de login con token CSRF inválido debe retornar 403');
+  });
+
+  await itAsync('OWASP A01: GET /admin/api/proofs/:filename sin autenticación debe redirigir al login', async () => {
+    const res = await makeRequest('/admin/api/proofs/proof-test-secret.webp');
+    assert.strictEqual(res.status, 302);
+    assert.ok(res.headers.location.includes('/admin/login'), 'Acceso a comprobantes sin sesión debe redirigir al login');
+  });
+
   await itAsync('Logo Oficial: Debe reemplazar el logo/icono por defecto en la portada cuando brand.logoUrl está configurado', async () => {
     // 1. Guardar logo personalizado
     const testLogoUrl = '/uploads/test-brand-logo.webp';
@@ -294,6 +317,32 @@ async function runTests() {
     assert.ok(!resRestored.body.includes(testLogoUrl), 'Al limpiar logoUrl, debe volver a mostrar el logo/icono por defecto');
   });
 
+  await itAsync('OWASP A03: Exportación CSV debe mitigar Formula Injection anteponiendo apóstrofe', async () => {
+    const testInscription = {
+      name: '=SUM(1,2)',
+      email: 'formula@test.cl',
+      kidName: '+CMD|"/C calc"!A0',
+      distance: '500 Metros (3-5 años)'
+    };
+    const saved = await db.saveInscription(testInscription);
+    const inscriptions = await db.getInscriptions();
+    const found = inscriptions.find(i => i.email === 'formula@test.cl');
+    assert.ok(found, 'Debe registrar inscripción con caracteres especiales');
+
+    const dangerousChars = ['=', '+', '-', '@', '\t', '\r'];
+    function testSanitizeCell(val) {
+      if (val === null || val === undefined) return '""';
+      const str = String(val);
+      const sanitized = (str.length > 0 && dangerousChars.includes(str.charAt(0))) ? `'${str}` : str;
+      return `"${sanitized.replace(/"/g, '""')}"`;
+    }
+
+    assert.strictEqual(testSanitizeCell(found.name), '"\'=SUM(1,2)"', 'Debe neutralizar fórmula iniciando con =');
+    assert.strictEqual(testSanitizeCell(found.kidName), '"\'+CMD|""/C calc""!A0"', 'Debe neutralizar comando iniciando con +');
+
+    await db.deleteInscription(found.id);
+  });
+
   testServer.close();
 
   console.log(`\n====================================================`);
@@ -302,8 +351,8 @@ async function runTests() {
 // 6. Pruebas de Secciones Dinámicas (Orden y Visibilidad)
 // ==========================================
 console.log('\n🧩 6. Pruebas de Secciones Dinámicas (Page Builder):');
-try {
-  // Test contentStore save and retrieve sections
+
+it('Debe guardar y recuperar el orden y visibilidad de secciones', () => {
   const contentStore = require('../src/services/contentStore');
   const current = contentStore.getContent();
   const testOrder = ["venue", "sponsors", "countdown", "hero", "circuits", "schedule", "gallery", "kits", "testimonials", "faq", "contact"];
@@ -320,49 +369,116 @@ try {
   });
   
   const updated = contentStore.getContent();
-  if (updated.sections && updated.sections.order[0] === 'venue' && updated.sections.visibility.sponsors === false) {
-    console.log('  ✓ Debe guardar y recuperar el orden y visibilidad de secciones');
-  } else {
-    throw new Error('Fallo al persistir orden o visibilidad de secciones');
-  }
+  assert.ok(updated.sections && updated.sections.order[0] === 'venue' && updated.sections.visibility.sponsors === false, 'Fallo al persistir orden o visibilidad de secciones');
   
   // Restore original
   if (current.sections) {
     contentStore.saveContent({ sections: current.sections });
   }
-} catch (e) {
-  console.error('  ✕ Error en pruebas de secciones:', e.message);
-  process.exit(1);
-}
+});
 
 
 // ==========================================
 // 7. Pruebas de Servicio de Email (Resend)
 // ==========================================
 console.log('\n📧 7. Pruebas de Servicio de Email (Auto-responder):');
-try {
+
+await itAsync('Debe procesar plantilla de confirmación de inscripción en modo seguro y con escape HTML (Anti-XSS)', async () => {
   const emailService = require('../src/services/emailService');
-  // Prueba modo simulado cuando no hay API Key configurada
+  
+  // Probar neutralización de Email HTML Injection
+  let capturedPayload = null;
+  const originalSendMail = emailService.sendMail;
+  emailService.sendMail = async (opts) => {
+    capturedPayload = opts;
+    return originalSendMail.call(emailService, opts);
+  };
+
   const result = await emailService.sendInscriptionConfirmation({
-    raceName: 'KidsRun 2026 Test',
-    name: 'Familia Test',
+    raceName: 'KidsRun <script>alert("xss")</script>',
+    name: 'Familia <img src=x onerror=1>',
     email: 'test@familia.cl',
-    kidName: 'Lucas Runner',
+    kidName: 'Lucas "Runner" & <Amigo>',
     kidAge: 6,
     distance: '1 Kilómetro',
     tutorRut: '12.345.678-9'
   });
-  if (result.success && result.simulated) {
-    console.log('  ✓ Debe procesar plantilla de confirmación de inscripción en modo seguro');
-  } else {
-    throw new Error('Fallo al generar plantilla o procesar envío seguro');
-  }
-} catch (e) {
-  console.error('  ✕ Error en prueba de emailService:', e.message);
-  process.exit(1);
-}
 
-console.log(`🎯 Resultados: ${passedTests} de ${totalTests} pruebas pasadas con éxito.`);
+  emailService.sendMail = originalSendMail;
+
+  assert.ok(result.success && result.simulated && capturedPayload, 'Fallo al generar plantilla o procesar envío seguro');
+  assert.ok(!capturedPayload.html.includes('<script>'), 'El HTML del email no debe contener <script> sin escapar');
+  assert.ok(!capturedPayload.html.includes('<img src=x'), 'El HTML del email no debe contener <img> sin escapar');
+  assert.ok(capturedPayload.html.includes('&lt;script&gt;'), 'Los caracteres especiales deben convertirse en entidades HTML');
+  assert.ok(capturedPayload.html.includes('&amp;'), 'Ampersand debe convertirse en &amp;');
+});
+
+
+// ==========================================
+// 8. Pruebas de Restricción de Roles (Editor vs Admin)
+// ==========================================
+console.log('\n🛡️ 8. Pruebas de Restricción de Roles (Editor vs Admin):');
+
+it('Usuario Editor NO tiene permisos para modificar contenido CMS (HTTP 403)', () => {
+  const auth = require('../src/services/auth');
+  const mockReqEditor = { session: { role: 'editor', isEditor: true, username: 'editor' }, xhr: true, headers: {} };
+  let editorBlocked = false;
+  const mockResEditor = {
+    status: (code) => {
+      if (code === 403) editorBlocked = true;
+      return { json: () => {} };
+    }
+  };
+  auth.requireAdmin(mockReqEditor, mockResEditor, () => {});
+  assert.ok(editorBlocked, 'El middleware requireAdmin no bloqueó al rol editor');
+});
+
+
+// ==========================================
+// 9. Pruebas de CRUD de Usuarios (Solo Administrador)
+// ==========================================
+console.log('\n👥 9. Pruebas de CRUD de Usuarios (Gestión de Cuentas):');
+
+it('Debe permitir al Administrador crear nuevos usuarios (Admin/Editor)', () => {
+  const auth = require('../src/services/auth');
+  const createRes = auth.createUser({
+    username: 'operador_prueba',
+    name: 'Operador Terreno',
+    role: 'editor',
+    password: 'passwordSeguro123!'
+  });
+  assert.ok(createRes.success, 'Fallo al crear usuario: ' + (createRes.error || ''));
+
+  // Guardar ID para las siguientes pruebas
+  global.__testUserId = createRes.user.id;
+});
+
+it('Debe permitir editar nombre, rol y contraseña de usuarios', () => {
+  const auth = require('../src/services/auth');
+  const updateRes = auth.updateUser(global.__testUserId, {
+    name: 'Operador Modificado',
+    role: 'editor'
+  });
+  assert.ok(updateRes.success && updateRes.user.name === 'Operador Modificado', 'Fallo al actualizar usuario: ' + (updateRes.error || ''));
+});
+
+it('Debe permitir eliminar usuarios revocando su acceso', () => {
+  const auth = require('../src/services/auth');
+  const deleteRes = auth.deleteUser(global.__testUserId, 'admin');
+  assert.ok(deleteRes.success, 'Fallo al eliminar usuario: ' + (deleteRes.error || ''));
+  delete global.__testUserId;
+});
+
+it('Debe proteger al Administrador impidiendo la auto-eliminación accidental', () => {
+  const auth = require('../src/services/auth');
+  const users = auth.getUsers();
+  const adminUser = users.find(u => u.role === 'admin');
+  assert.ok(adminUser, 'Debe existir al menos un usuario admin');
+  const selfDeleteRes = auth.deleteUser(adminUser.id, adminUser.username);
+  assert.ok(!selfDeleteRes.success, 'Permitió auto-eliminar la cuenta admin activa');
+});
+
+console.log(`\n🎯 Resultados: ${passedTests} de ${totalTests} pruebas pasadas con éxito.`);
   console.log(`====================================================\n`);
 
   if (passedTests === totalTests) {

@@ -94,7 +94,7 @@ function addLead(leadData) {
     const activeRace = getActiveRace();
 
     const newLead = {
-      id: crypto.randomUUID ? crypto.randomUUID() : `insc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`,
+      id: leadData.id || (crypto.randomUUID ? crypto.randomUUID() : `insc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`),
       raceId: leadData.raceId || (activeRace ? activeRace.id : 'race-2026-primavera'),
       raceName: leadData.raceName || (activeRace ? activeRace.name : 'KidsRun 2026'),
       // Datos del tutor (minimización de datos)

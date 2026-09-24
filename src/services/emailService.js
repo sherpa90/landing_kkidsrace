@@ -6,6 +6,16 @@
 
 const contentStore = require('./contentStore');
 
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 class EmailService {
   /**
    * Obtiene la configuración de Resend desde site-content o variables de entorno
@@ -72,7 +82,18 @@ class EmailService {
     const eventDate = content.countdown?.eventDateDisplay || 'Fecha por confirmar';
     const eventTime = content.countdown?.eventTime || '09:00 AM';
 
-    const subject = `🎉 ¡Inscripción Confirmada! - ${brandName} (${inscription.kidName})`;
+    const safeBrandName = escapeHtml(brandName);
+    const safeRaceName  = escapeHtml(raceName);
+    const safeLocation  = escapeHtml(location);
+    const safeEventDate = escapeHtml(eventDate);
+    const safeEventTime = escapeHtml(eventTime);
+    const safeKidName   = escapeHtml(inscription.kidName);
+    const safeName      = escapeHtml(inscription.name);
+    const safeDistance  = escapeHtml(inscription.distance);
+    const safeTutorRut  = escapeHtml(inscription.tutorRut);
+    const safeKidAge    = inscription.kidAge ? `${parseInt(inscription.kidAge, 10)} años` : 'Participante';
+
+    const subject = `🎉 ¡Inscripción Confirmada! - ${safeBrandName} (${safeKidName})`;
 
     const html = `
       <!DOCTYPE html>
@@ -100,38 +121,38 @@ class EmailService {
         <div class="container">
           <div class="header">
             <div class="badge">🏅 Comprobante de Inscripción</div>
-            <h1 class="title">¡Bienvenido a ${brandName}!</h1>
+            <h1 class="title">¡Bienvenido a ${safeBrandName}!</h1>
           </div>
           <div class="content">
-            <div class="greeting">Hola, ${inscription.name} 👋</div>
+            <div class="greeting">Hola, ${safeName} 👋</div>
             <p style="line-height: 1.6; font-size: 15px; color: #334155;">
-              ¡Tenemos excelentes noticias! La inscripción para <strong>${inscription.kidName}</strong> ha sido recibida con éxito en el sistema. Estamos muy entusiasmados de recibirlos en la pista.
+              ¡Tenemos excelentes noticias! La inscripción para <strong>${safeKidName}</strong> ha sido recibida con éxito en el sistema. Estamos muy entusiasmados de recibirlos en la pista.
             </p>
 
             <div class="details-card">
               <div class="detail-row">
                 <span class="detail-label">Pequeño Corredor/a:</span>
-                <span class="detail-val">${inscription.kidName} (${inscription.kidAge ? inscription.kidAge + ' años' : 'Participante'})</span>
+                <span class="detail-val">${safeKidName} (${safeKidAge})</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Distancia / Categoría:</span>
-                <span class="detail-val" style="color: #2563eb;">${inscription.distance}</span>
+                <span class="detail-val" style="color: #2563eb;">${safeDistance}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Evento:</span>
-                <span class="detail-val">${raceName}</span>
+                <span class="detail-val">${safeRaceName}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Fecha y Hora:</span>
-                <span class="detail-val">${eventDate} • ${eventTime}</span>
+                <span class="detail-val">${safeEventDate} • ${safeEventTime}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Lugar de Largada:</span>
-                <span class="detail-val">${location}</span>
+                <span class="detail-val">${safeLocation}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Tutor Responsable:</span>
-                <span class="detail-val">${inscription.name} ${inscription.tutorRut ? '(' + inscription.tutorRut + ')' : ''}</span>
+                <span class="detail-val">${safeName} ${safeTutorRut ? '(' + safeTutorRut + ')' : ''}</span>
               </div>
             </div>
 
@@ -145,7 +166,7 @@ class EmailService {
             </p>
           </div>
           <div class="footer">
-            © ${new Date().getFullYear()} ${brandName} • Deporte, Familia y Sonrisas.<br>
+            © ${new Date().getFullYear()} ${safeBrandName} • Deporte, Familia y Sonrisas.<br>
             Este es un correo automático de confirmación.
           </div>
         </div>
