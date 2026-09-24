@@ -1449,28 +1449,74 @@ document.addEventListener('DOMContentLoaded', () => {
 // 9. Modo Construcción / Pre-Lanzamiento
 function initConstructionManager() {
   const toggle = document.getElementById('input-construction-enabled');
+  const toggleTrack = document.getElementById('construction-toggle-track');
+  const switchContainer = document.getElementById('construction-switch-container');
+  const btnActivate = document.getElementById('btn-construction-activate');
+  const btnDeactivate = document.getElementById('btn-construction-deactivate');
+  const headerToggleBtn = document.getElementById('btn-header-toggle-construction');
+  const headerStatusText = document.getElementById('header-construction-status-text');
   const statusPill = document.getElementById('construction-status-pill');
   const sidebarBadge = document.getElementById('sidebar-construction-badge');
   const topBadge = document.getElementById('top-construction-badge');
   const saveSectionBtn = document.getElementById('btn-save-construction-section');
 
-  const updateBadges = (enabled) => {
+  const updateConstructionUI = (enabled) => {
+    // 1. Input checkbox nativo
+    if (toggle) {
+      toggle.checked = enabled;
+    }
+
+    // 2. Track & Thumb CSS
+    if (toggleTrack) {
+      if (enabled) {
+        toggleTrack.classList.add('active');
+        toggleTrack.setAttribute('aria-checked', 'true');
+      } else {
+        toggleTrack.classList.remove('active');
+        toggleTrack.setAttribute('aria-checked', 'false');
+      }
+    }
+
+    // 3. Status Pill dentro de la pestaña
     if (statusPill) {
       statusPill.textContent = enabled ? 'ACTIVADO' : 'DESACTIVADO';
       if (enabled) {
-        statusPill.className = 'text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-amber-500 text-slate-950 animate-pulse';
+        statusPill.className = 'text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-amber-500 text-slate-950 animate-pulse';
       } else {
-        statusPill.className = 'text-[10px] font-black uppercase px-2 py-0.5 rounded-full bg-slate-800 text-slate-400';
+        statusPill.className = 'text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-400';
       }
     }
-    if (sidebarBadge) {
-      sidebarBadge.textContent = enabled ? 'ACTIVO' : 'OFF';
+
+    // 4. Botones directos Activar / Desactivar
+    if (btnActivate) {
       if (enabled) {
-        sidebarBadge.className = 'text-[9px] px-1.5 py-0.5 rounded-full font-black bg-amber-500 text-slate-950 animate-pulse';
+        btnActivate.classList.add('opacity-40', 'pointer-events-none');
       } else {
-        sidebarBadge.className = 'text-[9px] px-1.5 py-0.5 rounded-full font-black bg-slate-800 text-slate-400';
+        btnActivate.classList.remove('opacity-40', 'pointer-events-none');
       }
     }
+    if (btnDeactivate) {
+      if (enabled) {
+        btnDeactivate.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        btnDeactivate.classList.add('opacity-40', 'pointer-events-none');
+      }
+    }
+
+    // 5. Botón de cabecera (Header Toggle)
+    if (headerToggleBtn) {
+      if (enabled) {
+        headerToggleBtn.className = 'text-xs font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm bg-amber-500/20 border-amber-500/50 text-amber-300 hover:bg-amber-500/30';
+      } else {
+        headerToggleBtn.className = 'text-xs font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white';
+      }
+    }
+    if (headerStatusText) {
+      headerStatusText.textContent = enabled ? 'ON' : 'OFF';
+      headerStatusText.className = enabled ? 'font-black text-amber-400' : 'font-black text-slate-400';
+    }
+
+    // 6. Badge en cabecera
     if (topBadge) {
       if (enabled) {
         topBadge.classList.remove('hidden');
@@ -1480,33 +1526,89 @@ function initConstructionManager() {
         topBadge.classList.remove('flex');
       }
     }
+
+    // 7. Badge en barra lateral
+    if (sidebarBadge) {
+      sidebarBadge.textContent = enabled ? 'ACTIVO' : 'OFF';
+      if (enabled) {
+        sidebarBadge.className = 'text-[9px] px-1.5 py-0.5 rounded-full font-black bg-amber-500 text-slate-950 animate-pulse';
+      } else {
+        sidebarBadge.className = 'text-[9px] px-1.5 py-0.5 rounded-full font-black bg-slate-800 text-slate-400';
+      }
+    }
   };
 
-  if (toggle) {
-    toggle.addEventListener('change', async () => {
-      const isEnabled = toggle.checked;
-      updateBadges(isEnabled);
+  let isToggling = false;
 
-      try {
-        const res = await cmsFetch('/admin/api/toggle-construction', {
-          method: 'POST',
-          body: JSON.stringify({ enabled: isEnabled })
-        });
-        if (res.success) {
-          showAdminToast(res.message, isEnabled ? 'warning' : 'success');
-        } else {
-          showAdminToast(res.error || 'Error al cambiar estado', 'error');
-          toggle.checked = !isEnabled;
-          updateBadges(!isEnabled);
-        }
-      } catch (err) {
-        showAdminToast(err.message || 'Error de conexión', 'error');
-        toggle.checked = !isEnabled;
-        updateBadges(!isEnabled);
+  const executeToggle = async (desiredState) => {
+    if (isToggling) return;
+    isToggling = true;
+
+    const currentState = toggle ? toggle.checked : false;
+    const targetState = (typeof desiredState === 'boolean') ? desiredState : !currentState;
+
+    // Actualización visual inmediata
+    updateConstructionUI(targetState);
+
+    try {
+      const res = await cmsFetch('/admin/api/toggle-construction', {
+        method: 'POST',
+        body: JSON.stringify({ enabled: targetState })
+      });
+
+      if (res.success) {
+        showAdminToast(res.message, targetState ? 'warning' : 'success');
+        updateConstructionUI(res.enabled);
+      } else {
+        showAdminToast(res.error || 'Error al cambiar estado', 'error');
+        updateConstructionUI(currentState);
       }
+    } catch (err) {
+      showAdminToast(err.message || 'Error de conexión', 'error');
+      updateConstructionUI(currentState);
+    } finally {
+      isToggling = false;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  };
+
+  // Clic en el Switch Container
+  if (switchContainer) {
+    switchContainer.addEventListener('click', (e) => {
+      e.preventDefault();
+      executeToggle();
     });
   }
 
+  // Cambio en el input checkbox
+  if (toggle) {
+    toggle.addEventListener('change', () => {
+      executeToggle(toggle.checked);
+    });
+  }
+
+  // Clic en botón Activar
+  if (btnActivate) {
+    btnActivate.addEventListener('click', () => {
+      executeToggle(true);
+    });
+  }
+
+  // Clic en botón Desactivar
+  if (btnDeactivate) {
+    btnDeactivate.addEventListener('click', () => {
+      executeToggle(false);
+    });
+  }
+
+  // Clic en botón de Cabecera
+  if (headerToggleBtn) {
+    headerToggleBtn.addEventListener('click', () => {
+      executeToggle();
+    });
+  }
+
+  // Guardado de la sección completa
   if (saveSectionBtn) {
     saveSectionBtn.addEventListener('click', async () => {
       const originalText = saveSectionBtn.innerHTML;
@@ -1538,7 +1640,7 @@ function initConstructionManager() {
 
         if (res.success) {
           showAdminToast('¡Configuración de Modo Construcción guardada exitosamente!', 'success');
-          updateBadges(construction.enabled);
+          updateConstructionUI(construction.enabled);
         } else {
           showAdminToast(res.error || 'No se pudo guardar la configuración', 'error');
         }
@@ -1551,5 +1653,18 @@ function initConstructionManager() {
       }
     });
   }
+
+  // Sincronizar estado inicial al arrancar
+  if (toggle) {
+    updateConstructionUI(toggle.checked);
+  }
 }
+
+// Inicialización de respaldo para Modo Construcción
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initConstructionManager);
+} else {
+  initConstructionManager();
+}
+
 

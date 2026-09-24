@@ -51,6 +51,15 @@
 
     <!-- Acciones Rápidas -->
     <div class="flex items-center gap-2">
+      <!-- Botón Quick Toggle Modo Construcción en Header -->
+      <button type="button" id="btn-header-toggle-construction" class="text-xs font-bold px-3 py-1.5 rounded-xl border transition-all flex items-center gap-1.5 cursor-pointer shadow-sm <%= content.construction?.enabled ? 'bg-amber-500/20 border-amber-500/50 text-amber-300 hover:bg-amber-500/30' : 'bg-slate-800 border-slate-700 text-slate-300 hover:bg-slate-700 hover:text-white' %>" title="Activar o Desactivar Modo Construcción instantáneamente con un clic">
+        <i data-lucide="construction" class="w-3.5 h-3.5 text-amber-400"></i>
+        <span class="hidden sm:inline">Construcción:</span>
+        <span id="header-construction-status-text" class="font-black <%= content.construction?.enabled ? 'text-amber-400' : 'text-slate-400' %>">
+          <%= content.construction?.enabled ? 'ON' : 'OFF' %>
+        </span>
+      </button>
+
       <!-- Indicador de Modo Construcción -->
       <div id="top-construction-badge" class="<%= content.construction?.enabled ? '' : 'hidden' %> hidden sm:flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-amber-500/20 border border-amber-500/40 text-amber-300 text-xs font-bold">
         <span class="w-2 h-2 rounded-full bg-amber-400 animate-ping"></span>
@@ -1685,25 +1694,39 @@
               </div>
             </div>
 
-            <!-- Interruptor Principal On/Off -->
-            <div class="p-5 rounded-2xl bg-gray-900/90 border border-gray-800 flex items-center justify-between gap-4">
-              <div class="space-y-0.5">
+            <!-- Interruptor Principal On/Off con Botones Rápidos -->
+            <div class="p-5 rounded-2xl bg-gray-900/90 border border-gray-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div class="space-y-1">
                 <div class="flex items-center gap-2">
                   <span class="text-sm font-bold text-white">Estado del Modo Construcción</span>
-                  <span id="construction-status-pill" class="text-[10px] font-black uppercase px-2 py-0.5 rounded-full <%= content.construction?.enabled ? 'bg-amber-500 text-slate-950 animate-pulse' : 'bg-slate-800 text-slate-400' %>">
+                  <span id="construction-status-pill" class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full transition-all <%= content.construction?.enabled ? 'bg-amber-500 text-slate-950 animate-pulse' : 'bg-slate-800 text-slate-400' %>">
                     <%= content.construction?.enabled ? 'ACTIVADO' : 'DESACTIVADO' %>
                   </span>
                 </div>
                 <p class="text-xs text-gray-400">
-                  Activa para ocultar la web al público o desactiva para abrir la web completa y el formulario de inscripciones.
+                  Activa para que el público general vea la pantalla de lanzamiento o desactiva para publicar la web completa.
                 </p>
               </div>
 
-              <!-- Switch Toggle -->
-              <label class="relative inline-flex items-center cursor-pointer shrink-0">
-                <input type="checkbox" id="input-construction-enabled" class="sr-only peer" <%= content.construction?.enabled ? 'checked' : '' %>>
-                <div class="w-14 h-7 bg-gray-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[4px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-6 after:w-6 after:transition-all peer-checked:bg-amber-500"></div>
-              </label>
+              <!-- Controles On/Off: Botones y Switch interactivo -->
+              <div class="flex items-center gap-2.5 self-start sm:self-auto">
+                <button type="button" id="btn-construction-activate" class="text-xs font-bold px-3 py-2 rounded-xl border border-amber-500/40 text-amber-300 hover:bg-amber-500/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm <%= content.construction?.enabled ? 'opacity-40 pointer-events-none' : '' %>" title="Poner la web en modo construcción">
+                  <i data-lucide="lock" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>Activar</span>
+                </button>
+                <button type="button" id="btn-construction-deactivate" class="text-xs font-bold px-3 py-2 rounded-xl border border-emerald-500/40 text-emerald-300 hover:bg-emerald-500/20 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer shadow-sm <%= !content.construction?.enabled ? 'opacity-40 pointer-events-none' : '' %>" title="Abrir y publicar la web completa">
+                  <i data-lucide="globe" class="w-3.5 h-3.5 text-emerald-400"></i>
+                  <span>Desactivar</span>
+                </button>
+
+                <!-- Switch Visual con Custom CSS -->
+                <div id="construction-switch-container" class="flex items-center ml-1 cursor-pointer" title="Haz clic para alternar ON / OFF">
+                  <input type="checkbox" id="input-construction-enabled" class="sr-only" <%= content.construction?.enabled ? 'checked' : '' %>>
+                  <div id="construction-toggle-track" class="construction-toggle-track <%= content.construction?.enabled ? 'active' : '' %>" role="switch" aria-checked="<%= content.construction?.enabled ? 'true' : 'false' %>">
+                    <div class="construction-toggle-thumb"></div>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <!-- Formulario de Configuración de la Pantalla de Construcción -->

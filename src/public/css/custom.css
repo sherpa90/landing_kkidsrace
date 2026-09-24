@@ -345,3 +345,33 @@ html.dark .sponsor-card:hover {
   display: none !important;
 }
 
+/* ─── Construction Mode Toggle Switch ─── */
+.construction-toggle-track {
+  width: 52px;
+  height: 28px;
+  background-color: #334155;
+  border-radius: 9999px;
+  position: relative;
+  transition: background-color 0.25s ease;
+  cursor: pointer;
+}
+.construction-toggle-track.active {
+  background-color: #f59e0b;
+}
+.construction-toggle-thumb {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 24px;
+  height: 24px;
+  background-color: #ffffff;
+  border-radius: 9999px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+  transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  pointer-events: none;
+}
+.construction-toggle-track.active .construction-toggle-thumb {
+  transform: translateX(24px);
+}
+
+

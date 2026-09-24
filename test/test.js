@@ -343,8 +343,6 @@ async function runTests() {
     await db.deleteInscription(found.id);
   });
 
-  testServer.close();
-
   console.log(`\n====================================================`);
   
 // ==========================================
@@ -528,6 +526,10 @@ await itAsync('POST /api/notify-launch debe permitir registrar emails para aviso
   const data = JSON.parse(res.body);
   assert.strictEqual(data.success, true);
 });
+
+if (testServer) {
+  testServer.close();
+}
 
 console.log(`\n🎯 Resultados: ${passedTests} de ${totalTests} pruebas pasadas con éxito.`);
   console.log(`====================================================\n`);

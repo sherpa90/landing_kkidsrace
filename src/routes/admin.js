@@ -117,7 +117,7 @@ router.get('/', auth.requireAuth, async (req, res) => {
 });
 
 // Guardar Actualizaciones de Contenido desde el CMS (CSRF protegido)
-router.post('/api/content', auth.requireAdmin, validateCsrf, (req, res) => {
+router.post('/api/content', auth.requireAuth, validateCsrf, (req, res) => {
   try {
     const newContent = req.body;
     if (!newContent || typeof newContent !== 'object' || Array.isArray(newContent)) {
@@ -146,7 +146,7 @@ router.post('/api/content', auth.requireAdmin, validateCsrf, (req, res) => {
 });
 
 // Endpoint rápido para activar/desactivar Modo Construcción
-router.post('/api/toggle-construction', auth.requireAdmin, validateCsrf, (req, res) => {
+router.post('/api/toggle-construction', auth.requireAuth, validateCsrf, (req, res) => {
   try {
     const current = contentStore.getContent();
     const currentConstruction = current.construction || {};
