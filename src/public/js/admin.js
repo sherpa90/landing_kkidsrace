@@ -68,6 +68,57 @@ function initAdminTabs() {
   const tabButtons = document.querySelectorAll('.tab-btn');
   const tabPanes = document.querySelectorAll('.tab-pane');
 
+  // Elementos para el modo pantalla completa de participantes
+  const sidebarNav = document.getElementById('sidebar-nav');
+  const showSidebarBtn = document.getElementById('btn-show-sidebar-leads');
+  const layoutWrapper = document.getElementById('main-layout-wrapper');
+
+  // Tabs que deben ocultar el sidebar para maximizar el espacio
+  const FULLWIDTH_TABS = new Set(['leads']);
+
+  function hideSidebarForFullWidth() {
+    if (!sidebarNav) return;
+    // Ocultar sidebar con animación (solo en escritorio md+)
+    sidebarNav.style.transition = 'opacity 200ms ease, transform 200ms ease, width 250ms ease, min-width 250ms ease, padding 250ms ease';
+    sidebarNav.style.overflow = 'hidden';
+    sidebarNav.style.opacity = '0';
+    sidebarNav.style.transform = 'translateX(-12px)';
+    sidebarNav.style.width = '0';
+    sidebarNav.style.minWidth = '0';
+    sidebarNav.style.padding = '0';
+    // Quitar el gap del contenedor
+    if (layoutWrapper) layoutWrapper.style.gap = '0';
+    // Mostrar botón flotante en escritorio
+    if (showSidebarBtn && window.innerWidth >= 768) {
+      showSidebarBtn.classList.remove('hidden');
+      showSidebarBtn.classList.add('flex');
+    }
+  }
+
+  function showSidebarFromFullWidth() {
+    if (!sidebarNav) return;
+    sidebarNav.style.transition = 'opacity 200ms ease, transform 200ms ease, width 250ms ease, min-width 250ms ease, padding 250ms ease';
+    sidebarNav.style.opacity = '1';
+    sidebarNav.style.transform = '';
+    sidebarNav.style.width = '';
+    sidebarNav.style.minWidth = '';
+    sidebarNav.style.padding = '';
+    sidebarNav.style.overflow = '';
+    if (layoutWrapper) layoutWrapper.style.gap = '';
+    // Ocultar botón flotante
+    if (showSidebarBtn) {
+      showSidebarBtn.classList.add('hidden');
+      showSidebarBtn.classList.remove('flex');
+    }
+  }
+
+  // Botón flotante para restaurar el sidebar manualmente
+  if (showSidebarBtn) {
+    showSidebarBtn.addEventListener('click', () => {
+      showSidebarFromFullWidth();
+    });
+  }
+
   tabButtons.forEach(btn => {
     btn.addEventListener('click', () => {
       const targetTab = btn.getAttribute('data-tab');
@@ -95,14 +146,20 @@ function initAdminTabs() {
         window._loadUsersList();
       }
 
-      // Asegurar que la pantalla suba al inicio para ver de inmediato todo el contenido de la pestaña
+      // Controlar visibilidad del sidebar según el tab activo
+      if (FULLWIDTH_TABS.has(targetTab)) {
+        hideSidebarForFullWidth();
+      } else {
+        showSidebarFromFullWidth();
+      }
+
+      // Asegurar que la pantalla suba al inicio para ver de inmediato todo el contenido
       try {
         window.scrollTo({ top: 0, behavior: 'auto' });
       } catch (_) {}
 
       // En móviles, cerrar el drawer lateral al pinchar cualquier tab
       if (window.innerWidth < 768) {
-        const sidebarNav = document.getElementById('sidebar-nav');
         const sidebarBackdrop = document.getElementById('sidebar-backdrop');
         if (sidebarNav) sidebarNav.classList.add('-translate-x-full');
         if (sidebarBackdrop) sidebarBackdrop.classList.add('hidden');
@@ -113,6 +170,7 @@ function initAdminTabs() {
     });
   });
 }
+
 
 // 4. Selector de color
 function initColorThemeSelector() {

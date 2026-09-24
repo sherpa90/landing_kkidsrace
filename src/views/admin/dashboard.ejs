@@ -113,7 +113,7 @@
   </header>
 
   <!-- CONTENIDO PRINCIPAL: SIDEBAR + PANELES -->
-  <div class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 gap-6 relative">
+  <div id="main-layout-wrapper" class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 gap-6 relative">
     
     <!-- Backdrop Móvil -->
     <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden md:hidden"></div>
@@ -277,8 +277,16 @@
       </nav>
     </aside>
 
+    <!-- Botón flotante para mostrar sidebar (visible solo en tab leads en escritorio) -->
+    <button type="button" id="btn-show-sidebar-leads"
+      class="hidden fixed bottom-6 left-6 z-30 items-center gap-2 px-4 py-2.5 rounded-2xl bg-slate-800 border border-slate-700 text-slate-200 text-xs font-bold hover:bg-slate-700 hover:text-white shadow-lg transition-all"
+      title="Mostrar panel de navegación">
+      <i data-lucide="panel-left-open" class="w-4 h-4 text-blue-400"></i>
+      <span>Mostrar menú</span>
+    </button>
+
     <!-- ÁREA DE CONTENIDO / FORMULARIO CMS -->
-    <main class="flex-1 min-w-0">
+    <main id="main-content-area" class="flex-1 min-w-0">
       <form id="cms-form" onsubmit="return false;" class="space-y-6">
         
         <!-- PESTAÑA: GESTIÓN DE CORRIDAS & FECHAS (SOLO ADMINISTRADOR) -->
