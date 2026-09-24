@@ -98,6 +98,14 @@ app.use('/uploads', express.static(path.resolve(__dirname, '../data/uploads'), {
   maxAge: '1d'
 }));
 
+// Servir favicon.ico de forma dinámica según configuración del CMS o default
+app.get('/favicon.ico', (req, res) => {
+  const contentStore = require('./services/contentStore');
+  const content = contentStore.getContent();
+  const favicon = content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg';
+  res.redirect(favicon);
+});
+
 // Rutas
 app.use('/', publicRoutes);
 app.use('/admin', adminRoutes);

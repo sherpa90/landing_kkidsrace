@@ -18,7 +18,8 @@ function initAllAdminModules() {
     ['Usuarios', initUsersManager],
     ['Cronograma', initScheduleManager],
     ['Preguntas Frecuentes', initFaqsManager],
-    ['Hero Preview', initHeroLivePreview]
+    ['Hero Preview', initHeroLivePreview],
+    ['Pestaña Navegador', initBrowserTabLivePreview]
   ];
 
   modules.forEach(([name, fn]) => {
@@ -330,6 +331,7 @@ function collectCmsFormData() {
     logoText: getVal('input-logoText'),
     logoIcon: getVal('input-logoIcon'),
     logoUrl: getVal('input-logoUrl'),
+    faviconUrl: getVal('input-faviconUrl'),
     themeMode: getVal('input-themeMode') || 'light',
     accentColor: getVal('input-accentColor') || 'green_yellow'
   };
@@ -344,9 +346,10 @@ function collectCmsFormData() {
     locationCity: getVal('input-cdLocationCity')
   };
 
-  // 3. SEO
+  // 3. SEO & Título de la Pestaña
+  const tabTitle = getVal('input-tabTitle') || getVal('input-metaTitle');
   const seo = {
-    metaTitle: getVal('input-metaTitle'),
+    metaTitle: tabTitle,
     metaDescription: getVal('input-metaDescription'),
     keywords: getVal('input-keywords'),
     canonicalUrl: getVal('input-canonicalUrl'),
@@ -1084,7 +1087,7 @@ function initImageUploadHandlers() {
         previewImg.src = `${imageUrl}?t=${Date.now()}`;
       }
 
-      // Si es un logo, auto-guardar inmediatamente para reemplazar el logo por defecto en la web
+      // Si es un logo o favicon, auto-guardar inmediatamente para reemplazar en la web
       if (uploadType === 'logo') {
         try {
           const payload = collectCmsFormData();
@@ -1097,6 +1100,23 @@ function initImageUploadHandlers() {
         } catch (saveErr) {
           console.warn('Error al auto-guardar logo:', saveErr);
           showAdminToast(`Imagen subida (${sizeKb} KB). Recuerda presionar "Guardar" para publicar el cambio.`, 'info');
+        }
+      } else if (uploadType === 'favicon') {
+        try {
+          const payload = collectCmsFormData();
+          payload.brand.faviconUrl = imageUrl;
+          await cmsFetch('/admin/api/content', {
+            method: 'POST',
+            body: JSON.stringify(payload)
+          });
+          const tabFavicon = document.getElementById('preview-tab-favicon');
+          if (tabFavicon) tabFavicon.src = `${imageUrl}?t=${Date.now()}`;
+          const faviconImg = document.getElementById('preview-favicon-img');
+          if (faviconImg) faviconImg.src = `${imageUrl}?t=${Date.now()}`;
+          showAdminToast(`¡Favicon de la pestaña actualizado con éxito! (${sizeKb} KB)`, 'success');
+        } catch (saveErr) {
+          console.warn('Error al auto-guardar favicon:', saveErr);
+          showAdminToast(`Favicon subido (${sizeKb} KB). Recuerda presionar "Guardar" para publicar el cambio.`, 'info');
         }
       } else {
         showAdminToast(`¡Imagen optimizada a WebP permanentemente! (${sizeKb} KB)`, 'success');
@@ -1130,7 +1150,31 @@ function initImageUploadHandlers() {
         });
         showAdminToast('¡Se restableció el logo e icono por defecto!', 'success');
       } catch (err) {
-        showAdminToast('Logo limpiado. Presiona "Guardar" para confirmar.', 'info');
+        console.error('Error al restablecer logo:', err);
+      }
+    });
+  }
+
+  // Botón para restablecer y volver al favicon por defecto
+  const removeFaviconBtn = document.getElementById('btn-remove-favicon');
+  if (removeFaviconBtn) {
+    removeFaviconBtn.addEventListener('click', async () => {
+      const faviconInput = document.getElementById('input-faviconUrl');
+      const tabFavicon = document.getElementById('preview-tab-favicon');
+      const faviconImg = document.getElementById('preview-favicon-img');
+      if (faviconInput) faviconInput.value = '';
+      if (tabFavicon) tabFavicon.src = '/images/default-favicon.svg';
+      if (faviconImg) faviconImg.src = '/images/default-favicon.svg';
+      try {
+        const payload = collectCmsFormData();
+        payload.brand.faviconUrl = '';
+        await cmsFetch('/admin/api/content', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        showAdminToast('Favicon de pestaña restablecido al predeterminado.', 'info');
+      } catch (err) {
+        console.warn('Error restableciendo favicon:', err);
       }
     });
   }
@@ -2644,6 +2688,38 @@ function initHeroLivePreview() {
   if (noticeInput && noticePreview) {
     noticeInput.addEventListener('input', () => {
       noticePreview.textContent = noticeInput.value || '';
+    });
+  }
+}
+
+// 19. Vista Previa en Vivo Interactiva de la Pestaña del Navegador (Browser Tab & Favicon)
+function initBrowserTabLivePreview() {
+  const tabTitleInput = document.getElementById('input-tabTitle');
+  const metaTitleInput = document.getElementById('input-metaTitle');
+  const faviconUrlInput = document.getElementById('input-faviconUrl');
+  const previewTabTitle = document.getElementById('preview-tab-title');
+  const previewTabFavicon = document.getElementById('preview-tab-favicon');
+  const previewFaviconImg = document.getElementById('preview-favicon-img');
+
+  function updateTitle(val) {
+    const displayVal = val || 'KidsRun 2026 | La Gran Corrida Infantil y Familiar';
+    if (previewTabTitle) previewTabTitle.textContent = displayVal;
+    if (tabTitleInput && tabTitleInput.value !== val) tabTitleInput.value = val;
+    if (metaTitleInput && metaTitleInput.value !== val) metaTitleInput.value = val;
+  }
+
+  if (tabTitleInput) {
+    tabTitleInput.addEventListener('input', () => updateTitle(tabTitleInput.value));
+  }
+  if (metaTitleInput) {
+    metaTitleInput.addEventListener('input', () => updateTitle(metaTitleInput.value));
+  }
+
+  if (faviconUrlInput) {
+    faviconUrlInput.addEventListener('input', () => {
+      const url = faviconUrlInput.value || '/images/default-favicon.svg';
+      if (previewTabFavicon) previewTabFavicon.src = url;
+      if (previewFaviconImg) previewFaviconImg.src = url;
     });
   }
 }

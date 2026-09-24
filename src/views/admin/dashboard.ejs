@@ -6,6 +6,8 @@
   <meta name="csrf-token" content="<%= csrfToken || '' %>">
   <meta name="current-user" content="<%= username || '' %>">
   <title>CMS Dashboard | <%= content.brand?.name || 'KidsRun 2026' %></title>
+  <link rel="icon" type="image/x-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
+  <link rel="shortcut icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
   <meta name="robots" content="noindex, nofollow">
 
   <!-- Tailwind CSS & Lucide -->
@@ -201,9 +203,12 @@
           <span>Kits de Corredor</span>
         </button>
 
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="brand">
-          <i data-lucide="palette" class="w-4 h-4"></i>
-          <span>Identidad & Marca</span>
+        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="brand">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="palette" class="w-4 h-4 text-purple-400"></i>
+            <span>Identidad, Logo & Pestaña</span>
+          </div>
+          <span class="text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full font-bold">Web</span>
         </button>
 
         <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="sections">
@@ -731,6 +736,78 @@
               <div>
                 <label class="block text-xs text-gray-400 mb-1">YouTube URL</label>
                 <input type="text" id="input-socialYoutube" value="<%= content.footer?.socialLinks?.youtube || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-3 py-2 text-xs text-white">
+              </div>
+            </div>
+          </div>
+          <!-- Card: Pestaña del Navegador & Favicon -->
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800 space-y-5">
+            <div>
+              <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
+                <i data-lucide="globe" class="w-4 h-4 text-blue-400"></i>
+                Pestaña del Navegador & Favicon (Browser Tab)
+              </h2>
+              <p class="text-xs text-gray-400">Personaliza el texto que aparece en la pestaña superior del navegador (Chrome, Safari, Edge) y el logo o icono que lo acompaña.</p>
+            </div>
+
+            <!-- Maqueta visual en vivo de la pestaña de Chrome -->
+            <div class="p-4 rounded-2xl bg-gray-950/90 border border-gray-800 space-y-2">
+              <div class="flex items-center justify-between text-[11px] font-bold text-gray-400 uppercase tracking-wider">
+                <span class="flex items-center gap-1.5">
+                  <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                  Vista Previa en Vivo (Pestaña del Navegador)
+                </span>
+                <span class="text-[10px] text-gray-500 font-normal">Actualización instantánea</span>
+              </div>
+
+              <!-- Chrome Tab Bar Mockup -->
+              <div class="w-full max-w-lg bg-slate-900 border border-slate-700/60 rounded-t-xl p-1.5 pt-2 flex items-center gap-2 shadow-lg">
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-800 rounded-lg border border-slate-700/80 max-w-full flex-1 min-w-0">
+                  <img id="preview-tab-favicon" src="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>" alt="Favicon" class="w-4 h-4 rounded-sm object-contain flex-shrink-0">
+                  <span id="preview-tab-title" class="text-xs font-semibold text-slate-100 truncate flex-1">
+                    <%= content.seo?.metaTitle || 'KidsRun 2026 | La Gran Corrida Infantil y Familiar' %>
+                  </span>
+                  <span class="text-slate-400 hover:text-white text-xs px-1 cursor-default font-mono">×</span>
+                </div>
+                <div class="text-slate-500 text-xs px-1 font-bold select-none">+</div>
+              </div>
+            </div>
+
+            <!-- Campos editables -->
+            <div class="space-y-4">
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5 flex items-center justify-between">
+                  <span>Texto de la Pestaña del Navegador (&lt;title&gt;)</span>
+                  <span class="text-[10px] text-gray-500 font-normal">ej: KidsRun 2026 | La Gran Corrida Infantil y Familiar</span>
+                </label>
+                <input type="text" id="input-tabTitle" value="<%= content.seo?.metaTitle || 'KidsRun 2026 | La Gran Corrida Infantil y Familiar' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white focus:outline-none focus:border-blue-400 font-medium">
+                <p class="text-[11px] text-gray-500 mt-1">Este texto aparece en la barra superior de Google Chrome / Safari y es el título principal indexado por Google.</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5 flex items-center justify-between">
+                  <span>Logo / Favicon de la Pestaña</span>
+                  <span class="text-[10px] text-gray-500 font-normal">PNG, WebP, SVG o JPG (cuadrado / 32x32 / 64x64)</span>
+                </label>
+                <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+                  <div class="w-12 h-12 rounded-xl bg-gray-900 border border-gray-800 flex items-center justify-center overflow-hidden flex-shrink-0 p-1" id="preview-favicon-box">
+                    <img id="preview-favicon-img" src="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>" alt="Favicon" class="max-w-full max-h-full object-contain rounded-lg">
+                  </div>
+                  <div class="flex-1 w-full space-y-2">
+                    <div class="flex gap-2">
+                      <input type="text" id="input-faviconUrl" value="<%= content.brand?.faviconUrl || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-2xl px-4 py-2 text-sm text-white focus:outline-none focus:border-blue-400" placeholder="/uploads/mi-favicon.webp o URL externa">
+                      <label class="cursor-pointer bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-3.5 py-2 rounded-2xl flex items-center gap-1.5 whitespace-nowrap transition-all shadow-md shadow-blue-600/30" title="Subir logo o favicon para la pestaña">
+                        <i data-lucide="upload" class="w-4 h-4"></i>
+                        <span>Subir Favicon</span>
+                        <input type="file" class="hidden file-uploader-input" data-target-input="#input-faviconUrl" data-preview-box="#preview-favicon-box" data-upload-type="favicon" accept="image/*">
+                      </label>
+                      <button type="button" id="btn-remove-favicon" class="px-3 py-2 bg-slate-800 hover:bg-red-950/50 text-slate-300 hover:text-red-400 border border-slate-700 hover:border-red-500/50 rounded-2xl text-xs font-bold transition-all flex items-center gap-1" title="Restablecer al logo predeterminado">
+                        <i data-lucide="rotate-ccw" class="w-3.5 h-3.5"></i>
+                        <span class="hidden sm:inline">Restablecer</span>
+                      </button>
+                    </div>
+                    <p class="text-[11px] text-gray-400">Si no configuras un favicon específico, se usará automáticamente el logo oficial del evento o el icono deportivo por defecto.</p>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
@@ -1482,7 +1559,7 @@
 
             <div class="space-y-4">
               <div>
-                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Meta Title</label>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5 flex items-center justify-between"><span>Meta Title (Título en Pestaña del Navegador & Google)</span><span class="text-[10px] text-gray-500 font-normal">Sincronizado con Pestaña del Navegador</span></label>
                 <input type="text" id="input-metaTitle" value="<%= content.seo?.metaTitle || '' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white">
               </div>
 

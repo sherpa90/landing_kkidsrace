@@ -4,6 +4,9 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Inscripción Oficial | <%= activeRace ? activeRace.name : (content.brand?.name || 'KidsRun') %></title>
+  <link rel="icon" type="image/x-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
+  <link rel="shortcut icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
+  <link rel="apple-touch-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
   <meta name="description" content="Inscribe a tu pequeño/a en la corrida infantil más alegre y segura. Selecciona su distancia y asegura su kit con medalla oficial.">
 
   <!-- Tailwind CSS & Lucide Icons -->

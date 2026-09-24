@@ -191,7 +191,8 @@ router.post('/api/upload', auth.requireAdmin, validateCsrf, imageService.upload.
       return res.status(400).json({ success: false, error: 'No se ha proporcionado ningún archivo de imagen.' });
     }
 
-    const type = req.body.type === 'logo' ? 'logo' : 'standard';
+    const validTypes = ['logo', 'favicon', 'sponsor', 'standard'];
+    const type = validTypes.includes(req.body.type) ? req.body.type : 'standard';
     const result = await imageService.processAndSaveImage(req.file.buffer, req.file.originalname, type);
 
     return res.json({

@@ -18,6 +18,9 @@
   </script>
 
   <title><%= content.construction?.title || 'Próximamente' %> | <%= content.brand?.name || 'KidsRun 2026' %></title>
+  <link rel="icon" type="image/x-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
+  <link rel="shortcut icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
+  <link rel="apple-touch-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
   <meta name="description" content="<%= content.construction?.subtitle || 'La Gran Corrida Infantil KidsRun 2026 está preparando una pista llena de aventuras y diversión.' %>">
   <meta name="robots" content="noindex, follow">
 

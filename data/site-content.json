@@ -6,7 +6,8 @@
     "logoIcon": "trophy",
     "logoUrl": "",
     "accentColor": "blue_sport",
-    "themeMode": "light"
+    "themeMode": "light",
+    "faviconUrl": "/images/default-favicon.svg"
   },
   "countdown": {
     "targetDate": "2026-10-18T09:00:00",
@@ -17,7 +18,7 @@
     "badge": "⏰ ¡FALTAN SÓLO!"
   },
   "seo": {
-    "metaTitle": "KidsRace 2026 | La Gran Corrida Infantil y Familiar",
+    "metaTitle": "KidsRun 2026 | La Gran Corrida Infantil y Familiar",
     "metaDescription": "Inscribe a tus hijos en la corrida infantil más alegre, segura y emocionante del año. Circuitos de 500m a 3K, medalla finisher garantizada para todos, polera técnica oficial y actividades familiares.",
     "keywords": "corrida de niños, corrida infantil, maraton infantil, carrera familiar, kids run, running niños, deporte infantil, medallas niños",
     "canonicalUrl": "http://localhost:3000",

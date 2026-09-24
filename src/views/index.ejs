@@ -17,8 +17,11 @@
     })();
   </script>
 
-  <!-- Metadatos SEO Principales -->
+  <!-- Metadatos SEO Principales y Pestaña del Navegador -->
   <title><%= content.seo?.metaTitle || 'KidsRun 2026 | La Gran Corrida Infantil y Familiar' %></title>
+  <link rel="icon" type="image/x-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
+  <link rel="shortcut icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
+  <link rel="apple-touch-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
   <meta name="description" content="<%= content.seo?.metaDescription || '' %>">
   <meta name="keywords" content="<%= content.seo?.keywords || '' %>">
   <link rel="canonical" href="<%= content.seo?.canonicalUrl || siteUrl %>">

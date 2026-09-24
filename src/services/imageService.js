@@ -144,7 +144,20 @@ async function processAndSaveImage(buffer, originalName, type = 'standard') {
 
   let sharpInstance = sharp(buffer).rotate(); // auto-rotar según orientación EXIF si existe
 
-  if (type === 'logo') {
+  if (type === 'favicon') {
+    // Configuración para favicon de pestaña: 128x128 nítido con fondo transparente
+    sharpInstance = sharpInstance.resize({
+      width: 128,
+      height: 128,
+      fit: 'contain',
+      background: { r: 0, g: 0, b: 0, alpha: 0 }
+    }).webp({
+      quality: 95,
+      alphaQuality: 100,
+      lossless: false,
+      effort: 6
+    });
+  } else if (type === 'logo') {
     // Configuración para logos: max 600px de ancho/alto manteniendo proporción, calidad nítida
     sharpInstance = sharpInstance.resize({
       width: 600,
