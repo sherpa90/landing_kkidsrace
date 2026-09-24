@@ -196,6 +196,77 @@ function saveRace(raceData) {
   return saveContent(content);
 }
 
+function deleteRace(id) {
+  const content = getContent();
+  let races = content.races || [];
+  const target = races.find(r => r.id === id);
+  if (!target) return { success: false, error: 'Corrida no encontrada' };
+
+  races = races.filter(r => r.id !== id);
+  content.races = races;
+
+  // Si se eliminó la activa, pero aún quedan otras, poner la primera como activa
+  if (target.status === 'active' && races.length > 0) {
+    races[0].status = 'active';
+    content.countdown = {
+      ...content.countdown,
+      targetDate: races[0].date,
+      eventDateDisplay: races[0].dateDisplay || content.countdown?.eventDateDisplay,
+      eventTime: races[0].time || content.countdown?.eventTime,
+      locationName: races[0].location || content.countdown?.locationName,
+      locationCity: races[0].city || content.countdown?.locationCity
+    };
+  }
+
+  return saveContent(content);
+}
+
+function updateRaceStatus(id, newStatus) {
+  const content = getContent();
+  let races = content.races || [];
+  const idx = races.findIndex(r => r.id === id);
+  if (idx === -1) return { success: false, error: 'Corrida no encontrada' };
+
+  if (newStatus === 'active') {
+    races.forEach(r => { if (r.id !== id && r.status === 'active') r.status = 'inactive'; });
+  }
+
+  races[idx].status = newStatus;
+
+  const active = races.find(r => r.status === 'active');
+  if (active) {
+    content.countdown = {
+      ...content.countdown,
+      targetDate: active.date,
+      eventDateDisplay: active.dateDisplay || content.countdown?.eventDateDisplay,
+      eventTime: active.time || content.countdown?.eventTime,
+      locationName: active.location || content.countdown?.locationName,
+      locationCity: active.city || content.countdown?.locationCity
+    };
+  }
+
+  content.races = races;
+  return saveContent(content);
+}
+
+function updateRaceCapacity(id, { add, maxParticipants }) {
+  const content = getContent();
+  let races = content.races || [];
+  const idx = races.findIndex(r => r.id === id);
+  if (idx === -1) return { success: false, error: 'Corrida no encontrada' };
+
+  let current = parseInt(races[idx].maxParticipants, 10) || 500;
+  if (typeof maxParticipants !== 'undefined' && !isNaN(parseInt(maxParticipants, 10))) {
+    current = Math.max(1, parseInt(maxParticipants, 10));
+  } else if (typeof add !== 'undefined' && !isNaN(parseInt(add, 10))) {
+    current = Math.max(1, current + parseInt(add, 10));
+  }
+
+  races[idx].maxParticipants = current;
+  content.races = races;
+  return saveContent(content);
+}
+
 function deleteLead(id) {
   try {
     let leads = getLeads();
@@ -379,6 +450,9 @@ module.exports = {
   getRaces,
   getActiveRace,
   saveRace,
+  deleteRace,
+  updateRaceStatus,
+  updateRaceCapacity,
   COLOR_THEMES,
   getTheme
 };

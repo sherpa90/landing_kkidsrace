@@ -641,33 +641,69 @@ function initLeadsManager() {
 }
 
 // 8. Gestión y Programación de Corridas (Administrador)
+// 8. Gestión y Programación de Corridas (Administrador)
 function initRacesManager() {
   const openBtn = document.getElementById('btn-open-new-race');
-  const cancelBtn = document.getElementById('btn-cancel-new-race');
-  const panel = document.getElementById('new-race-panel');
-  const submitBtn = document.getElementById('btn-submit-new-race');
+  const cancelBtn = document.getElementById('btn-cancel-race-form');
+  const cancelBtn2 = document.getElementById('btn-cancel-race-form-2');
+  const panel = document.getElementById('race-form-panel');
+  const submitBtn = document.getElementById('btn-submit-race');
+  const submitText = document.getElementById('btn-submit-race-text');
+  const formTitle = document.getElementById('race-form-title');
 
-  if (openBtn && panel) {
-    openBtn.addEventListener('click', () => {
-      panel.classList.remove('hidden');
-      panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    });
+  const editIdInput = document.getElementById('input-editRaceId');
+  const nameInput = document.getElementById('input-raceName');
+  const dateInput = document.getElementById('input-raceDate');
+  const timeInput = document.getElementById('input-raceTime');
+  const locInput = document.getElementById('input-raceLocation');
+  const cityInput = document.getElementById('input-raceCity');
+  const maxInput = document.getElementById('input-raceMax');
+  const statusSelect = document.getElementById('input-raceStatus');
+
+  function resetRaceForm() {
+    if (editIdInput) editIdInput.value = '';
+    if (nameInput) nameInput.value = '';
+    if (dateInput) dateInput.value = '';
+    if (timeInput) timeInput.value = '09:00 AM';
+    if (locInput) locInput.value = 'Parque Bicentenario • Circuito Cerrado';
+    if (cityInput) cityInput.value = 'Vitacura, Santiago';
+    if (maxInput) maxInput.value = '500';
+    if (statusSelect) statusSelect.value = 'active';
+    if (formTitle) {
+      formTitle.innerHTML = `<i data-lucide="flag" class="w-4 h-4 text-blue-400"></i><span>Crear Nueva Edición de Carrera</span>`;
+    }
+    if (submitText) submitText.textContent = 'Guardar Corrida';
+    if (window.lucide) window.lucide.createIcons();
   }
 
-  if (cancelBtn && panel) {
-    cancelBtn.addEventListener('click', () => {
-      panel.classList.add('hidden');
-    });
+  function openCreateForm() {
+    if (!panel) return;
+    resetRaceForm();
+    panel.classList.remove('hidden');
+    panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    if (nameInput) nameInput.focus();
   }
 
+  if (openBtn) openBtn.addEventListener('click', openCreateForm);
+
+  const closeForm = () => {
+    if (panel) panel.classList.add('hidden');
+    resetRaceForm();
+  };
+  if (cancelBtn) cancelBtn.addEventListener('click', closeForm);
+  if (cancelBtn2) cancelBtn2.addEventListener('click', closeForm);
+
+  // Guardar (Crear o Actualizar) Corrida
   if (submitBtn) {
     submitBtn.addEventListener('click', async () => {
-      const name = document.getElementById('input-newRaceName')?.value.trim();
-      const date = document.getElementById('input-newRaceDate')?.value;
-      const time = document.getElementById('input-newRaceTime')?.value.trim() || '09:00 AM';
-      const location = document.getElementById('input-newRaceLocation')?.value.trim();
-      const maxParticipants = document.getElementById('input-newRaceMax')?.value || 500;
-      const isActive = document.getElementById('input-newRaceActive')?.checked;
+      const id = editIdInput ? editIdInput.value : '';
+      const name = nameInput ? nameInput.value.trim() : '';
+      const date = dateInput ? dateInput.value : '';
+      const time = timeInput ? timeInput.value.trim() : '09:00 AM';
+      const location = locInput ? locInput.value.trim() : '';
+      const city = cityInput ? cityInput.value.trim() : '';
+      const maxParticipants = maxInput ? parseInt(maxInput.value, 10) || 500 : 500;
+      const status = statusSelect ? statusSelect.value : 'active';
 
       if (!name || !date) {
         showAdminToast('Por favor completa el nombre y la fecha de la corrida', 'error');
@@ -675,58 +711,213 @@ function initRacesManager() {
       }
 
       submitBtn.disabled = true;
-      submitBtn.textContent = 'Guardando...';
+      const origHtml = submitBtn.innerHTML;
+      submitBtn.innerHTML = '<span class="inline-block animate-spin mr-1.5">⟳</span> Guardando...';
 
       try {
         const json = await cmsFetch('/admin/api/races', {
           method: 'POST',
           body: JSON.stringify({
+            id: id || undefined,
             name,
             date,
             time,
             location,
-            status: isActive ? 'active' : 'planned',
+            city,
+            status,
             maxParticipants
           })
         });
 
         if (json.success) {
-          showAdminToast(json.message, 'success');
-          setTimeout(() => window.location.reload(), 1200);
+          showAdminToast(json.message || 'Corrida guardada exitosamente', 'success');
+          setTimeout(() => window.location.reload(), 800);
         } else {
-          showAdminToast(json.error || 'No se pudo crear la corrida', 'error');
+          showAdminToast(json.error || 'No se pudo guardar la corrida', 'error');
         }
       } catch (err) {
-        showAdminToast('Error de conexión al guardar corrida', 'error');
+        showAdminToast(err.message || 'Error de conexión al guardar corrida', 'error');
       } finally {
         submitBtn.disabled = false;
-        submitBtn.textContent = 'Guardar y Publicar Corrida';
+        submitBtn.innerHTML = origHtml;
+        if (window.lucide) window.lucide.createIcons();
       }
     });
   }
 
-  // Botones para activar corrida
-  document.querySelectorAll('.btn-activate-race').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const raceId = btn.getAttribute('data-race-id');
-      if (!confirm('¿Deseas activar esta corrida como la oficial visible en la portada y el formulario?')) return;
+  // Delegación de eventos para las tarjetas de corridas
+  const racesContainer = document.getElementById('races-list-container');
+  if (racesContainer) {
+    racesContainer.addEventListener('click', async (e) => {
+      // 1. EDITAR CORRIDA
+      const editBtn = e.target.closest('.btn-edit-race');
+      if (editBtn) {
+        const id = editBtn.getAttribute('data-id');
+        const name = editBtn.getAttribute('data-name');
+        const rawDate = editBtn.getAttribute('data-date');
+        const time = editBtn.getAttribute('data-time');
+        const location = editBtn.getAttribute('data-location');
+        const city = editBtn.getAttribute('data-city');
+        const max = editBtn.getAttribute('data-max');
+        const status = editBtn.getAttribute('data-status');
 
-      try {
-        const json = await cmsFetch(`/admin/api/races/${raceId}/activate`, {
-          method: 'POST'
-        });
+        if (editIdInput) editIdInput.value = id;
+        if (nameInput) nameInput.value = name || '';
 
-        if (json.success) {
-          showAdminToast(json.message, 'success');
-          setTimeout(() => window.location.reload(), 1000);
-        } else {
-          showAdminToast(json.error || 'No se pudo activar la corrida', 'error');
+        // Formatear fecha para datetime-local (YYYY-MM-DDTHH:mm)
+        if (dateInput && rawDate) {
+          try {
+            const d = new Date(rawDate);
+            if (!isNaN(d.getTime())) {
+              const pad = n => String(n).padStart(2, '0');
+              const localIso = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
+              dateInput.value = localIso;
+            } else {
+              dateInput.value = rawDate.slice(0, 16);
+            }
+          } catch (err) {
+            dateInput.value = rawDate.slice(0, 16);
+          }
         }
-      } catch (err) {
-        showAdminToast('Error de conexión', 'error');
+        if (timeInput) timeInput.value = time || '09:00 AM';
+        if (locInput) locInput.value = location || '';
+        if (cityInput) cityInput.value = city || '';
+        if (maxInput) maxInput.value = max || 500;
+        if (statusSelect) statusSelect.value = status || 'active';
+
+        if (formTitle) {
+          formTitle.innerHTML = `<i data-lucide="edit-3" class="w-4 h-4 text-emerald-400"></i><span>Editar Corrida: ${name}</span>`;
+        }
+        if (submitText) submitText.textContent = 'Actualizar Datos de la Corrida';
+        if (window.lucide) window.lucide.createIcons();
+
+        if (panel) {
+          panel.classList.remove('hidden');
+          panel.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }
+        if (nameInput) nameInput.focus();
+        return;
+      }
+
+      // 2. PAUSAR / REANUDAR / ACTIVAR / DESACTIVAR CORRIDA
+      const toggleBtn = e.target.closest('.btn-toggle-race-status');
+      if (toggleBtn) {
+        const raceId = toggleBtn.getAttribute('data-race-id');
+        const newStatus = toggleBtn.getAttribute('data-status');
+
+        const actionLabels = {
+          active: 'activar como oficial en la web',
+          paused: 'pausar temporalmente las inscripciones',
+          inactive: 'desactivar de la portada'
+        };
+
+        if (!confirm(`¿Estás seguro de ${actionLabels[newStatus] || newStatus} esta corrida?`)) return;
+
+        try {
+          const json = await cmsFetch(`/admin/api/races/${raceId}/status`, {
+            method: 'POST',
+            body: JSON.stringify({ status: newStatus })
+          });
+
+          if (json.success) {
+            showAdminToast(json.message, 'success');
+            setTimeout(() => window.location.reload(), 700);
+          } else {
+            showAdminToast(json.error || 'No se pudo actualizar el estado de la corrida', 'error');
+          }
+        } catch (err) {
+          showAdminToast(err.message || 'Error de conexión', 'error');
+        }
+        return;
+      }
+
+      // 3. AGREGAR CUPOS RÁPIDO (+50, +100)
+      const quickCuposBtn = e.target.closest('.btn-quick-add-cupos');
+      if (quickCuposBtn) {
+        const raceId = quickCuposBtn.getAttribute('data-race-id');
+        const addAmount = parseInt(quickCuposBtn.getAttribute('data-add'), 10) || 50;
+
+        if (!confirm(`¿Deseas agregar ${addAmount} cupos adicionales a esta corrida?`)) return;
+
+        try {
+          const json = await cmsFetch(`/admin/api/races/${raceId}/capacity`, {
+            method: 'POST',
+            body: JSON.stringify({ add: addAmount })
+          });
+
+          if (json.success) {
+            showAdminToast(json.message, 'success');
+            setTimeout(() => window.location.reload(), 700);
+          } else {
+            showAdminToast(json.error || 'No se pudieron agregar cupos', 'error');
+          }
+        } catch (err) {
+          showAdminToast(err.message || 'Error de conexión', 'error');
+        }
+        return;
+      }
+
+      // 4. AJUSTE PERSONALIZADO DE CUPOS
+      const customCuposBtn = e.target.closest('.btn-custom-cupos');
+      if (customCuposBtn) {
+        const raceId = customCuposBtn.getAttribute('data-race-id');
+        const raceName = customCuposBtn.getAttribute('data-race-name');
+        const currentMax = customCuposBtn.getAttribute('data-current-max');
+
+        const promptVal = prompt(`Ingresa el nuevo cupo total máximo de inscripciones para "${raceName}":`, currentMax);
+        if (promptVal === null) return;
+        const newMax = parseInt(promptVal.trim(), 10);
+        if (isNaN(newMax) || newMax < 1) {
+          showAdminToast('Por favor introduce un número válido mayor a 0', 'error');
+          return;
+        }
+
+        try {
+          const json = await cmsFetch(`/admin/api/races/${raceId}/capacity`, {
+            method: 'POST',
+            body: JSON.stringify({ maxParticipants: newMax })
+          });
+
+          if (json.success) {
+            showAdminToast(json.message, 'success');
+            setTimeout(() => window.location.reload(), 700);
+          } else {
+            showAdminToast(json.error || 'No se pudo actualizar el cupo', 'error');
+          }
+        } catch (err) {
+          showAdminToast(err.message || 'Error de conexión', 'error');
+        }
+        return;
+      }
+
+      // 5. ELIMINAR CORRIDA
+      const deleteBtn = e.target.closest('.btn-delete-race');
+      if (deleteBtn) {
+        const raceId = deleteBtn.getAttribute('data-race-id');
+        const raceName = deleteBtn.getAttribute('data-race-name');
+
+        if (!confirm(`¿Estás completamente seguro de ELIMINAR la corrida "${raceName}"? Esta acción no se puede deshacer.`)) {
+          return;
+        }
+
+        try {
+          const json = await cmsFetch(`/admin/api/races/${raceId}`, {
+            method: 'DELETE'
+          });
+
+          if (json.success) {
+            showAdminToast(json.message, 'success');
+            setTimeout(() => window.location.reload(), 800);
+          } else {
+            showAdminToast(json.error || 'No se pudo eliminar la corrida', 'error');
+          }
+        } catch (err) {
+          showAdminToast(err.message || 'Error de conexión', 'error');
+        }
+        return;
       }
     });
-  });
+  }
 }
 
 // 7. Cambio de contraseña

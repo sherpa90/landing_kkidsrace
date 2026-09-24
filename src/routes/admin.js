@@ -305,6 +305,84 @@ router.post('/api/races', auth.requireAdmin, validateCsrf, (req, res) => {
 router.post('/api/races/:id/activate', auth.requireAdmin, validateCsrf, (req, res) => {
   try {
     const { id } = req.params;
+    const result = contentStore.updateRaceStatus(id, 'active');
+    if (result.success) {
+      const active = contentStore.getActiveRace();
+      return res.json({
+        success: true,
+        message: `Corrida "${active?.name || id}" activada como oficial para la landing page.`,
+        activeRace: active,
+        races: contentStore.getRaces()
+      });
+    } else {
+      return res.status(404).json({ success: false, error: result.error || 'Corrida no encontrada' });
+    }
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Cambiar estado de corrida: pausar, activar, desactivar (SOLO Administrador)
+router.post('/api/races/:id/status', auth.requireAdmin, validateCsrf, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    const validStatuses = ['active', 'paused', 'inactive', 'planned'];
+
+    if (!validStatuses.includes(status)) {
+      return res.status(400).json({ success: false, error: 'Estado de corrida inválido.' });
+    }
+
+    const result = contentStore.updateRaceStatus(id, status);
+    if (result.success) {
+      const statusLabels = {
+        active: 'activada en la web',
+        paused: 'pausada temporalmente',
+        inactive: 'desactivada de la web',
+        planned: 'marcada como programada'
+      };
+      return res.json({
+        success: true,
+        message: `Corrida ${statusLabels[status] || status} exitosamente.`,
+        races: contentStore.getRaces(),
+        activeRace: contentStore.getActiveRace()
+      });
+    } else {
+      return res.status(404).json({ success: false, error: result.error || 'Corrida no encontrada' });
+    }
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Modificar o agregar cupos a una corrida (SOLO Administrador)
+router.post('/api/races/:id/capacity', auth.requireAdmin, validateCsrf, (req, res) => {
+  try {
+    const { id } = req.params;
+    const { add, maxParticipants } = req.body;
+
+    const result = contentStore.updateRaceCapacity(id, { add, maxParticipants });
+    if (result.success) {
+      const races = contentStore.getRaces();
+      const updated = races.find(r => r.id === id);
+      return res.json({
+        success: true,
+        message: `Cupo de la corrida actualizado a ${updated?.maxParticipants || 'nuevo valor'} participantes.`,
+        races,
+        race: updated
+      });
+    } else {
+      return res.status(404).json({ success: false, error: result.error || 'Corrida no encontrada' });
+    }
+  } catch (err) {
+    return res.status(500).json({ success: false, error: err.message });
+  }
+});
+
+// Eliminar una corrida (SOLO Administrador)
+router.delete('/api/races/:id', auth.requireAdmin, validateCsrf, (req, res) => {
+  try {
+    const { id } = req.params;
     const races = contentStore.getRaces();
     const race = races.find(r => r.id === id);
 
@@ -312,14 +390,13 @@ router.post('/api/races/:id/activate', auth.requireAdmin, validateCsrf, (req, re
       return res.status(404).json({ success: false, error: 'Corrida no encontrada.' });
     }
 
-    race.status = 'active';
-    const result = contentStore.saveRace(race);
-
+    const result = contentStore.deleteRace(id);
     if (result.success) {
       return res.json({
         success: true,
-        message: `Corrida "${race.name}" activada como oficial para la landing page.`,
-        activeRace: race
+        message: `Corrida "${race.name}" eliminada correctamente del sistema.`,
+        races: contentStore.getRaces(),
+        activeRace: contentStore.getActiveRace()
       });
     } else {
       return res.status(500).json({ success: false, error: result.error });

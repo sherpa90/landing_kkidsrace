@@ -402,6 +402,19 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
   }
 
   const activeRace = contentStore.getActiveRace();
+  if (activeRace && activeRace.status === 'paused') {
+    return res.status(400).json({
+      success: false,
+      error: 'Las inscripciones para esta corrida se encuentran temporalmente pausadas. Por favor intenta más tarde o comunícate con la organización.'
+    });
+  }
+  if (activeRace && activeRace.status === 'inactive') {
+    return res.status(400).json({
+      success: false,
+      error: 'No hay inscripciones abiertas en este momento para esta corrida.'
+    });
+  }
+
   const targetRaceId = raceId || (activeRace ? activeRace.id : 'race-2026-primavera');
   const targetRaceName = raceName || (activeRace ? activeRace.name : 'KidsRun 2026');
 
