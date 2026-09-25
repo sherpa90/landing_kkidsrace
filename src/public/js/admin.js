@@ -73,44 +73,69 @@ function initAdminTabs() {
   const sidebarNav = document.getElementById('sidebar-nav');
   const showSidebarBtn = document.getElementById('btn-show-sidebar-leads');
   const layoutWrapper = document.getElementById('main-layout-wrapper');
+  const fullscreenToggleBtn = document.getElementById('btn-toggle-fullscreen-leads');
+  const fullscreenIcon = document.getElementById('icon-fullscreen-leads');
+  const fullscreenText = document.getElementById('text-fullscreen-leads');
 
   // Tabs que deben ocultar el sidebar para maximizar el espacio
   const FULLWIDTH_TABS = new Set(['leads']);
+  let isLeadsFullscreen = false;
+
+  function updateFullscreenUI(active) {
+    isLeadsFullscreen = active;
+    if (fullscreenIcon) {
+      fullscreenIcon.setAttribute('data-lucide', active ? 'minimize-2' : 'maximize-2');
+    }
+    if (fullscreenText) {
+      fullscreenText.textContent = active ? 'Ver Menú' : 'Pantalla Completa';
+    }
+    if (showSidebarBtn) {
+      if (active && window.innerWidth >= 768) {
+        showSidebarBtn.classList.remove('hidden');
+        showSidebarBtn.classList.add('flex');
+      } else {
+        showSidebarBtn.classList.add('hidden');
+        showSidebarBtn.classList.remove('flex');
+      }
+    }
+    if (window.lucide) window.lucide.createIcons();
+  }
 
   function hideSidebarForFullWidth() {
-    if (!sidebarNav) return;
-    // Ocultar sidebar con animación (solo en escritorio md+)
-    sidebarNav.style.transition = 'opacity 200ms ease, transform 200ms ease, width 250ms ease, min-width 250ms ease, padding 250ms ease';
-    sidebarNav.style.overflow = 'hidden';
-    sidebarNav.style.opacity = '0';
-    sidebarNav.style.transform = 'translateX(-12px)';
-    sidebarNav.style.width = '0';
-    sidebarNav.style.minWidth = '0';
-    sidebarNav.style.padding = '0';
-    // Quitar el gap del contenedor
-    if (layoutWrapper) layoutWrapper.style.gap = '0';
-    // Mostrar botón flotante en escritorio
-    if (showSidebarBtn && window.innerWidth >= 768) {
-      showSidebarBtn.classList.remove('hidden');
-      showSidebarBtn.classList.add('flex');
+    if (sidebarNav) {
+      sidebarNav.classList.add('hidden');
+      sidebarNav.classList.remove('md:block');
     }
+    if (layoutWrapper) {
+      layoutWrapper.classList.remove('max-w-7xl');
+      layoutWrapper.classList.add('max-w-none', 'w-full', 'px-3', 'sm:px-6');
+      layoutWrapper.style.gap = '0';
+    }
+    updateFullscreenUI(true);
   }
 
   function showSidebarFromFullWidth() {
-    if (!sidebarNav) return;
-    sidebarNav.style.transition = 'opacity 200ms ease, transform 200ms ease, width 250ms ease, min-width 250ms ease, padding 250ms ease';
-    sidebarNav.style.opacity = '1';
-    sidebarNav.style.transform = '';
-    sidebarNav.style.width = '';
-    sidebarNav.style.minWidth = '';
-    sidebarNav.style.padding = '';
-    sidebarNav.style.overflow = '';
-    if (layoutWrapper) layoutWrapper.style.gap = '';
-    // Ocultar botón flotante
-    if (showSidebarBtn) {
-      showSidebarBtn.classList.add('hidden');
-      showSidebarBtn.classList.remove('flex');
+    if (sidebarNav) {
+      sidebarNav.classList.remove('hidden');
+      sidebarNav.classList.add('md:block');
     }
+    if (layoutWrapper) {
+      layoutWrapper.classList.add('max-w-7xl');
+      layoutWrapper.classList.remove('max-w-none', 'w-full', 'px-3', 'sm:px-6');
+      layoutWrapper.style.gap = '';
+    }
+    updateFullscreenUI(false);
+  }
+
+  // Botón en cabecera para alternar entre pantalla completa y menú visible
+  if (fullscreenToggleBtn) {
+    fullscreenToggleBtn.addEventListener('click', () => {
+      if (isLeadsFullscreen) {
+        showSidebarFromFullWidth();
+      } else {
+        hideSidebarForFullWidth();
+      }
+    });
   }
 
   // Botón flotante para restaurar el sidebar manualmente
@@ -170,6 +195,15 @@ function initAdminTabs() {
       if (window.lucide) window.lucide.createIcons();
     });
   });
+
+  // Al cargar la página, si la pestaña visible es leads, activar pantalla completa automáticamente
+  const leadsPane = document.getElementById('tab-leads');
+  const activeTabBtn = document.querySelector('.tab-btn.bg-blue-600');
+  const isLeadsInitiallyActive = (activeTabBtn && activeTabBtn.getAttribute('data-tab') === 'leads') ||
+                                (leadsPane && !leadsPane.classList.contains('hidden'));
+  if (isLeadsInitiallyActive) {
+    hideSidebarForFullWidth();
+  }
 }
 
 
