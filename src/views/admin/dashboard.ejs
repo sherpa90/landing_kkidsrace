@@ -1717,6 +1717,13 @@
                   <span class="hidden sm:inline">Exportar CSV</span>
                 </a>
 
+                <% if (role === 'admin') { %>
+                <button type="button" id="btn-trigger-bulk-delete" class="px-3.5 py-2.5 rounded-2xl text-xs font-bold text-red-300 bg-red-950/80 hover:bg-red-900 border border-red-500/40 shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer" title="Eliminación masiva de participantes con palabra de seguridad">
+                  <i data-lucide="shield-alert" class="w-4 h-4 text-red-400"></i>
+                  <span class="hidden sm:inline">Eliminación Masiva</span>
+                </button>
+                <% } %>
+
                 <% if (isPostgres) { %>
                 <span class="text-xs bg-emerald-950/80 text-emerald-300 font-bold px-3 py-1.5 rounded-xl border border-emerald-500/30 flex items-center gap-1.5">
                   <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
@@ -1776,6 +1783,9 @@
                   <!-- Cabecera de la tarjeta: Dorsal + Circuito -->
                   <div class="flex items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
+                      <% if (role === 'admin') { %>
+                      <input type="checkbox" class="lead-select-checkbox w-4 h-4 rounded text-blue-600 bg-slate-950 border-slate-700 focus:ring-blue-500 cursor-pointer shrink-0" data-id="<%= lead.id %>" data-name="<%= lead.kidName || lead.name %>">
+                      <% } %>
                       <span class="inline-flex items-center gap-1 font-mono font-black text-sm text-amber-300 bg-amber-950/80 border border-amber-500/40 px-2.5 py-1 rounded-xl shadow-sm">
                         <i data-lucide="hash" class="w-3.5 h-3.5 text-amber-400"></i>
                         <span><%= lead.bibNumber || '----' %></span>
@@ -1881,6 +1891,11 @@
               <table class="w-full text-left text-xs text-slate-300" id="participants-table">
                 <thead class="bg-slate-900 text-slate-400 uppercase tracking-wider font-mono text-[10px] border-b border-slate-800">
                   <tr>
+                    <% if (role === 'admin') { %>
+                    <th class="py-3.5 px-3 text-center w-10">
+                      <input type="checkbox" id="checkbox-select-all-leads" class="w-4 h-4 rounded text-blue-600 bg-slate-950 border-slate-700 focus:ring-blue-500 cursor-pointer" title="Seleccionar todos">
+                    </th>
+                    <% } %>
                     <th class="py-3.5 px-4 font-black">Dorsal</th>
                     <th class="py-3.5 px-4 font-black">Pupilo/a</th>
                     <th class="py-3.5 px-4 font-black">Edad</th>
@@ -1898,7 +1913,7 @@
                 <tbody class="divide-y divide-slate-800/80" id="participants-tbody">
                   <% if (!leads || leads.length === 0) { %>
                   <tr id="no-participants-row">
-                    <td colspan="<%= role === 'admin' ? 10 : 9 %>" class="text-center py-12 text-slate-500">
+                    <td colspan="<%= role === 'admin' ? 11 : 9 %>" class="text-center py-12 text-slate-500">
                       <i data-lucide="user-check" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
                       <p class="text-sm font-bold text-slate-400">Aún no hay inscripciones registradas en la base de datos.</p>
                       <p class="text-xs text-slate-600 mt-1">Los registros desde el landing se reflejarán aquí al instante.</p>
@@ -1907,9 +1922,16 @@
                   <% } else { %>
                     <% leads.forEach(lead => { %>
                     <tr id="lead-row-<%= lead.id %>" class="participant-row hover:bg-slate-900/60 transition-colors"
+                        data-id="<%= lead.id %>"
                         data-search="<%= ((lead.tutorRut || '') + ' ' + (lead.name || '') + ' ' + (lead.kidName || '') + ' ' + (lead.email || '') + ' ' + (lead.phone || '') + ' ' + (lead.emergencyContact || '') + ' ' + (lead.bibNumber || '')).toLowerCase() %>"
                         data-distance="<%= (lead.distance || '').toLowerCase() %>">
                       
+                      <% if (role === 'admin') { %>
+                      <td class="py-3.5 px-3 text-center">
+                        <input type="checkbox" class="lead-select-checkbox w-4 h-4 rounded text-blue-600 bg-slate-950 border-slate-700 focus:ring-blue-500 cursor-pointer" data-id="<%= lead.id %>" data-name="<%= lead.kidName || lead.name %>">
+                      </td>
+                      <% } %>
+
                       <!-- Dorsal Oficial -->
                       <td class="py-3.5 px-4 font-mono font-black text-amber-400">
                         #<%= lead.bibNumber || '----' %>
@@ -2103,6 +2125,104 @@
             </div>
           </div>
         </div>
+
+        <% if (role === 'admin') { %>
+        <!-- BARRA FLOTANTE DE ACCIONES PARA SELECCIÓN MÁLTIPLE -->
+        <div id="bulk-selection-bar" class="hidden fixed bottom-6 inset-x-4 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 z-40 bg-slate-900/95 backdrop-blur-md border border-slate-700 shadow-2xl rounded-2xl px-5 py-3 flex items-center justify-between sm:justify-start gap-4 text-xs transition-all">
+          <div class="flex items-center gap-2">
+            <span class="w-2.5 h-2.5 rounded-full bg-red-400 animate-pulse"></span>
+            <span class="font-bold text-white"><span id="bulk-selected-counter" class="font-black text-red-400">0</span> seleccionados</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button type="button" id="btn-deselect-all-leads" class="px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 font-semibold transition-all cursor-pointer">
+              Deseleccionar
+            </button>
+            <button type="button" id="btn-delete-selected-leads" class="px-3.5 py-1.5 rounded-xl bg-red-600 hover:bg-red-500 text-white font-black shadow-md shadow-red-600/30 flex items-center gap-1.5 transition-all cursor-pointer">
+              <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+              <span>Eliminar Seleccionados</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- MODAL DE EMERGENCIA PARA ELIMINACIÓN MASIVA (CON PALABRA CLAVE DE SEGURIDAD) -->
+        <div id="emergency-delete-modal" class="fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-md hidden flex items-center justify-center p-4">
+          <div class="bg-slate-900 border-2 border-red-500/60 rounded-3xl max-w-lg w-full p-6 sm:p-7 shadow-2xl shadow-red-950/50 space-y-5 relative animate-in fade-in zoom-in-95 duration-150">
+            
+            <!-- Encabezado con Alerta Roja -->
+            <div class="flex items-start gap-4">
+              <div class="w-12 h-12 rounded-2xl bg-red-600/20 text-red-400 border border-red-500/40 flex items-center justify-center shrink-0">
+                <i data-lucide="shield-alert" class="w-6 h-6 animate-pulse"></i>
+              </div>
+              <div>
+                <span class="text-[10px] font-black uppercase tracking-wider text-red-400 bg-red-950/60 border border-red-500/30 px-2 py-0.5 rounded-full inline-block mb-1">
+                  ZONA CRÍTICA DE SEGURIDAD
+                </span>
+                <h3 class="text-lg font-black text-white">Eliminación Masiva de Participantes</h3>
+                <p class="text-xs text-slate-400 mt-0.5">Operación irreversible de purga de base de datos.</p>
+              </div>
+            </div>
+
+            <!-- Cuadro de advertencia -->
+            <div class="p-4 rounded-2xl bg-red-950/40 border border-red-500/40 text-xs text-red-200 space-y-2">
+              <p class="font-bold flex items-center gap-1.5 text-red-300">
+                <i data-lucide="alert-triangle" class="w-4 h-4 shrink-0 text-amber-400"></i>
+                <span>¡Atención Administrador! Esta acción no se puede deshacer.</span>
+              </p>
+              <p class="text-[11px] text-red-300/80 leading-relaxed">
+                Se eliminarán permanentemente los registros seleccionados tanto de <strong>PostgreSQL</strong> como de los <strong>respaldos locales</strong>.
+              </p>
+              <div class="pt-2 border-t border-red-500/30 flex items-center justify-between text-xs">
+                <span class="text-slate-300 font-medium">Registros a eliminar:</span>
+                <span id="modal-delete-scope-text" class="font-black text-amber-300 bg-slate-950 px-2.5 py-0.5 rounded-lg border border-slate-700">0 participantes</span>
+              </div>
+            </div>
+
+            <!-- Selector de alcance cuando se abre desde botón superior -->
+            <div id="modal-scope-selector" class="space-y-1.5 hidden">
+              <label class="block text-xs font-bold text-slate-300">Alcance de la eliminación:</label>
+              <div class="grid grid-cols-2 gap-2 text-xs">
+                <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700">
+                  <input type="radio" name="deleteScope" value="selected" id="scope-selected" class="text-red-600 focus:ring-red-500">
+                  <span class="font-bold text-slate-300">Sólo seleccionados (<span id="scope-selected-count">0</span>)</span>
+                </label>
+                <label class="flex items-center gap-2 p-2.5 rounded-xl bg-slate-950 border border-slate-800 cursor-pointer hover:border-slate-700">
+                  <input type="radio" name="deleteScope" value="all" id="scope-all" class="text-red-600 focus:ring-red-500">
+                  <span class="font-bold text-red-400">Toda la base de datos</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Input de confirmación con palabra de emergencia -->
+            <div class="space-y-2">
+              <label class="block text-xs font-bold text-slate-300">
+                Escribe la palabra de seguridad de emergencia para desbloquear:
+              </label>
+              <div class="flex items-center justify-between p-2.5 rounded-xl bg-slate-950 border border-slate-800 text-xs font-mono">
+                <span class="text-slate-400">Palabra requerida:</span>
+                <span id="target-security-word" class="font-black text-red-400 bg-red-950/80 px-2.5 py-1 rounded-lg border border-red-500/40 select-all tracking-wider"><%= typeof emergencySecurityWord !== 'undefined' ? emergencySecurityWord : 'ELIMINAR-PARTICIPANTES' %></span>
+              </div>
+              <input type="text" id="input-emergency-security-word"
+                     autocomplete="off"
+                     placeholder="Escribe la palabra exactamente..."
+                     class="w-full bg-slate-950 border-2 border-slate-800 focus:border-red-500 rounded-xl px-4 py-3 text-sm font-mono font-bold text-white placeholder-slate-600 focus:outline-none transition-colors">
+              <p id="security-word-hint" class="text-[10px] text-slate-500 italic">El botón de confirmación se habilitará automáticamente al escribir la palabra exacta.</p>
+            </div>
+
+            <!-- Botones de Acción -->
+            <div class="flex items-center justify-end gap-3 pt-3 border-t border-slate-800">
+              <button type="button" id="btn-cancel-emergency-delete" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-all cursor-pointer">
+                Cancelar
+              </button>
+              <button type="button" id="btn-confirm-emergency-delete" disabled
+                      class="px-5 py-2.5 rounded-xl text-xs font-black text-white bg-red-600 hover:bg-red-500 active:bg-red-700 disabled:opacity-40 disabled:cursor-not-allowed shadow-lg shadow-red-600/30 transition-all flex items-center gap-2 cursor-pointer">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+                <span id="btn-confirm-emergency-delete-text">Confirmar Eliminación</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+        <% } %>
         <!-- /#tab-leads -->
 
         <!-- PESTAÑA: GESTIÓN DE USUARIOS (SOLO ADMINISTRADOR) -->

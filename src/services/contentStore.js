@@ -280,6 +280,32 @@ function deleteLead(id) {
   }
 }
 
+function deleteLeadsBulk(ids) {
+  try {
+    let leads = getLeads();
+    if (ids === 'ALL') {
+      const count = leads.length;
+      leads = [];
+      const tempFile = `${LEADS_FILE}.tmp`;
+      fs.writeFileSync(tempFile, JSON.stringify(leads, null, 2), 'utf-8');
+      fs.renameSync(tempFile, LEADS_FILE);
+      return { success: true, count };
+    } else if (Array.isArray(ids)) {
+      const idSet = new Set(ids);
+      const initial = leads.length;
+      leads = leads.filter(l => !idSet.has(l.id));
+      const removed = initial - leads.length;
+      const tempFile = `${LEADS_FILE}.tmp`;
+      fs.writeFileSync(tempFile, JSON.stringify(leads, null, 2), 'utf-8');
+      fs.renameSync(tempFile, LEADS_FILE);
+      return { success: true, count: removed };
+    }
+    return { success: false, error: 'Identificadores inválidos' };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 // Configuración de Paletas de Colores para el tema moderno
 // Colores corporativos: Rojo (#ef4444), Verde (#10b981), Amarillo (#facc15)
 const COLOR_THEMES = {
@@ -447,6 +473,7 @@ module.exports = {
   getLeads,
   addLead,
   deleteLead,
+  deleteLeadsBulk,
   getRaces,
   getActiveRace,
   saveRace,

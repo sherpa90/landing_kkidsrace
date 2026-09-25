@@ -12,6 +12,9 @@ const imageService = require('../services/imageService');
 // Sincronizar usuario de variables de entorno una sola vez al arrancar
 auth.syncEnvAdmin();
 
+// Palabra de seguridad para operaciones críticas (Eliminación masiva de participantes)
+const EMERGENCY_SECURITY_WORD = process.env.EMERGENCY_SECURITY_WORD || 'ELIMINAR-PARTICIPANTES';
+
 // Rate limiting para login: 10 intentos cada 15 minutos por IP
 const loginLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
@@ -112,7 +115,8 @@ router.get('/', auth.requireAuth, async (req, res) => {
     name,
     isPostgres,
     csrfToken,
-    usersList
+    usersList,
+    emergencySecurityWord: EMERGENCY_SECURITY_WORD
   });
 });
 
@@ -488,6 +492,41 @@ router.delete('/api/leads/:id', auth.requireAdmin, validateCsrf, async (req, res
     res.json({ success: true, message: 'Registro de inscripción eliminado correctamente.' });
   } else {
     res.status(500).json({ success: false, error: result.error });
+  }
+});
+
+// Eliminación Masiva de Registros de Inscripción con Palabra de Seguridad de Emergencia (SOLO Administrador)
+router.post('/api/leads/bulk-delete', auth.requireAdmin, validateCsrf, async (req, res) => {
+  try {
+    const { ids, securityWord } = req.body;
+
+    if (!securityWord || securityWord.trim().toUpperCase() !== EMERGENCY_SECURITY_WORD.toUpperCase()) {
+      return res.status(403).json({
+        success: false,
+        error: `Palabra de seguridad de emergencia incorrecta. Debes ingresar exactamente: ${EMERGENCY_SECURITY_WORD}`
+      });
+    }
+
+    if (ids !== 'ALL' && (!Array.isArray(ids) || ids.length === 0)) {
+      return res.status(400).json({
+        success: false,
+        error: 'Debes seleccionar al menos un participante o indicar "ALL" para purgar la base de datos.'
+      });
+    }
+
+    const result = await db.deleteInscriptionsBulk(ids);
+    if (result.success) {
+      res.json({
+        success: true,
+        message: `Eliminación masiva completada con éxito. Se eliminaron ${result.count ?? (Array.isArray(ids) ? ids.length : 'todos los')} registros.`,
+        count: result.count
+      });
+    } else {
+      res.status(500).json({ success: false, error: result.error || 'Error al procesar la eliminación masiva.' });
+    }
+  } catch (err) {
+    console.error('Error en bulk-delete:', err);
+    res.status(500).json({ success: false, error: err.message || 'Error interno del servidor.' });
   }
 });
 

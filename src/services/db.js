@@ -218,6 +218,35 @@ async function deleteInscription(id) {
   return { success: true };
 }
 
+// Eliminar inscripciones masivamente (por array de IDs o 'ALL')
+async function deleteInscriptionsBulk(ids) {
+  if (initPromise) {
+    await initPromise;
+  }
+
+  let deletedCount = 0;
+  if (pool && isConnected) {
+    try {
+      if (ids === 'ALL') {
+        const res = await pool.query('DELETE FROM inscriptions;');
+        deletedCount = res.rowCount || 0;
+      } else if (Array.isArray(ids) && ids.length > 0) {
+        const res = await pool.query('DELETE FROM inscriptions WHERE id = ANY($1::text[]);', [ids]);
+        deletedCount = res.rowCount || 0;
+      }
+      // Eliminar también del store local
+      contentStore.deleteLeadsBulk(ids);
+      return { success: true, count: deletedCount };
+    } catch (err) {
+      console.error('Error eliminando masivamente en PostgreSQL:', err.message);
+      return { success: false, error: err.message };
+    }
+  }
+
+  // Respaldo local
+  return contentStore.deleteLeadsBulk(ids);
+}
+
 function isPostgresConnected() {
   return isConnected;
 }
@@ -226,6 +255,7 @@ module.exports = {
   saveInscription,
   getInscriptions,
   deleteInscription,
+  deleteInscriptionsBulk,
   isPostgresConnected,
   initDb
 };

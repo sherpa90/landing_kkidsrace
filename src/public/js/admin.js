@@ -721,6 +721,251 @@ function initLeadsManager() {
     });
   });
 
+  // --- Gestión de Selección Múltiple y Eliminación Masiva con Palabra de Emergencia ---
+  const selectAllCb = document.getElementById('checkbox-select-all-leads');
+  const bulkBar = document.getElementById('bulk-selection-bar');
+  const bulkCounter = document.getElementById('bulk-selected-counter');
+  const deselectBtn = document.getElementById('btn-deselect-all-leads');
+  const deleteSelectedBtn = document.getElementById('btn-delete-selected-leads');
+  const triggerBulkDeleteBtn = document.getElementById('btn-trigger-bulk-delete');
+
+  const emergencyModal = document.getElementById('emergency-delete-modal');
+  const modalScopeText = document.getElementById('modal-delete-scope-text');
+  const modalScopeSelector = document.getElementById('modal-scope-selector');
+  const targetSecurityWordEl = document.getElementById('target-security-word');
+  const inputSecurityWord = document.getElementById('input-emergency-security-word');
+  const confirmDeleteBtn = document.getElementById('btn-confirm-emergency-delete');
+  const cancelDeleteBtn = document.getElementById('btn-cancel-emergency-delete');
+  const scopeSelectedRadio = document.getElementById('scope-selected');
+  const scopeAllRadio = document.getElementById('scope-all');
+  const scopeSelectedCount = document.getElementById('scope-selected-count');
+
+  let currentDeleteMode = 'selected'; // 'selected' | 'all'
+  const targetWord = (targetSecurityWordEl?.textContent || 'ELIMINAR-PARTICIPANTES').trim();
+
+  function getSelectedLeadIds() {
+    const checked = document.querySelectorAll('.lead-select-checkbox:checked');
+    const ids = new Set();
+    checked.forEach(cb => {
+      const id = cb.getAttribute('data-id');
+      if (id) ids.add(id);
+    });
+    return Array.from(ids);
+  }
+
+  function updateBulkBar() {
+    const ids = getSelectedLeadIds();
+    const count = ids.length;
+
+    if (bulkCounter) bulkCounter.textContent = count;
+    if (bulkBar) {
+      if (count > 0) {
+        bulkBar.classList.remove('hidden');
+        bulkBar.classList.add('flex');
+      } else {
+        bulkBar.classList.add('hidden');
+        bulkBar.classList.remove('flex');
+      }
+    }
+
+    if (selectAllCb) {
+      const allCheckboxes = document.querySelectorAll('#participants-tbody .lead-select-checkbox');
+      if (allCheckboxes.length === 0) {
+        selectAllCb.checked = false;
+        selectAllCb.indeterminate = false;
+      } else {
+        const allChecked = count > 0 && count === allCheckboxes.length;
+        selectAllCb.checked = allChecked;
+        selectAllCb.indeterminate = count > 0 && !allChecked;
+      }
+    }
+  }
+
+  // Sincronización de checkboxes individuales
+  document.addEventListener('change', (e) => {
+    if (e.target && e.target.classList.contains('lead-select-checkbox')) {
+      const id = e.target.getAttribute('data-id');
+      const isChecked = e.target.checked;
+      document.querySelectorAll(`.lead-select-checkbox[data-id="${id}"]`).forEach(cb => {
+        cb.checked = isChecked;
+      });
+      updateBulkBar();
+    }
+  });
+
+  // Checkbox Seleccionar Todos (filas visibles)
+  if (selectAllCb) {
+    selectAllCb.addEventListener('change', () => {
+      const isChecked = selectAllCb.checked;
+      document.querySelectorAll('.participant-row').forEach(row => {
+        if (row.style.display !== 'none') {
+          row.querySelectorAll('.lead-select-checkbox').forEach(cb => {
+            cb.checked = isChecked;
+          });
+        }
+      });
+      updateBulkBar();
+    });
+  }
+
+  // Botón Deseleccionar
+  if (deselectBtn) {
+    deselectBtn.addEventListener('click', () => {
+      document.querySelectorAll('.lead-select-checkbox').forEach(cb => { cb.checked = false; });
+      updateBulkBar();
+    });
+  }
+
+  // Abrir Modal de Confirmación de Emergencia
+  function openEmergencyModal(mode = 'selected') {
+    if (!emergencyModal) return;
+    currentDeleteMode = mode;
+    const selectedIds = getSelectedLeadIds();
+
+    if (mode === 'selected') {
+      if (modalScopeSelector) modalScopeSelector.classList.add('hidden');
+      if (modalScopeText) modalScopeText.textContent = `${selectedIds.length} participantes seleccionados`;
+    } else {
+      if (modalScopeSelector) {
+        modalScopeSelector.classList.remove('hidden');
+        if (scopeSelectedCount) scopeSelectedCount.textContent = selectedIds.length;
+        if (selectedIds.length > 0) {
+          if (scopeSelectedRadio) scopeSelectedRadio.checked = true;
+          currentDeleteMode = 'selected';
+          if (modalScopeText) modalScopeText.textContent = `${selectedIds.length} participantes seleccionados`;
+        } else {
+          if (scopeAllRadio) scopeAllRadio.checked = true;
+          currentDeleteMode = 'all';
+          if (modalScopeText) modalScopeText.textContent = 'TODOS los participantes registrados (Base completa)';
+        }
+      }
+    }
+
+    if (inputSecurityWord) {
+      inputSecurityWord.value = '';
+      inputSecurityWord.classList.remove('border-emerald-500');
+      inputSecurityWord.classList.add('border-slate-800');
+    }
+    if (confirmDeleteBtn) confirmDeleteBtn.disabled = true;
+
+    emergencyModal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => { inputSecurityWord?.focus(); }, 120);
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  function closeEmergencyModal() {
+    if (!emergencyModal) return;
+    emergencyModal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  if (deleteSelectedBtn) {
+    deleteSelectedBtn.addEventListener('click', () => {
+      const ids = getSelectedLeadIds();
+      if (ids.length === 0) {
+        showAdminToast('Selecciona al menos un participante', 'warning');
+        return;
+      }
+      openEmergencyModal('selected');
+    });
+  }
+
+  if (triggerBulkDeleteBtn) {
+    triggerBulkDeleteBtn.addEventListener('click', () => {
+      openEmergencyModal('trigger');
+    });
+  }
+
+  if (scopeSelectedRadio) {
+    scopeSelectedRadio.addEventListener('change', () => {
+      currentDeleteMode = 'selected';
+      const ids = getSelectedLeadIds();
+      if (modalScopeText) modalScopeText.textContent = `${ids.length} participantes seleccionados`;
+    });
+  }
+  if (scopeAllRadio) {
+    scopeAllRadio.addEventListener('change', () => {
+      currentDeleteMode = 'all';
+      if (modalScopeText) modalScopeText.textContent = 'TODOS los participantes registrados (Base completa)';
+    });
+  }
+
+  if (inputSecurityWord) {
+    inputSecurityWord.addEventListener('input', () => {
+      const val = inputSecurityWord.value.trim().toUpperCase();
+      const isValid = (val === targetWord.toUpperCase());
+      if (confirmDeleteBtn) confirmDeleteBtn.disabled = !isValid;
+      if (isValid) {
+        inputSecurityWord.classList.add('border-emerald-500');
+        inputSecurityWord.classList.remove('border-slate-800');
+      } else {
+        inputSecurityWord.classList.remove('border-emerald-500');
+        inputSecurityWord.classList.add('border-slate-800');
+      }
+    });
+  }
+
+  if (cancelDeleteBtn) cancelDeleteBtn.addEventListener('click', closeEmergencyModal);
+  if (emergencyModal) {
+    emergencyModal.addEventListener('click', (e) => {
+      if (e.target === emergencyModal) closeEmergencyModal();
+    });
+  }
+
+  // Confirmación y Envío al Servidor
+  if (confirmDeleteBtn) {
+    confirmDeleteBtn.addEventListener('click', async () => {
+      const securityWord = inputSecurityWord?.value.trim();
+      const ids = (currentDeleteMode === 'all') ? 'ALL' : getSelectedLeadIds();
+
+      if (currentDeleteMode === 'selected' && (!Array.isArray(ids) || ids.length === 0)) {
+        showAdminToast('No hay participantes seleccionados para eliminar', 'warning');
+        return;
+      }
+
+      confirmDeleteBtn.disabled = true;
+      const originalHtml = confirmDeleteBtn.innerHTML;
+      confirmDeleteBtn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Eliminando...</span>';
+      if (window.lucide) window.lucide.createIcons();
+
+      try {
+        const csrf = getCsrfToken();
+        const res = await cmsFetch('/admin/api/leads/bulk-delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+          body: JSON.stringify({ ids, securityWord })
+        });
+        const json = await res.json();
+
+        if (json.success) {
+          showAdminToast(json.message || 'Eliminación masiva completada con éxito', 'success');
+          closeEmergencyModal();
+
+          if (ids === 'ALL') {
+            document.querySelectorAll('.participant-row').forEach(el => el.remove());
+          } else {
+            ids.forEach(id => {
+              document.querySelectorAll(`[id="lead-row-${id}"]`).forEach(el => el.remove());
+              document.querySelectorAll(`.participant-row[data-id="${id}"]`).forEach(el => el.remove());
+            });
+          }
+
+          updateBulkBar();
+          applyFilters();
+        } else {
+          showAdminToast(json.error || 'Error al ejecutar eliminación masiva', 'error');
+        }
+      } catch (err) {
+        showAdminToast(err.message || 'Error de conexión con el servidor', 'error');
+      } finally {
+        confirmDeleteBtn.disabled = false;
+        confirmDeleteBtn.innerHTML = originalHtml;
+        if (window.lucide) window.lucide.createIcons();
+      }
+    });
+  }
+
   // Menú Móvil (Drawer Toggle)
   const toggleMobileBtn = document.getElementById('btn-toggle-mobile-menu');
   const closeMobileBtn = document.getElementById('btn-close-mobile-menu');
