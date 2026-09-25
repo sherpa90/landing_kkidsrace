@@ -97,13 +97,19 @@ function addLead(leadData) {
       id: leadData.id || (crypto.randomUUID ? crypto.randomUUID() : `insc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`),
       raceId: leadData.raceId || (activeRace ? activeRace.id : 'race-2026-primavera'),
       raceName: leadData.raceName || (activeRace ? activeRace.name : 'KidsRun 2026'),
-      // Datos del tutor (minimización de datos)
-      name: (leadData.name || leadData.tutorName || '').trim(),
+      // Datos del tutor (organizados por nombre y apellido)
+      tutorFirstName: (leadData.tutorFirstName || '').trim(),
+      tutorLastName: (leadData.tutorLastName || '').trim(),
+      tutorRut: (leadData.tutorRut || leadData.rut || '').trim(),
+      name: (leadData.name || (leadData.tutorFirstName || leadData.tutorLastName ? `${leadData.tutorFirstName || ''} ${leadData.tutorLastName || ''}`.trim() : '') || leadData.tutorName || '').trim(),
       email: (leadData.email || '').trim(),
       phone: (leadData.phone || '').trim(),
-      // Datos del participante menor (mínimos para resguardo y seguridad)
-      kidName: String(leadData.kidName || '').trim(),
-      kidAge: leadData.kidAge ? parseInt(leadData.kidAge, 10) : null,
+      // Datos del participante menor (organizados por nombre, apellido y talla)
+      kidFirstName: (leadData.kidFirstName || '').trim(),
+      kidLastName: (leadData.kidLastName || '').trim(),
+      kidName: String(leadData.kidName || (leadData.kidFirstName || leadData.kidLastName ? `${leadData.kidFirstName || ''} ${leadData.kidLastName || ''}`.trim() : '') || '').trim(),
+      kidAge: leadData.kidAge !== undefined && leadData.kidAge !== null ? parseInt(leadData.kidAge, 10) : null,
+      shirtSize: String(leadData.shirtSize || '4').trim(),
       distance: String(leadData.distance || leadData.category || '').trim(),
       emergencyContact: (leadData.emergencyContact || leadData.phone || '').trim(),
       medicalNotes: (leadData.medicalNotes || leadData.message || '').trim(),
@@ -113,7 +119,15 @@ function addLead(leadData) {
       consentGiven: Boolean(leadData.consentGiven !== false), // Consentimiento de tutor legal
       createdAt: new Date().toISOString(),
       status: 'confirmed',
-      bibNumber: generateBibNumber(leads.length + 101)
+      bibNumber: leadData.bibNumber || (() => {
+        let maxBib = 100;
+        for (const l of leads) {
+          const raw = String(l.bibNumber || l.bib_number || '').replace(/\D/g, '');
+          const n = parseInt(raw, 10);
+          if (!isNaN(n) && n > maxBib) maxBib = n;
+        }
+        return generateBibNumber(maxBib + 1);
+      })()
     };
 
     leads.unshift(newLead);

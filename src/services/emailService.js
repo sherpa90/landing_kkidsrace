@@ -91,9 +91,11 @@ class EmailService {
     const safeName      = escapeHtml(inscription.name);
     const safeDistance  = escapeHtml(inscription.distance);
     const safeTutorRut  = escapeHtml(inscription.tutorRut);
-    const safeKidAge    = inscription.kidAge ? `${parseInt(inscription.kidAge, 10)} años` : 'Participante';
+    const safeBibNumber = escapeHtml(inscription.bibNumber || '0100');
+    const safeShirtSize = escapeHtml(inscription.shirtSize || '4');
+    const safeKidAge    = inscription.kidAge !== null && inscription.kidAge !== undefined ? `${parseInt(inscription.kidAge, 10)} años` : 'Participante';
 
-    const subject = `🎉 ¡Inscripción Confirmada! - ${safeBrandName} (${safeKidName})`;
+    const subject = `🎉 ¡Inscripción Confirmada #${safeBibNumber}! - ${safeBrandName} (${safeKidName})`;
 
     const html = `
       <!DOCTYPE html>
@@ -120,19 +122,27 @@ class EmailService {
       <body>
         <div class="container">
           <div class="header">
-            <div class="badge">🏅 Comprobante de Inscripción</div>
+            <div class="badge">🏅 Comprobante Oficial de Inscripción</div>
             <h1 class="title">¡Bienvenido a ${safeBrandName}!</h1>
           </div>
           <div class="content">
             <div class="greeting">Hola, ${safeName} 👋</div>
             <p style="line-height: 1.6; font-size: 15px; color: #334155;">
-              ¡Tenemos excelentes noticias! La inscripción para <strong>${safeKidName}</strong> ha sido recibida con éxito en el sistema. Estamos muy entusiasmados de recibirlos en la pista.
+              ¡Tenemos excelentes noticias! La inscripción para <strong>${safeKidName}</strong> ha sido recibida y confirmada exitosamente con el <strong>N° de Inscripción #${safeBibNumber}</strong>. Por favor guarda este comprobante.
             </p>
 
             <div class="details-card">
+              <div class="detail-row" style="background: #e0f2fe; padding: 10px; border-radius: 8px; border-bottom: none; margin-bottom: 8px;">
+                <span class="detail-label" style="color: #0369a1; font-weight: 900;">N° DE INSCRIPCIÓN:</span>
+                <span class="detail-val" style="color: #0284c7; font-size: 18px; font-family: monospace;">#${safeBibNumber}</span>
+              </div>
               <div class="detail-row">
                 <span class="detail-label">Pequeño Corredor/a:</span>
                 <span class="detail-val">${safeKidName} (${safeKidAge})</span>
+              </div>
+              <div class="detail-row">
+                <span class="detail-label">Talla de Polera:</span>
+                <span class="detail-val">Talla ${safeShirtSize}</span>
               </div>
               <div class="detail-row">
                 <span class="detail-label">Distancia / Categoría:</span>
@@ -152,13 +162,13 @@ class EmailService {
               </div>
               <div class="detail-row">
                 <span class="detail-label">Tutor Responsable:</span>
-                <span class="detail-val">${safeName} ${safeTutorRut ? '(' + safeTutorRut + ')' : ''}</span>
+                <span class="detail-val">${safeName} ${safeTutorRut ? '(RUT: ' + safeTutorRut + ')' : ''}</span>
               </div>
             </div>
 
             <div class="info-box">
-              <strong>📦 Retiro de Kits de Corredor:</strong><br>
-              Todos los corredores inscritos reciben su polera oficial de competencia, dorsal y su medalla finisher garantizada al cruzar la meta. Te avisaremos oportunamente por este medio los días y horarios previos para retirar el kit.
+              <strong>📸 IMPORTANTE: Conserva este comprobante</strong><br>
+              Tu <strong>N° de Inscripción #${safeBibNumber}</strong> identifica a tu pequeño corredor en la base de datos oficial del evento y te servirá para retirar tu kit oficial (polera talla ${safeShirtSize}, número y medalla finisher garantizada).
             </div>
 
             <p style="font-size: 13px; color: #64748b; line-height: 1.5;">

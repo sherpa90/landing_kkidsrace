@@ -183,15 +183,16 @@ async function processAndSaveImage(buffer, originalName, type = 'standard') {
       effort: 6
     });
   } else if (type === 'payment_proof') {
-    // Comprobante de pago: max 1280px para mantener números legibles, compresión WebP eficiente
+    // Comprobante de pago: max 1000px y compresión WebP máxima (effort 6) para no saturar almacenamiento
     sharpInstance = sharpInstance.resize({
-      width: 1280,
-      height: 1280,
+      width: 1000,
+      height: 1000,
       fit: 'inside',
       withoutEnlargement: true
     }).webp({
-      quality: 82,
-      effort: 4
+      quality: 70,
+      effort: 6,
+      smartSubsample: true
     });
   } else {
     // Configuración para fotos/galería/banners: max 1920px de ancho

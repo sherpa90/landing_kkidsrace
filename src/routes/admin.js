@@ -430,18 +430,23 @@ function sanitizeCsvCell(val) {
 router.get('/api/inscriptions/export', auth.requireAuth, async (req, res) => {
   const leads = await db.getInscriptions();
 
-  // Encabezados limpios respetando privacidad
-  const headers = ['Dorsal', 'Corrida', 'Nombre Pupilo/a', 'Edad', 'Distancia/Circuito', 'Nombre Tutor', 'Email Contacto', 'Telefono Emergencia', 'Comprobante URL', 'Consentimiento', 'Fecha Registro'];
+  // Encabezados limpios respetando privacidad y máxima organización de datos
+  const headers = ['N° Inscripción', 'Corrida', 'RUT Tutor', 'Nombre Tutor', 'Apellido Tutor', 'Nombre Pupilo/a', 'Apellido Pupilo/a', 'Edad', 'Talla Polera', 'Distancia/Circuito', 'Email Contacto', 'Teléfono Contacto', 'Teléfono Emergencia', 'Comprobante URL', 'Consentimiento', 'Fecha Registro'];
   
   const rows = leads.map(l => [
     sanitizeCsvCell(l.bibNumber || ''),
     sanitizeCsvCell(l.raceName || 'KidsRun 2026'),
-    sanitizeCsvCell(l.kidName || ''),
-    sanitizeCsvCell(l.kidAge || ''),
+    sanitizeCsvCell(l.tutorRut || ''),
+    sanitizeCsvCell(l.tutorFirstName || l.name || ''),
+    sanitizeCsvCell(l.tutorLastName || ''),
+    sanitizeCsvCell(l.kidFirstName || l.kidName || ''),
+    sanitizeCsvCell(l.kidLastName || ''),
+    sanitizeCsvCell(l.kidAge !== undefined && l.kidAge !== null ? l.kidAge : ''),
+    sanitizeCsvCell(l.shirtSize || '4'),
     sanitizeCsvCell(l.distance || ''),
-    sanitizeCsvCell(l.name || ''),
     sanitizeCsvCell(l.email || ''),
-    sanitizeCsvCell(l.phone || l.emergencyContact || ''),
+    sanitizeCsvCell(l.phone || ''),
+    sanitizeCsvCell(l.emergencyContact || l.phone || ''),
     sanitizeCsvCell(l.paymentProof || ''),
     sanitizeCsvCell(l.consentGiven ? 'SI' : 'NO'),
     sanitizeCsvCell(new Date(l.createdAt).toLocaleString('es-ES'))

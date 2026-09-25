@@ -46,6 +46,15 @@
       </div>
     </div>
 
+    <!-- CONTADOR DE NIÑOS EN CARRERA (Visible para Admin y Editor en todo momento) -->
+    <div class="flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-xl bg-gradient-to-r from-amber-500/20 to-orange-500/20 border border-amber-500/40 text-amber-300 shadow-sm shrink-0" title="Total de niños participantes inscritos en la corrida">
+      <i data-lucide="users" class="w-3.5 h-3.5 text-amber-400 shrink-0"></i>
+      <span class="text-[11px] font-bold text-slate-300 hidden sm:inline">Niños Inscritos:</span>
+      <span class="font-mono font-black text-xs text-amber-300 bg-amber-950/80 px-2 py-0.5 rounded-lg border border-amber-500/30" id="header-kids-count">
+        <%= leads ? leads.length : 0 %>
+      </span>
+    </div>
+
     <!-- CENTRO: Rol/Usuario (sólo en pantallas md+) -->
     <div class="hidden md:flex items-center gap-2 flex-1 justify-center">
       <div class="flex items-center gap-1.5 px-3 py-1 rounded-xl <%= role === 'admin' ? 'bg-blue-950/90 border border-blue-500/50 text-blue-300' : 'bg-amber-950/90 border border-amber-500/50 text-amber-300' %>">
@@ -2078,7 +2087,7 @@
                         <i data-lucide="hash" class="w-3.5 h-3.5 text-amber-400"></i>
                         <span><%= lead.bibNumber || '----' %></span>
                       </span>
-                      <span class="text-[11px] font-semibold text-slate-400">Dorsal</span>
+                      <span class="text-[11px] font-semibold text-slate-400">N° Inscripción</span>
                     </div>
 
                     <span class="px-3 py-1 rounded-full text-xs font-black bg-blue-950/80 text-blue-300 border border-blue-500/40 flex items-center gap-1.5 shadow-sm">
@@ -2098,11 +2107,18 @@
                         <h3 class="font-black text-white text-base truncate leading-snug"><%= lead.kidName || 'Sin nombre' %></h3>
                       </div>
                     </div>
-                    <% if (lead.kidAge) { %>
-                    <span class="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold shrink-0 border border-slate-700">
-                      <%= lead.kidAge %> años
-                    </span>
-                    <% } %>
+                    <div class="flex items-center gap-1.5 shrink-0">
+                      <% if (lead.kidAge !== undefined && lead.kidAge !== null) { %>
+                      <span class="px-2.5 py-1 rounded-xl bg-slate-800 text-slate-300 text-xs font-bold border border-slate-700">
+                        <%= lead.kidAge %> años
+                      </span>
+                      <% } %>
+                      <% if (lead.shirtSize) { %>
+                      <span class="px-2 py-0.5 rounded-xl bg-purple-950/80 text-purple-300 border border-purple-500/40 text-[10px] font-black">
+                        Talla <%= lead.shirtSize %>
+                      </span>
+                      <% } %>
+                    </div>
                   </div>
 
                   <!-- Ficha de Datos del Apoderado / Tutor -->
@@ -2184,9 +2200,10 @@
                       <input type="checkbox" id="checkbox-select-all-leads" class="w-4 h-4 rounded text-blue-600 bg-slate-950 border-slate-700 focus:ring-blue-500 cursor-pointer" title="Seleccionar todos">
                     </th>
                     <% } %>
-                    <th class="py-3.5 px-4 font-black">Dorsal</th>
+                    <th class="py-3.5 px-4 font-black">N° Inscripción</th>
                     <th class="py-3.5 px-4 font-black">Pupilo/a</th>
                     <th class="py-3.5 px-4 font-black">Edad</th>
+                    <th class="py-3.5 px-4 font-black">Talla</th>
                     <th class="py-3.5 px-4 font-black">Circuito</th>
                     <th class="py-3.5 px-4 font-black">Tutor / Apoderado</th>
                     <th class="py-3.5 px-4 font-black">RUT Tutor</th>
@@ -2201,7 +2218,7 @@
                 <tbody class="divide-y divide-slate-800/80" id="participants-tbody">
                   <% if (!leads || leads.length === 0) { %>
                   <tr id="no-participants-row">
-                    <td colspan="<%= role === 'admin' ? 11 : 9 %>" class="text-center py-12 text-slate-500">
+                    <td colspan="<%= role === 'admin' ? 12 : 10 %>" class="text-center py-12 text-slate-500">
                       <i data-lucide="user-check" class="w-10 h-10 mx-auto mb-2 opacity-40"></i>
                       <p class="text-sm font-bold text-slate-400">Aún no hay inscripciones registradas en la base de datos.</p>
                       <p class="text-xs text-slate-600 mt-1">Los registros desde el landing se reflejarán aquí al instante.</p>
@@ -2235,7 +2252,14 @@
 
                       <!-- Edad -->
                       <td class="py-3.5 px-4 text-slate-300 font-medium">
-                        <%= lead.kidAge ? lead.kidAge + ' años' : '-' %>
+                        <%= lead.kidAge !== undefined && lead.kidAge !== null ? lead.kidAge + ' años' : '-' %>
+                      </td>
+
+                      <!-- Talla Polera -->
+                      <td class="py-3.5 px-4">
+                        <span class="px-2 py-0.5 rounded-lg bg-purple-950/80 text-purple-300 border border-purple-500/30 text-[11px] font-black">
+                          <%= lead.shirtSize ? 'Talla ' + lead.shirtSize : '-' %>
+                        </span>
                       </td>
 
                       <!-- Distancia / Circuito con badge -->

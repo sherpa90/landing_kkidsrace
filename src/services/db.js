@@ -77,10 +77,15 @@ async function createTableIfNotExists() {
     ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS consent_given BOOLEAN DEFAULT TRUE;
     ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS payment_proof VARCHAR(500);
     ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS tutor_rut VARCHAR(30);
+    ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS tutor_first_name VARCHAR(100);
+    ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS tutor_last_name VARCHAR(100);
+    ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS kid_first_name VARCHAR(100);
+    ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS kid_last_name VARCHAR(100);
+    ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS shirt_size VARCHAR(20);
   `;
   try {
     await pool.query(sql);
-    console.log('✅ Tabla "inscriptions" verificada en PostgreSQL (con payment_proof).');
+    console.log('✅ Tabla "inscriptions" verificada en PostgreSQL (con payment_proof, nombres separados y tallas).');
   } catch (err) {
     console.error('Error creando tabla inscriptions:', err);
   }
@@ -89,19 +94,65 @@ async function createTableIfNotExists() {
 // Inicializar al cargar (async, no bloquea)
 initPromise = initDb();
 
+// Calcular siguiente número de inscripción correlativo incremental
+async function getNextInscriptionNumber() {
+  let maxBib = 100;
+
+  if (pool && isConnected) {
+    try {
+      const res = await pool.query(`
+        SELECT COALESCE(MAX(CAST(NULLIF(regexp_replace(bib_number, '\\D', '', 'g'), '') AS INTEGER)), 100) AS max_num
+        FROM inscriptions;
+      `);
+      if (res.rows && res.rows[0] && res.rows[0].max_num) {
+        const n = parseInt(res.rows[0].max_num, 10);
+        if (!isNaN(n) && n > maxBib) {
+          maxBib = n;
+        }
+      }
+    } catch (err) {
+      console.warn('Error obteniendo max bib de PostgreSQL:', err.message);
+    }
+  }
+
+  const localLeads = contentStore.getLeads();
+  for (const l of localLeads) {
+    const raw = String(l.bibNumber || l.bib_number || '').replace(/\D/g, '');
+    const n = parseInt(raw, 10);
+    if (!isNaN(n) && n > maxBib) {
+      maxBib = n;
+    }
+  }
+
+  const next = maxBib + 1;
+  return String(next).padStart(4, '0');
+}
+
 // Guardar nueva inscripción (PostgreSQL con respaldo local)
 async function saveInscription(data) {
   const id = data.id || (crypto.randomUUID ? crypto.randomUUID() : `insc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`);
   const raceId = data.raceId || 'race-2026-primavera';
   const raceName = data.raceName || 'KidsRun 2026';
-  const name = (data.name || data.tutorName || '').trim();
+  
+  // Datos del tutor separados
+  const tutorFirstName = (data.tutorFirstName || '').trim();
+  const tutorLastName  = (data.tutorLastName || '').trim();
+  const name = (data.name || (tutorFirstName || tutorLastName ? `${tutorFirstName} ${tutorLastName}` : '') || data.tutorName || '').trim();
   const email = (data.email || '').trim();
   const phone = (data.phone || '').trim();
-  const kidName = (data.kidName || '').trim();
-  const kidAge = parseInt(data.kidAge, 10) || null;
+  
+  // Datos del participante separados
+  const kidFirstName = (data.kidFirstName || '').trim();
+  const kidLastName  = (data.kidLastName || '').trim();
+  const kidName = (data.kidName || (kidFirstName || kidLastName ? `${kidFirstName} ${kidLastName}` : '') || '').trim();
+  const kidAge = data.kidAge !== undefined && data.kidAge !== null && !isNaN(parseInt(data.kidAge, 10)) ? parseInt(data.kidAge, 10) : null;
+  const shirtSize = (data.shirtSize || '4').trim();
+  
   const distance = (data.distance || data.category || '').trim();
   const emergencyContact = (data.emergencyContact || phone || '').trim();
-  const bibNumber = data.bibNumber || String(Math.floor(100 + Math.random() * 900));
+  
+  // Asignar número de inscripción correlativo incremental
+  const bibNumber = data.bibNumber || await getNextInscriptionNumber();
   const consentGiven = Boolean(data.consentGiven !== false);
   const subject = (data.subject || (distance ? `Inscripción - ${distance}` : 'KidsRun')).trim();
   const message = (data.message || data.medicalNotes || '').trim();
@@ -118,28 +169,49 @@ async function saveInscription(data) {
   if (pool && isConnected) {
     try {
       const sql = `
-        INSERT INTO inscriptions (id, race_id, race_name, name, email, phone, kid_name, kid_age, distance, emergency_contact, bib_number, consent_given, subject, message, payment_proof, tutor_rut, created_at, read)
-        VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, false)
+        INSERT INTO inscriptions (
+          id, race_id, race_name, name, tutor_first_name, tutor_last_name,
+          email, phone, kid_name, kid_first_name, kid_last_name, kid_age,
+          distance, shirt_size, emergency_contact, bib_number,
+          consent_given, subject, message, payment_proof, tutor_rut, created_at, read
+        )
+        VALUES (
+          $1, $2, $3, $4, $5, $6,
+          $7, $8, $9, $10, $11, $12,
+          $13, $14, $15, $16,
+          $17, $18, $19, $20, $21, $22, false
+        )
         RETURNING *;
       `;
-      const values = [id, raceId, raceName, name, email, phone, kidName, kidAge, distance, emergencyContact, bibNumber, consentGiven, subject, message, paymentProof, tutorRut, now];
+      const values = [
+        id, raceId, raceName, name, tutorFirstName, tutorLastName,
+        email, phone, kidName, kidFirstName, kidLastName, kidAge,
+        distance, shirtSize, emergencyContact, bibNumber,
+        consentGiven, subject, message, paymentProof, tutorRut, now
+      ];
       const result = await pool.query(sql, values);
-      return { success: true, lead: result.rows[0], source: 'postgresql' };
+      return { success: true, lead: result.rows[0], bibNumber, source: 'postgresql' };
     } catch (err) {
       console.error('Error guardando en PostgreSQL, guardado en respaldo local:', err.message);
       // Fallback: guardar en local
       contentStore.addLead({
-        id, raceId, raceName, name, email, phone, kidName, kidAge, distance, emergencyContact, bibNumber, consentGiven, subject, message, paymentProof, tutorRut
+        id, raceId, raceName, name, tutorFirstName, tutorLastName,
+        email, phone, kidName, kidFirstName, kidLastName, kidAge,
+        shirtSize, distance, emergencyContact, bibNumber, consentGiven,
+        subject, message, paymentProof, tutorRut
       });
-      return { success: true, source: 'local_backup' };
+      return { success: true, bibNumber, source: 'local_backup' };
     }
   }
 
   // Sin PostgreSQL: guardar en local
   contentStore.addLead({
-    id, raceId, raceName, name, email, phone, kidName, kidAge, distance, emergencyContact, bibNumber, consentGiven, subject, message, paymentProof, tutorRut
+    id, raceId, raceName, name, tutorFirstName, tutorLastName,
+    email, phone, kidName, kidFirstName, kidLastName, kidAge,
+    shirtSize, distance, emergencyContact, bibNumber, consentGiven,
+    subject, message, paymentProof, tutorRut
   });
-  return { success: true, source: 'local' };
+  return { success: true, bibNumber, source: 'local' };
 }
 
 // Obtener todas las inscripciones
@@ -157,11 +229,16 @@ async function getInscriptions() {
         raceId: row.race_id,
         raceName: row.race_name,
         name: row.name,
+        tutorFirstName: row.tutor_first_name || '',
+        tutorLastName: row.tutor_last_name || '',
         email: row.email,
         phone: row.phone,
         kidName: row.kid_name,
+        kidFirstName: row.kid_first_name || '',
+        kidLastName: row.kid_last_name || '',
         kidAge: row.kid_age,
         distance: row.distance,
+        shirtSize: row.shirt_size || '',
         emergencyContact: row.emergency_contact,
         bibNumber: row.bib_number,
         consentGiven: row.consent_given,

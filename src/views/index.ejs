@@ -85,8 +85,24 @@
 
   <!-- Estilos Personalizados y Animaciones -->
   <link rel="stylesheet" href="/css/custom.css">
-  <!-- Leaflet.js CSS (mapa interactivo) -->
+  <!-- Leaflet.js CSS con respaldo CDN -->
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+  <style>
+    /* Corrección de renderizado para Leaflet con Tailwind CSS y Flexbox */
+    #venue-map {
+      min-height: 320px;
+    }
+    #venue-map .leaflet-tile-pane img {
+      max-width: none !important;
+      max-height: none !important;
+    }
+    #venue-map .leaflet-container {
+      width: 100% !important;
+      height: 100% !important;
+      font-family: inherit;
+    }
+  </style>
 </head>
 <body class="bg-white text-slate-800 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300 selection:bg-blue-600 selection:text-white antialiased relative overflow-x-hidden">
 

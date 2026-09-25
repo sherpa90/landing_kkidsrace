@@ -4,6 +4,7 @@ const contentStore = require('../services/contentStore');
 const db = require('../services/db');
 const { validateCsrf } = require('../middleware/csrf');
 const { rateLimit } = require('../middleware/rateLimit');
+const emailService = require('../services/emailService');
 
 // Rate limiters para endpoints públicos de inscripción y contacto
 const contactLimiter = rateLimit({
@@ -222,11 +223,18 @@ router.get('/inscribir', (req, res) => {
 // ─── Upload de Comprobante de Pago ──────────────────────────────────────────
 
 const imageService = require('../services/imageService');
-const emailService = require('../services/emailService');
 router.post('/api/upload-proof', uploadLimiter, validateCsrf, imageService.upload.single('proof'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ success: false, error: 'No se ha adjuntado ningún archivo de comprobante.' });
+    }
+
+    // Límite estricto de 3 MB para la captura
+    if (req.file.size > 3 * 1024 * 1024) {
+      return res.status(400).json({
+        success: false,
+        error: 'El comprobante supera el tamaño máximo permitido de 3 MB. Por favor adjunta una imagen o captura más liviana.'
+      });
     }
 
     const result = await imageService.processAndSaveImage(req.file.buffer, req.file.originalname, 'payment_proof');
@@ -343,20 +351,48 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
     return res.json({ success: true, message: '¡Inscripción recibida!' });
   }
 
-  const raceId          = sanitizeField(req.body.raceId, 64);
-  const raceName        = sanitizeField(req.body.raceName, 255);
-  const name            = sanitizeField(req.body.name, 100);
-  const email           = sanitizeField(req.body.email, 254);
-  const phone           = sanitizeField(req.body.phone, 30);
-  const emergencyContact = sanitizeField(req.body.emergencyContact, 30);
-  const tutorRut        = sanitizeField(req.body.tutorRut, 20);
-  const paymentProof    = sanitizeField(req.body.paymentProof, 500);
-  const consentGiven    = req.body.consentGiven;
+  const raceId           = sanitizeField(req.body.raceId, 64);
+  const raceName         = sanitizeField(req.body.raceName, 255);
+  const tutorFirstName   = sanitizeField(req.body.tutorFirstName, 60);
+  const tutorLastName    = sanitizeField(req.body.tutorLastName, 60);
+  let name               = sanitizeField(req.body.name, 120);
+  if (!name && (tutorFirstName || tutorLastName)) {
+    name = `${tutorFirstName} ${tutorLastName}`.trim();
+  }
 
-  if (!name || !email) {
+  const email            = sanitizeField(req.body.email, 254);
+  const phone            = sanitizeField(req.body.phone, 30);
+  const emergencyContact = sanitizeField(req.body.emergencyContact, 30);
+  const tutorRut         = sanitizeField(req.body.tutorRut, 20);
+  const paymentProof     = sanitizeField(req.body.paymentProof, 500);
+  const consentGiven     = req.body.consentGiven;
+
+  // Validación de campos obligatorios del apoderado/tutor
+  if (!tutorFirstName || !tutorLastName) {
     return res.status(400).json({
       success: false,
-      error: 'Por favor ingresa tu Nombre (Padre/Tutor) y Correo Electrónico de contacto.'
+      error: 'Por favor ingresa tanto el Nombre como el Apellido del padre o tutor.'
+    });
+  }
+
+  if (!tutorRut) {
+    return res.status(400).json({
+      success: false,
+      error: 'El RUN / RUT del apoderado o tutor es obligatorio como número identificatorio.'
+    });
+  }
+
+  if (!isValidRut(tutorRut)) {
+    return res.status(400).json({
+      success: false,
+      error: 'El RUT/RUN ingresado no es válido. Verifica el dígito verificador (ej: 12.345.678-9).'
+    });
+  }
+
+  if (!email) {
+    return res.status(400).json({
+      success: false,
+      error: 'El correo electrónico de contacto es obligatorio.'
     });
   }
 
@@ -368,19 +404,39 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
     });
   }
 
-  // Validar RUT chileno si fue proporcionado
-  if (tutorRut && !isValidRut(tutorRut)) {
+  if (!phone) {
     return res.status(400).json({
       success: false,
-      error: 'El RUT/DNI ingresado no es válido. Verifica el formato (ej: 12.345.678-9).'
+      error: 'El teléfono / WhatsApp de contacto es obligatorio.'
     });
   }
 
-  // Validar que paymentProof sea una URL propia del servidor si fue proporcionada
-  if (paymentProof && !paymentProof.startsWith('/admin/api/proofs/') && !paymentProof.startsWith('/uploads/')) {
+  if (!emergencyContact) {
+    return res.status(400).json({
+      success: false,
+      error: 'El teléfono de contacto de emergencia para el día de la corrida es obligatorio.'
+    });
+  }
+
+  if (!paymentProof) {
+    return res.status(400).json({
+      success: false,
+      error: 'Por favor adjunta la captura o comprobante de pago/transferencia (máx. 3 MB).'
+    });
+  }
+
+  // Validar que paymentProof sea una URL propia del servidor
+  if (!paymentProof.startsWith('/admin/api/proofs/') && !paymentProof.startsWith('/uploads/')) {
     return res.status(400).json({
       success: false,
       error: 'El comprobante de pago no es válido. Por favor sube el archivo nuevamente.'
+    });
+  }
+
+  if (!consentGiven || consentGiven === 'false') {
+    return res.status(400).json({
+      success: false,
+      error: 'Debes confirmar la autorización y consentimiento informado para participar.'
     });
   }
 
@@ -402,6 +458,7 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
   const targetRaceName = raceName || (activeRace ? activeRace.name : 'KidsRun 2026');
 
   const allowedDistances = getAllowedDistances();
+  const ALLOWED_SHIRT_SIZES = ['2', '4', '8', '12', '16', 'S', 'M'];
 
   // ── Multi-child: si viene array de children, procesar cada uno ──────────────
   let childrenArray = [];
@@ -410,42 +467,79 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
   } else {
     // Compatibilidad hacia atrás: un solo hijo con campos legacy
     childrenArray = [{
+      kidFirstName: req.body.kidFirstName || req.body.kidName,
+      kidLastName: req.body.kidLastName || '',
       kidName: req.body.kidName,
       kidAge: req.body.kidAge,
+      shirtSize: req.body.shirtSize || '4',
       distance: req.body.distance,
       medicalNotes: req.body.medicalNotes
     }];
   }
 
   if (childrenArray.length === 0) {
-    return res.status(400).json({ success: false, error: 'Debes ingresar al menos un hijo/a.' });
+    return res.status(400).json({ success: false, error: 'Debes ingresar al menos un hijo/a a inscribir.' });
   }
 
   const results = [];
-  for (const child of childrenArray) {
-    const kidName      = sanitizeField(child.kidName, 100);
-    const medicalNotes = sanitizeField(child.medicalNotes, 500);
+  for (let idx = 0; idx < childrenArray.length; idx++) {
+    const child = childrenArray[idx];
+    const kidFirstName = sanitizeField(child.kidFirstName, 60);
+    const kidLastName  = sanitizeField(child.kidLastName, 60);
+    let kidName        = sanitizeField(child.kidName, 120);
+    if (!kidName && (kidFirstName || kidLastName)) {
+      kidName = `${kidFirstName} ${kidLastName}`.trim();
+    }
+
+    if (!kidFirstName || !kidLastName) {
+      return res.status(400).json({
+        success: false,
+        error: `Por favor ingresa tanto el Nombre como el Apellido para el corredor #${idx + 1}.`
+      });
+    }
+
+    const shirtSize = sanitizeField(child.shirtSize, 10);
+    if (!shirtSize || !ALLOWED_SHIRT_SIZES.includes(shirtSize)) {
+      return res.status(400).json({
+        success: false,
+        error: `Por favor selecciona una talla de polera válida (2, 4, 8, 12, 16, S o M) para "${kidName}".`
+      });
+    }
+
     const rawDistance  = sanitizeField(child.distance, 100);
     const distance     = allowedDistances.includes(rawDistance) ? rawDistance : null;
-    const kidAge       = parseInt(child.kidAge, 10);
-    const validKidAge  = (!isNaN(kidAge) && kidAge >= 2 && kidAge <= 15) ? kidAge : null;
-
-    if (!kidName) {
-      return res.status(400).json({ success: false, error: 'Por favor ingresa el Nombre o Apodo deportivo de tu pupilo.' });
-    }
     if (!distance) {
-      return res.status(400).json({ success: false, error: `Distancia no válida para el participante "${kidName}". Selecciona un circuito válido.` });
+      return res.status(400).json({
+        success: false,
+        error: `Distancia o circuito no válido para el participante "${kidName}". Selecciona un circuito válido.`
+      });
     }
+
+    const kidAge       = parseInt(child.kidAge, 10);
+    if (isNaN(kidAge) || kidAge < 0 || kidAge > 14) {
+      return res.status(400).json({
+        success: false,
+        error: `La edad del participante "${kidName}" debe estar en el rango de 0 a 14 años.`
+      });
+    }
+    const validKidAge  = kidAge;
+
+    const medicalNotes = sanitizeField(child.medicalNotes, 500) || 'Ninguna';
 
     const result = await db.saveInscription({
       raceId: targetRaceId,
       raceName: targetRaceName,
+      tutorFirstName,
+      tutorLastName,
       name,
       email,
       phone,
       tutorRut,
+      kidFirstName,
+      kidLastName,
       kidName,
       kidAge: validKidAge,
+      shirtSize,
       distance,
       emergencyContact: emergencyContact || phone,
       medicalNotes,
@@ -454,7 +548,19 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
       subject: `Inscripción ${distance} - Pupilo: ${kidName}`
     });
 
-    results.push({ kidName, distance, success: result.success });
+    const assignedBib = result.bibNumber || (result.lead ? result.lead.bib_number : '0100');
+
+    results.push({
+      kidName,
+      kidFirstName,
+      kidLastName,
+      kidAge: validKidAge,
+      distance,
+      shirtSize,
+      bibNumber: assignedBib,
+      inscriptionNumber: assignedBib,
+      success: result.success
+    });
 
     if (result.success) {
       // Despacho asíncrono de correo de confirmación al usuario (Resend)
@@ -462,9 +568,15 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
         emailService.sendInscriptionConfirmation({
           raceName: targetRaceName,
           name,
+          tutorFirstName,
+          tutorLastName,
           email,
           kidName,
+          kidFirstName,
+          kidLastName,
           kidAge: validKidAge,
+          shirtSize,
+          bibNumber: assignedBib,
           distance,
           tutorRut
         }).catch(err => {
@@ -481,6 +593,8 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
     return res.json({
       success: true,
       count: results.length,
+      tutorRut,
+      tutorName: name,
       message: results.length > 1
         ? `¡${results.length} inscripciones confirmadas con éxito! Sus datos están debidamente protegidos y se han reservado los cupos y kits oficiales.`
         : '¡Inscripción confirmada con éxito! Sus datos están debidamente protegidos y se ha reservado el cupo y kit oficial.',

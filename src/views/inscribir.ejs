@@ -7,7 +7,7 @@
   <link rel="icon" type="image/x-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
   <link rel="shortcut icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
   <link rel="apple-touch-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
-  <meta name="description" content="Inscribe a tu pequeño/a en la corrida infantil más alegre y segura. Selecciona su distancia y asegura su kit con medalla oficial.">
+  <meta name="description" content="Inscribe a tu pequeño/a en la corrida infantil más alegre y segura. Selecciona su distancia, talla de polera y asegura su kit con medalla oficial.">
 
   <!-- Tailwind CSS & Lucide Icons & Canvas Confetti -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -72,7 +72,7 @@
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-primary) 25%, transparent) !important;
     }
 
-    /* Dorsal de Carrera Realista con perforaciones */
+    /* Tarjeta de Número de Inscripción */
     .bib-card {
       background: #ffffff;
       box-shadow: 0 20px 35px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05);
@@ -110,7 +110,31 @@
       color: #ffffff !important;
       border-color: var(--theme-primary) !important;
       font-weight: 800;
-      transform: scale(1.05);
+      transform: scale(1.04);
+      box-shadow: 0 4px 12px color-mix(in srgb, var(--theme-primary) 35%, transparent);
+    }
+
+    /* Segmented switch de tallas */
+    .shirt-size-btn.active {
+      background-color: #ffffff !important;
+      color: var(--theme-primary) !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+      transform: scale(1.03);
+    }
+    .dark .shirt-size-btn.active {
+      background-color: #1f2937 !important;
+      color: #ffffff !important;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.35);
+    }
+
+    /* Quitar scrollbar visible en contenedores de scroll táctil horizontal */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #success-message, #success-message * { visibility: visible; }
+      #success-message { position: absolute; left: 0; top: 0; width: 100%; box-shadow: none; }
     }
   </style>
 </head>
@@ -118,7 +142,7 @@
 
   <!-- BARRA DE NAVEGACIÓN SUPERIOR FIJA -->
   <header class="sticky top-0 z-40 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md border-b border-slate-200/80 dark:border-gray-800">
-    <div class="max-w-xl mx-auto px-4 h-15 flex items-center justify-between">
+    <div class="max-w-xl mx-auto px-4 h-14 flex items-center justify-between">
       <a href="/" class="flex items-center gap-1.5 text-slate-600 dark:text-gray-400 hover:text-slate-900 dark:hover:text-white text-xs font-bold transition-colors py-2">
         <i data-lucide="arrow-left" class="w-4 h-4"></i>
         <span>Volver a la Portada</span>
@@ -203,7 +227,7 @@
           </div>
           <div class="flex items-center gap-1.5">
             <i data-lucide="map-pin" class="w-3.5 h-3.5 text-yellow-300"></i>
-            <span class="truncate"><%= activeRace ? activeRace.location.split('•')[0] : 'Parque Bicentenario' %></span>
+            <span class="truncate"><%= activeRace ? activeRace.location.split('•')[0] : 'Costanera, Puerto Varas' %></span>
           </div>
         </div>
       </div>
@@ -224,7 +248,7 @@
       <div class="p-3 bg-white dark:bg-gray-900 rounded-2xl border border-slate-200/80 dark:border-gray-800 shadow-sm transition-all hover:border-blue-400/50">
         <i data-lucide="<%= content.registrationForm?.badge3Icon || 'shirt' %>" class="w-5 h-5 mx-auto mb-1 theme-color"></i>
         <p class="text-[11px] font-bold text-slate-800 dark:text-white leading-tight"><%= content.registrationForm?.badge3Text || 'Polera Oficial' %></p>
-        <p class="text-[9px] text-slate-400 mt-0.5"><%= content.registrationForm?.badge3Sub || 'Incluida en Kit' %></p>
+        <p class="text-[9px] text-slate-400 mt-0.5"><%= content.registrationForm?.badge3Sub || 'Talla a tu elección' %></p>
       </div>
     </div>
 
@@ -242,14 +266,14 @@
       </div>
     </div>
 
-    <!-- PREVISUALIZACIÓN DE DORSAL EN TIEMPO REAL (EXPERIENCIA DIVERTIDA) -->
+    <!-- PREVISUALIZACIÓN DE NÚMERO DE INSCRIPCIÓN EN TIEMPO REAL -->
     <div class="space-y-2">
       <div class="flex items-center justify-between px-1">
         <div class="flex items-center gap-1.5 text-xs font-black text-slate-700 dark:text-gray-300 uppercase tracking-wide">
           <i data-lucide="tag" class="w-3.5 h-3.5 theme-color"></i>
-          <span>Tu Dorsal Oficial en Tiempo Real</span>
+          <span>Tu Número de Inscripción Oficial en Tiempo Real</span>
         </div>
-        <span class="text-[10px] text-slate-400 font-bold">Se actualiza en vivo ✨</span>
+        <span class="text-[10px] text-slate-400 font-bold">Correlativo único ✨</span>
       </div>
 
       <div class="bib-card rounded-3xl p-5 border border-slate-200/80 dark:border-gray-800 space-y-3 relative overflow-hidden transition-all">
@@ -259,34 +283,43 @@
         <div class="absolute bottom-3.5 left-3.5 bib-pin"></div>
         <div class="absolute bottom-3.5 right-3.5 bib-pin"></div>
 
-        <!-- Encabezado del Dorsal -->
+        <!-- Encabezado del Ticket / Número -->
         <div class="flex items-center justify-between border-b border-slate-200 dark:border-gray-800 pb-2">
           <div class="flex items-center gap-1.5">
             <span class="text-[10px] font-black tracking-widest uppercase theme-color"><%= content.brand?.name || 'KidsRun 2026' %></span>
           </div>
           <span class="text-[10px] font-black tracking-wider uppercase bg-slate-100 dark:bg-gray-800 px-2 py-0.5 rounded-full text-slate-600 dark:text-gray-300">
-            NÚMERO OFICIAL
+            N° DE INSCRIPCIÓN OFICIAL
           </span>
         </div>
 
-        <!-- Número Grande & Distancia -->
+        <!-- Número Grande & Distancia / Talla -->
         <div class="text-center py-1">
           <div class="text-4xl sm:text-5xl font-black font-mono tracking-tight text-slate-900 dark:text-white" id="bib-number">
-            #0428
+            #0117
           </div>
-          <div class="mt-1.5">
+          <div class="mt-1.5 flex items-center justify-center gap-2 flex-wrap">
             <span id="bib-badge" class="inline-block px-3 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider text-white shadow-sm theme-bg">
-              500 Metros (3-5 años)
+              500 Metros (0-5 años)
+            </span>
+            <span id="bib-shirt-badge" class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider text-purple-200 bg-purple-950 border border-purple-500/40">
+              Polera: Talla 4
             </span>
           </div>
         </div>
 
         <!-- Nombre del Atleta -->
         <div class="bg-slate-100/80 dark:bg-gray-800/80 rounded-2xl py-2 px-4 text-center border border-slate-200/60 dark:border-gray-700">
-          <p class="text-[9px] uppercase tracking-wider text-slate-400 font-black">NOMBRE EN NÚMERO DE CARRERA</p>
+          <p class="text-[9px] uppercase tracking-wider text-slate-400 font-black">NOMBRE OFICIAL EN CARRERA</p>
           <p id="bib-runner-name" class="text-base sm:text-lg font-black text-slate-900 dark:text-white truncate">
             TU PEQUEÑO/A CAMPEÓN/A
           </p>
+        </div>
+
+        <!-- Pie identificatorio -->
+        <div class="pt-1 flex items-center justify-between text-[9px] font-bold text-slate-400 uppercase tracking-wider border-t border-slate-100 dark:border-gray-800">
+          <span>ID Niño: N° de Inscripción</span>
+          <span>ID Tutor: RUN / RUT</span>
         </div>
       </div>
     </div>
@@ -304,7 +337,7 @@
       </div>
 
       <% const categoriesList = (content.categories && content.categories.length > 0) ? content.categories : [
-        { distance: '500 Metros', badge: '3-5 años', title: 'Mini Runners', description: 'Acompañado de papás' },
+        { distance: '500 Metros', badge: '0-5 años', title: 'Mini Runners', description: 'Acompañado de papás / coche' },
         { distance: '1 Kilómetro', badge: '6-8 años', title: 'Pequeños Rayos', description: 'Circuito plano seguro' },
         { distance: '2 Kilómetros', badge: '9-11 años', title: 'Súper Campeones', description: 'Con cronometraje' },
         { distance: '3 Kilómetros', badge: '12-14 años', title: 'Jóvenes Titanes', description: 'Gran desafío atlético' }
@@ -322,7 +355,7 @@
                 1
               </span>
               <h2 class="kid-title text-sm font-black text-slate-900 dark:text-white">
-                <%= content.registrationForm?.step2Title || 'Datos del Pequeño/a' %>
+                <%= content.registrationForm?.step2Title || 'Datos del Pequeño/a (Titular)' %>
               </h2>
             </div>
             
@@ -332,13 +365,73 @@
             </button>
           </div>
 
+          <!-- NOMBRES Y APELLIDOS SEPARADOS DEL NIÑO -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label class="block text-xs font-bold text-slate-700 dark:text-gray-300">
+                Nombre del Niño/a *
+              </label>
+              <input type="text" class="kid-firstname-input w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus-theme focus:outline-none transition-all" required maxlength="60" placeholder="Ej: Mateo" autocomplete="off" autocapitalize="words">
+            </div>
+
+            <div class="space-y-1">
+              <label class="block text-xs font-bold text-slate-700 dark:text-gray-300">
+                Apellido del Niño/a *
+              </label>
+              <input type="text" class="kid-lastname-input w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus-theme focus:outline-none transition-all" required maxlength="60" placeholder="Ej: Gómez Valenzuela" autocomplete="off" autocapitalize="words">
+            </div>
+          </div>
+
+          <!-- EDAD DEL PARTICIPANTE (0 A 14 AÑOS) -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
+                <i data-lucide="cake" class="w-3.5 h-3.5 theme-color"></i>
+                <span>Edad del Niño/a (0 a 14 años) *</span>
+              </label>
+              <span class="text-[10px] font-bold text-slate-400 age-selected-hint">Seleccionada: <strong class="theme-color font-black">5 años</strong></span>
+            </div>
+
+            <!-- Chips táctiles de edad (0 a 14) con scroll horizontal suave -->
+            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 age-pills-container">
+              <% [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].forEach(ageVal => { %>
+              <button type="button" class="age-pill shrink-0 px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 text-slate-700 dark:text-gray-300 transition-all cursor-pointer <%= ageVal === 5 ? 'active' : '' %>" data-age="<%= ageVal %>">
+                <%= ageVal === 0 ? '0 años (Bebé/Coche)' : `${ageVal} años` %>
+              </button>
+              <% }); %>
+            </div>
+            <input type="hidden" class="kid-age-input" value="5">
+          </div>
+
+          <!-- SELECTOR NOVEDOSO DE TALLA DE POLERA (2, 4, 8, 12, 16, S, M) -->
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
+                <i data-lucide="shirt" class="w-3.5 h-3.5 theme-color"></i>
+                <span>Talla de Polera Oficial *</span>
+              </label>
+              <span class="text-[10px] font-bold text-slate-400 shirt-selected-hint">Seleccionada: <strong class="theme-color font-black">Talla 4</strong></span>
+            </div>
+
+            <!-- Selector compacto tipo segmented switch que no ocupa espacio vertical -->
+            <div class="shirt-size-selector flex items-center justify-between p-1 bg-slate-100/90 dark:bg-gray-800/80 rounded-2xl border border-slate-200 dark:border-gray-700/80 gap-1 select-none">
+              <% ['2', '4', '8', '12', '16', 'S', 'M'].forEach(size => { %>
+                <button type="button" class="shirt-size-btn flex-1 py-1.5 px-0.5 text-center text-xs font-black rounded-xl transition-all cursor-pointer <%= size === '4' ? 'active' : 'text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white' %>" data-size="<%= size %>">
+                  <%= size %>
+                </button>
+              <% }); %>
+            </div>
+            <input type="hidden" class="kid-shirt-input" value="4">
+          </div>
+
           <!-- SELECCIÓN TÁCTIL DE CIRCUITO DEL HIJO -->
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <label class="text-xs font-bold text-slate-700 dark:text-gray-300">
-                Selecciona su Circuito *
+              <label class="text-xs font-bold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 theme-color"></i>
+                <span>Selecciona su Circuito *</span>
               </label>
-              <span class="text-[10px] text-slate-400 font-semibold">Sugerido por edad</span>
+              <span class="text-[10px] text-slate-400 font-semibold">Sugerido según edad</span>
             </div>
 
             <div class="grid grid-cols-2 gap-2 kid-distance-grid">
@@ -360,43 +453,13 @@
             <input type="hidden" class="kid-distance-input" value="<%= categoriesList[0].distance %> (<%= categoriesList[0].badge %>)">
           </div>
 
-          <!-- NOMBRE DEL NIÑO -->
+          <!-- NOTAS MÉDICAS U OBSERVACIONES (OBLIGATORIO) -->
           <div class="space-y-1">
             <label class="block text-xs font-bold text-slate-700 dark:text-gray-300">
-              <%= content.registrationForm?.step2KidNameLabel || 'Nombre o Apodo *' %>
+              <%= content.registrationForm?.step2MedicalLabel || 'Alergias o Condiciones Médicas *' %>
             </label>
-            <input type="text" class="kid-name-input w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus-theme focus:outline-none transition-all" required maxlength="60" placeholder="<%= content.registrationForm?.step2KidNamePlaceholder || 'Ej: Mateo o Sofi' %>" autocomplete="off" autocapitalize="words">
-            <span class="text-[10px] text-slate-400 block">
-              <%= content.registrationForm?.step2KidNameHint || 'Se imprimirá en su número oficial de carrera.' %>
-            </span>
-          </div>
-
-          <!-- EDAD Y SELECTOR TÁCTIL RÁPIDO DE EDAD -->
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <label class="text-xs font-bold text-slate-700 dark:text-gray-300">
-                <%= content.registrationForm?.step2KidAgeLabel || 'Edad del Pequeño/a *' %>
-              </label>
-              <span class="text-[10px] font-bold text-slate-400">Toca para seleccionar</span>
-            </div>
-
-            <!-- Chips de edad rápida (3 a 14) -->
-            <div class="flex flex-wrap gap-1.5 age-pills-container">
-              <% [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].forEach(ageVal => { %>
-              <button type="button" class="age-pill px-2.5 py-1 text-xs font-bold rounded-xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 text-slate-700 dark:text-gray-300 transition-all cursor-pointer <%= ageVal === 5 ? 'active' : '' %>" data-age="<%= ageVal %>">
-                <%= ageVal %> años
-              </button>
-              <% }); %>
-            </div>
-            <input type="hidden" class="kid-age-input" value="5">
-          </div>
-
-          <!-- NOTAS MÉDICAS U OBSERVACIONES -->
-          <div class="space-y-1">
-            <label class="block text-xs font-semibold text-slate-600 dark:text-gray-400">
-              <%= content.registrationForm?.step2MedicalLabel || 'Alergias o notas médicas (Opcional)' %>
-            </label>
-            <input type="text" class="kid-medical-input w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus-theme focus:outline-none transition-all" maxlength="500" placeholder="<%= content.registrationForm?.step2MedicalPlaceholder || 'Ej: Asma leve, alergia al maní...' %>">
+            <input type="text" class="kid-medical-input w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus-theme focus:outline-none transition-all" required maxlength="500" value="Ninguna" placeholder="Ej: Ninguna o describir condición médica">
+            <span class="text-[10px] text-slate-400 block">Si no presenta ninguna condición médica ni alergia, déjalo como "Ninguna".</span>
           </div>
 
         </div>
@@ -419,57 +482,79 @@
       </div>
       <% } %>
 
-      <!-- PASO 3: DATOS DEL PADRE / TUTOR -->
+      <!-- PASO 2: DATOS DEL PADRE / TUTOR -->
       <div class="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-slate-200/80 dark:border-gray-800 shadow-sm space-y-4">
         <div class="flex items-center gap-2 pb-2 border-b border-slate-100 dark:border-gray-800">
           <span class="w-6 h-6 rounded-full text-white text-xs font-black flex items-center justify-center theme-bg">
             2
           </span>
-          <h2 class="text-sm font-black text-slate-900 dark:text-white">
-            <%= content.registrationForm?.step3Title || 'Datos del Padre / Tutor' %>
-          </h2>
+          <div>
+            <h2 class="text-sm font-black text-slate-900 dark:text-white">
+              <%= content.registrationForm?.step3Title || 'Datos del Padre / Tutor' %>
+            </h2>
+            <p class="text-[10px] text-slate-400 font-medium">El RUN / RUT será el número identificatorio del apoderado.</p>
+          </div>
         </div>
 
         <div class="space-y-3">
+          <!-- NOMBRES Y APELLIDOS SEPARADOS DEL PADRE/TUTOR -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label for="name" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
-                <%= content.registrationForm?.step3NameLabel || 'Nombre Completo *' %>
+              <label for="tutorFirstName" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
+                Nombre del Padre / Tutor *
               </label>
-              <input type="text" id="name" name="name" required maxlength="100" placeholder="<%= content.registrationForm?.step3NamePlaceholder || 'Tu Nombre y Apellido' %>" autocomplete="name" autocapitalize="words" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all">
+              <input type="text" id="tutorFirstName" name="tutorFirstName" required maxlength="60" placeholder="Ej: Carlos" autocomplete="given-name" autocapitalize="words" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all font-semibold">
             </div>
 
             <div>
-              <div class="flex items-center justify-between mb-1">
-                <label for="tutorRut" class="text-xs font-bold text-slate-700 dark:text-gray-300">
-                  <%= content.registrationForm?.step3RutLabel || 'RUT o DNI del Padre/Tutor *' %>
-                </label>
-                <span id="rut-status-indicator" class="text-[10px] hidden font-bold"></span>
-              </div>
-              <input type="text" id="tutorRut" name="tutorRut" required maxlength="15" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="<%= content.registrationForm?.step3RutPlaceholder || 'Ej: 12.345.678-9' %>" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all">
-              <span id="rutError" class="text-[10px] text-red-500 hidden mt-1 block">RUT inválido. Verifica el dígito verificador.</span>
+              <label for="tutorLastName" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
+                Apellido del Padre / Tutor *
+              </label>
+              <input type="text" id="tutorLastName" name="tutorLastName" required maxlength="60" placeholder="Ej: Gómez Valenzuela" autocomplete="family-name" autocapitalize="words" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all font-semibold">
             </div>
           </div>
 
+          <!-- RUT Y CORREO -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div>
+              <div class="flex items-center justify-between mb-1">
+                <label for="tutorRut" class="text-xs font-bold text-slate-700 dark:text-gray-300">
+                  RUN / RUT del Tutor (ID Oficial) *
+                </label>
+                <span id="rut-status-indicator" class="text-[10px] hidden font-bold"></span>
+              </div>
+              <input type="text" id="tutorRut" name="tutorRut" required maxlength="15" autocomplete="off" autocapitalize="characters" autocorrect="off" spellcheck="false" placeholder="Ej: 12.345.678-9" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all font-mono font-semibold">
+              <span id="rutError" class="text-[10px] text-red-500 hidden mt-1 block">RUT inválido. Verifica el dígito verificador.</span>
+            </div>
+
             <div>
               <label for="email" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
                 <%= content.registrationForm?.step3EmailLabel || 'Correo Electrónico *' %>
               </label>
-              <input type="email" id="email" name="email" required maxlength="254" placeholder="<%= content.registrationForm?.step3EmailPlaceholder || 'tu@correo.com' %>" autocomplete="email" inputmode="email" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all">
+              <input type="email" id="email" name="email" required maxlength="254" placeholder="tu@correo.com" autocomplete="email" inputmode="email" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all">
             </div>
+          </div>
 
+          <!-- TELÉFONO WHATSAPP Y TELÉFONO DE EMERGENCIA -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label for="phone" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
                 <%= content.registrationForm?.step3PhoneLabel || 'WhatsApp / Teléfono *' %>
               </label>
-              <input type="tel" id="phone" name="phone" required maxlength="30" placeholder="<%= content.registrationForm?.step3PhonePlaceholder || '+56 9 1234 5678' %>" autocomplete="tel" inputmode="tel" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all">
+              <input type="tel" id="phone" name="phone" required maxlength="30" placeholder="+56 9 1234 5678" autocomplete="tel" inputmode="tel" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all">
+            </div>
+
+            <div>
+              <label for="emergencyContact" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
+                Teléfono de Emergencia (Día de Carrera) *
+              </label>
+              <input type="tel" id="emergencyContact" name="emergencyContact" required maxlength="30" placeholder="+56 9 8765 4321" inputmode="tel" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all">
             </div>
           </div>
         </div>
       </div>
 
-      <!-- PASO 4: COMPROBANTE DE PAGO -->
+      <!-- PASO 3: COMPROBANTE DE PAGO -->
       <div class="bg-white dark:bg-gray-900 p-5 rounded-3xl border border-slate-200/80 dark:border-gray-800 shadow-sm space-y-4">
         <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-gray-800">
           <div class="flex items-center gap-2">
@@ -477,16 +562,16 @@
               3
             </span>
             <h2 class="text-sm font-black text-slate-900 dark:text-white">
-              <%= content.registrationForm?.step4Title || 'Comprobante de Pago' %>
+              <%= content.registrationForm?.step4Title || 'Comprobante de Pago' %> *
             </h2>
           </div>
           <span class="text-[10px] bg-emerald-100 dark:bg-emerald-950/60 text-emerald-700 dark:text-emerald-300 font-bold px-2 py-0.5 rounded-full border border-emerald-300 dark:border-emerald-800">
-            <%= content.registrationForm?.step4Badge || 'Acreditación Rápida' %>
+            Máx. 3 MB
           </span>
         </div>
 
         <p class="text-xs text-slate-500 dark:text-gray-400">
-          <%= content.registrationForm?.step4Description || 'Adjunta la foto o captura de transferencia del kit de inscripción. Nuestro servidor la optimizará y guardará de forma permanente.' %>
+          Adjunta la foto o captura de transferencia del kit de inscripción (<strong>máximo 3 MB</strong>). Se optimizará y comprimirá automáticamente a WebP ultraligero para proteger la base de datos.
         </p>
 
         <!-- ZONA DE CARGA TÁCTIL -->
@@ -498,15 +583,15 @@
               <i data-lucide="camera" class="w-6 h-6"></i>
             </div>
             <div>
-              <p class="text-xs font-bold text-slate-800 dark:text-white">Toca aquí para tomar foto o adjuntar captura</p>
-              <p class="text-[10px] text-slate-400 mt-0.5">JPG, PNG o foto de celular (Se optimiza a WebP ligero)</p>
+              <p class="text-xs font-bold text-slate-800 dark:text-white">Toca aquí para tomar foto o adjuntar captura *</p>
+              <p class="text-[10px] text-slate-400 mt-0.5">JPG, PNG o foto de celular (Máx. 3 MB • Se comprime al guardar)</p>
             </div>
           </div>
 
           <!-- Estado Subiendo -->
           <div id="upload-loading-state" class="hidden space-y-2 py-2">
             <span class="inline-block w-8 h-8 border-3 border-emerald-600 border-t-transparent rounded-full animate-spin"></span>
-            <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Optimizando y guardando captura...</p>
+            <p class="text-xs font-bold text-emerald-600 dark:text-emerald-400">Comprimiendo y guardando captura segura...</p>
           </div>
 
           <!-- Estado Listo con Previsualización -->
@@ -516,10 +601,10 @@
               <div class="text-left">
                 <div class="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-black text-xs">
                   <i data-lucide="check-circle" class="w-4 h-4"></i>
-                  <span>¡Comprobante Listo!</span>
+                  <span>¡Comprobante Adjuntado con Éxito!</span>
                 </div>
                 <p id="payment-file-info" class="text-[10px] text-slate-400 mt-0.5"></p>
-                <button type="button" id="btn-change-payment" class="text-[11px] hover:underline mt-1 font-bold theme-color">Cambiar foto</button>
+                <button type="button" id="btn-change-payment" class="text-[11px] hover:underline mt-1 font-bold theme-color">Cambiar captura</button>
               </div>
             </div>
           </div>
@@ -527,15 +612,15 @@
 
         <div class="p-3 bg-amber-50 dark:bg-yellow-950/30 rounded-2xl border border-amber-200 dark:border-yellow-500/20 text-[11px] text-amber-800 dark:text-yellow-200/90 flex items-start gap-2">
           <i data-lucide="info" class="w-4 h-4 text-amber-600 dark:text-yellow-400 flex-shrink-0 mt-0.5"></i>
-          <span><%= content.registrationForm?.step4PaymentHint || '¿No realizaste la transferencia aún? Puedes enviar la inscripción ahora y coordinar el pago por WhatsApp antes del cierre de cupos.' %></span>
+          <span><%= content.registrationForm?.step4PaymentHint || 'Todos los datos aquí ingresados son confidenciales y están protegidos para la acreditación oficial de la carrera.' %></span>
         </div>
       </div>
 
-      <!-- CONSENTIMIENTO INFORMADO -->
+      <!-- CONSENTIMIENTO INFORMADO (OBLIGATORIO) -->
       <div class="p-4 rounded-2xl bg-white dark:bg-gray-900 border border-slate-200/80 dark:border-gray-800 shadow-sm flex items-start gap-3">
         <input type="checkbox" id="consentCheck" name="consentGiven" checked required class="mt-1 w-4 h-4 rounded border-slate-300 cursor-pointer" style="accent-color: var(--theme-primary)">
         <label for="consentCheck" class="text-xs text-slate-600 dark:text-gray-300 leading-relaxed cursor-pointer select-none">
-          <%= content.registrationForm?.consentText || 'Confirmo que soy padre/madre o tutor legal del pupilo/a, autorizo su participación en la corrida y confirmo que cuenta con aptitud física para la actividad deportiva.' %>
+          <%= content.registrationForm?.consentText || 'Confirmo que soy padre/madre o tutor legal del pupilo/a, autorizo su participación en la corrida y confirmo que cuenta con aptitud física para la actividad deportiva.' %> *
         </label>
       </div>
 
@@ -547,7 +632,7 @@
         </div>
         <span class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400 flex items-center gap-1">
           <i data-lucide="check" class="w-3.5 h-3.5"></i>
-          Cupo Reservado
+          Cupo y Kit Reservado
         </span>
       </div>
 
@@ -583,32 +668,51 @@
       </button>
       <% } %>
 
-      <!-- MENSAJE DE ÉXITO FINAL MODAL/INLINE CON CONFETTI -->
-      <div id="success-message" class="hidden p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white text-center space-y-4 shadow-2xl">
+      <!-- MENSAJE DE ÉXITO FINAL MODAL/INLINE CON CONFETTI Y LEYENDA DE CAPTURA -->
+      <div id="success-message" class="hidden p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white text-center space-y-5 shadow-2xl">
         <div class="w-16 h-16 bg-white text-emerald-600 rounded-full mx-auto flex items-center justify-center font-black text-3xl shadow-xl animate-bounce">
           ✓
         </div>
         <div class="space-y-1">
-          <h3 class="text-2xl font-black" id="success-title"><%= content.registrationForm?.successTitle || '¡Inscripción Exitosa!' %></h3>
+          <h3 class="text-2xl sm:text-3xl font-black" id="success-title"><%= content.registrationForm?.successTitle || '¡Inscripción Exitosa!' %></h3>
           <p class="text-xs sm:text-sm text-emerald-100 leading-relaxed max-w-md mx-auto" id="success-details">
-            <%= content.registrationForm?.successText || 'Hemos reservado el cupo y kit oficial. Te contactaremos al correo y WhatsApp indicados con las instrucciones de acreditación y número de dorsal.' %>
+            <%= content.registrationForm?.successText || 'Hemos reservado el cupo y kit oficial. Por favor guarda los siguientes datos de inscripción para el día de la corrida.' %>
           </p>
         </div>
 
-        <div id="registered-children-summary" class="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-left text-xs space-y-2 border border-white/20">
-          <p class="font-bold text-yellow-300 uppercase tracking-wider text-[10px]">Corredores Inscritos Oficialmente:</p>
-          <div id="registered-children-list" class="space-y-1"></div>
+        <!-- LEYENDA DESTACADA PARA SACAR CAPTURA DE PANTALLA -->
+        <div class="bg-amber-400 text-slate-950 p-4 sm:p-5 rounded-2xl font-bold text-left shadow-xl space-y-1.5 border-2 border-amber-300">
+          <div class="flex items-center gap-2 text-slate-950">
+            <i data-lucide="camera" class="w-5 h-5 text-slate-950 animate-bounce"></i>
+            <h4 class="font-black text-sm uppercase tracking-wide">📸 ¡IMPORTANTE: SACA CAPTURA DE PANTALLA AHORA!</h4>
+          </div>
+          <p class="text-xs text-slate-900 font-medium leading-relaxed">
+            Ojalá le saques captura de pantalla a este comprobante para no perderlo. Tu <strong>Número de Inscripción</strong> es la forma más rápida y fácil de buscar a cada uno de tus niños en la base de datos oficial y retirar sus kits oficiales el día del evento.
+          </p>
+        </div>
+
+        <!-- RESUMEN DE PUPILOS CON NÚMERO DE INSCRIPCIÓN CORRELATIVO -->
+        <div id="registered-children-summary" class="bg-white/10 backdrop-blur-md rounded-2xl p-4 text-left text-xs space-y-3 border border-white/20">
+          <div class="flex items-center justify-between border-b border-white/15 pb-2">
+            <p class="font-black text-yellow-300 uppercase tracking-wider text-[11px]">Pupilos Inscritos Oficialmente:</p>
+            <span id="registered-tutor-rut" class="font-mono text-[11px] bg-black/30 px-2.5 py-0.5 rounded-lg text-white/90"></span>
+          </div>
+          <div id="registered-children-list" class="space-y-2.5"></div>
         </div>
 
         <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <a href="/" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-emerald-800 hover:bg-emerald-50 font-black text-xs px-6 py-3.5 rounded-2xl shadow-md transition-all">
-            <i data-lucide="home" class="w-4 h-4"></i>
-            <span>Volver a la Portada</span>
-          </a>
+          <button type="button" onclick="window.print()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-emerald-800 hover:bg-emerald-50 font-black text-xs px-6 py-3.5 rounded-2xl shadow-md transition-all cursor-pointer">
+            <i data-lucide="printer" class="w-4 h-4"></i>
+            <span>Guardar / Imprimir Ticket</span>
+          </button>
           <button type="button" id="btn-share-whatsapp" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs px-6 py-3.5 rounded-2xl border border-white/30 shadow-md transition-all cursor-pointer">
             <i data-lucide="share-2" class="w-4 h-4"></i>
-            <span>Compartir con la Familia</span>
+            <span>Compartir por WhatsApp</span>
           </button>
+          <a href="/" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-black/30 hover:bg-black/40 text-white font-bold text-xs px-5 py-3.5 rounded-2xl border border-white/20 transition-all">
+            <i data-lucide="home" class="w-4 h-4"></i>
+            <span>Volver a Portada</span>
+          </a>
         </div>
       </div>
     </form>
@@ -626,32 +730,34 @@
 
       // ─── Categories data from backend ─────────────────────────────────────────
       const categoriesData = <%- JSON.stringify(categoriesList) %>;
+      const SHIRT_SIZES = ['2', '4', '8', '12', '16', 'S', 'M'];
 
-      // ─── Elementos del Dorsal en Tiempo Real ──────────────────────────────────
+      // ─── Elementos del Dorsal / Ticket en Tiempo Real ──────────────────────────
       const bibNumberDisplay = document.getElementById('bib-number');
       const bibBadgeDisplay  = document.getElementById('bib-badge');
+      const bibShirtDisplay  = document.getElementById('bib-shirt-badge');
       const bibNameDisplay   = document.getElementById('bib-runner-name');
-
-      // Generar número de corredor amigable aleatorio para la previsualización
-      const randomBibNumber = '#' + String(Math.floor(Math.random() * 800) + 100).padStart(4, '0');
-      if (bibNumberDisplay) bibNumberDisplay.textContent = randomBibNumber;
 
       function updateBibLive() {
         const firstKidCard = document.querySelector('.kid-card');
         if (!firstKidCard) return;
 
-        const nameInput = firstKidCard.querySelector('.kid-name-input');
+        const fnInput = firstKidCard.querySelector('.kid-firstname-input');
+        const lnInput = firstKidCard.querySelector('.kid-lastname-input');
         const distInput = firstKidCard.querySelector('.kid-distance-input');
+        const shirtInput = firstKidCard.querySelector('.kid-shirt-input');
+        const ageInput = firstKidCard.querySelector('.kid-age-input');
 
-        const name = (nameInput?.value || '').trim();
-        const dist = distInput?.value || '500 Metros (3-5 años)';
+        const fn = (fnInput?.value || '').trim();
+        const ln = (lnInput?.value || '').trim();
+        const fullName = (fn || ln) ? `${fn} ${ln}`.trim().toUpperCase() : 'TU PEQUEÑO/A CAMPEÓN/A';
+        const dist = distInput?.value || '500 Metros (0-5 años)';
+        const shirt = shirtInput?.value || '4';
+        const age = ageInput?.value || '5';
 
-        if (bibNameDisplay) {
-          bibNameDisplay.textContent = name ? name.toUpperCase() : 'TU PEQUEÑO/A CAMPEÓN/A';
-        }
-        if (bibBadgeDisplay) {
-          bibBadgeDisplay.textContent = dist;
-        }
+        if (bibNameDisplay) bibNameDisplay.textContent = fullName;
+        if (bibBadgeDisplay) bibBadgeDisplay.textContent = `${dist.split(' ')[0]} • ${age} años`;
+        if (bibShirtDisplay) bibShirtDisplay.textContent = `Polera: Talla ${shirt}`;
       }
 
       // ─── Manejador de selección táctil de distancia por hijo ─────────────────
@@ -686,10 +792,11 @@
         });
       }
 
-      // ─── Manejador de selección táctil de edad rápida por hijo ───────────────
+      // ─── Manejador de selección táctil de edad rápida (0 a 14) ───────────────
       function setupAgeSelection(kidCard) {
         const pills = kidCard.querySelectorAll('.age-pill');
         const ageInput = kidCard.querySelector('.kid-age-input');
+        const ageHint = kidCard.querySelector('.age-selected-hint');
 
         pills.forEach(pill => {
           pill.addEventListener('click', () => {
@@ -697,11 +804,14 @@
             pill.classList.add('active');
             const ageVal = pill.getAttribute('data-age');
             if (ageInput) ageInput.value = ageVal;
+            if (ageHint) {
+              ageHint.innerHTML = `Seleccionada: <strong class="theme-color font-black">${ageVal === '0' ? '0 años (Bebé)' : ageVal + ' años'}</strong>`;
+            }
 
             // Auto-seleccionar circuito sugerido según edad
             const ageNum = parseInt(ageVal, 10);
             let suggestedIdx = 0;
-            if (ageNum >= 3 && ageNum <= 5) suggestedIdx = 0;
+            if (ageNum >= 0 && ageNum <= 5) suggestedIdx = 0;
             else if (ageNum >= 6 && ageNum <= 8) suggestedIdx = Math.min(1, categoriesData.length - 1);
             else if (ageNum >= 9 && ageNum <= 11) suggestedIdx = Math.min(2, categoriesData.length - 1);
             else if (ageNum >= 12) suggestedIdx = Math.min(3, categoriesData.length - 1);
@@ -711,6 +821,35 @@
               distOptions[suggestedIdx].click();
             }
 
+            updateBibLive();
+            updateFormProgress();
+          });
+        });
+      }
+
+      // ─── Manejador del Selector Novedoso de Tallas de Camisetas ───────────────
+      function setupShirtSizeSelection(kidCard) {
+        const sizeBtns = kidCard.querySelectorAll('.shirt-size-btn');
+        const shirtInput = kidCard.querySelector('.kid-shirt-input');
+        const shirtHint = kidCard.querySelector('.shirt-selected-hint');
+
+        sizeBtns.forEach(btn => {
+          btn.addEventListener('click', () => {
+            sizeBtns.forEach(b => {
+              b.classList.remove('active', 'bg-white', 'dark:bg-gray-900', 'shadow-sm', 'theme-color', 'scale-[1.03]');
+              b.classList.add('text-slate-500', 'dark:text-gray-400');
+            });
+
+            btn.classList.add('active', 'bg-white', 'dark:bg-gray-900', 'shadow-sm', 'theme-color', 'scale-[1.03]');
+            btn.classList.remove('text-slate-500', 'dark:text-gray-400');
+
+            const selectedSize = btn.getAttribute('data-size');
+            if (shirtInput) shirtInput.value = selectedSize;
+            if (shirtHint) {
+              shirtHint.innerHTML = `Seleccionada: <strong class="theme-color font-black">Talla ${selectedSize}</strong>`;
+            }
+
+            updateBibLive();
             updateFormProgress();
           });
         });
@@ -721,10 +860,11 @@
       if (firstKid) {
         setupDistanceSelection(firstKid);
         setupAgeSelection(firstKid);
-        const nameInput = firstKid.querySelector('.kid-name-input');
-        if (nameInput) {
-          nameInput.addEventListener('input', updateBibLive);
-        }
+        setupShirtSizeSelection(firstKid);
+        const fnInput = firstKid.querySelector('.kid-firstname-input');
+        const lnInput = firstKid.querySelector('.kid-lastname-input');
+        if (fnInput) fnInput.addEventListener('input', updateBibLive);
+        if (lnInput) lnInput.addEventListener('input', updateBibLive);
       }
 
       // ─── Multi-Hijo: Agregar y Eliminar Hijos ─────────────────────────────────
@@ -777,14 +917,20 @@
           `;
         }).join('');
 
-        const agePillsHtml = [3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(a => `
-          <button type="button" class="age-pill px-2.5 py-1 text-xs font-bold rounded-xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 text-slate-700 dark:text-gray-300 transition-all cursor-pointer ${a === 6 ? 'active' : ''}" data-age="${a}">
-            ${a} años
+        const agePillsHtml = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].map(a => `
+          <button type="button" class="age-pill shrink-0 px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 text-slate-700 dark:text-gray-300 transition-all cursor-pointer ${a === 6 ? 'active' : ''}" data-age="${a}">
+            ${a === 0 ? '0 años (Bebé/Coche)' : `${a} años`}
+          </button>
+        `).join('');
+
+        const shirtPillsHtml = SHIRT_SIZES.map(s => `
+          <button type="button" class="shirt-size-btn flex-1 py-1.5 px-0.5 text-center text-xs font-black rounded-xl transition-all cursor-pointer ${s === '4' ? 'active' : 'text-slate-500 dark:text-gray-400 hover:text-slate-800 dark:hover:text-white'}" data-size="${s}">
+            ${s}
           </button>
         `).join('');
 
         const div = document.createElement('div');
-        div.className = 'kid-card bg-white dark:bg-gray-900 p-5 rounded-3xl border border-slate-200/80 dark:border-gray-800 shadow-sm space-y-4 animate-fade-in';
+        div.className = 'kid-card bg-white dark:bg-gray-900 p-5 rounded-3xl border border-slate-200/80 dark:border-gray-800 shadow-sm space-y-4';
         div.setAttribute('data-kid-index', idx);
         div.innerHTML = `
           <div class="flex items-center justify-between pb-2 border-b border-slate-100 dark:border-gray-800">
@@ -802,10 +948,52 @@
             </button>
           </div>
 
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="space-y-1">
+              <label class="block text-xs font-bold text-slate-700 dark:text-gray-300">Nombre del Niño/a *</label>
+              <input type="text" class="kid-firstname-input w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus-theme focus:outline-none transition-all" required maxlength="60" placeholder="Ej: Valentina" autocomplete="off" autocapitalize="words">
+            </div>
+            <div class="space-y-1">
+              <label class="block text-xs font-bold text-slate-700 dark:text-gray-300">Apellido del Niño/a *</label>
+              <input type="text" class="kid-lastname-input w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus-theme focus:outline-none transition-all" required maxlength="60" placeholder="Ej: Soto Gómez" autocomplete="off" autocapitalize="words">
+            </div>
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
+                <i data-lucide="cake" class="w-3.5 h-3.5 theme-color"></i>
+                <span>Edad del Niño/a (0 a 14 años) *</span>
+              </label>
+              <span class="text-[10px] font-bold text-slate-400 age-selected-hint">Seleccionada: <strong class="theme-color font-black">6 años</strong></span>
+            </div>
+            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 age-pills-container">
+              ${agePillsHtml}
+            </div>
+            <input type="hidden" class="kid-age-input" value="6">
+          </div>
+
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <label class="text-xs font-bold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
+                <i data-lucide="shirt" class="w-3.5 h-3.5 theme-color"></i>
+                <span>Talla de Polera Oficial *</span>
+              </label>
+              <span class="text-[10px] font-bold text-slate-400 shirt-selected-hint">Seleccionada: <strong class="theme-color font-black">Talla 4</strong></span>
+            </div>
+            <div class="shirt-size-selector flex items-center justify-between p-1 bg-slate-100/90 dark:bg-gray-800/80 rounded-2xl border border-slate-200 dark:border-gray-700/80 gap-1 select-none">
+              ${shirtPillsHtml}
+            </div>
+            <input type="hidden" class="kid-shirt-input" value="4">
+          </div>
+
           <div class="space-y-2">
             <div class="flex items-center justify-between">
-              <label class="text-xs font-bold text-slate-700 dark:text-gray-300">Selecciona su Circuito *</label>
-              <span class="text-[10px] text-slate-400 font-semibold">Sugerido por edad</span>
+              <label class="text-xs font-bold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
+                <i data-lucide="map-pin" class="w-3.5 h-3.5 theme-color"></i>
+                <span>Selecciona su Circuito *</span>
+              </label>
+              <span class="text-[10px] text-slate-400 font-semibold">Sugerido según edad</span>
             </div>
             <div class="grid grid-cols-2 gap-2 kid-distance-grid">
               ${distItems}
@@ -814,24 +1002,9 @@
           </div>
 
           <div class="space-y-1">
-            <label class="block text-xs font-bold text-slate-700 dark:text-gray-300">Nombre o Apodo *</label>
-            <input type="text" class="kid-name-input w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm font-bold text-slate-900 dark:text-white focus-theme focus:outline-none transition-all" required maxlength="60" placeholder="Ej: Valentina o Lucas" autocomplete="off" autocapitalize="words">
-          </div>
-
-          <div class="space-y-2">
-            <div class="flex items-center justify-between">
-              <label class="text-xs font-bold text-slate-700 dark:text-gray-300">Edad del Pequeño/a *</label>
-              <span class="text-[10px] font-bold text-slate-400">Toca para seleccionar</span>
-            </div>
-            <div class="flex flex-wrap gap-1.5 age-pills-container">
-              ${agePillsHtml}
-            </div>
-            <input type="hidden" class="kid-age-input" value="6">
-          </div>
-
-          <div class="space-y-1">
-            <label class="block text-xs font-semibold text-slate-600 dark:text-gray-400">Alergias o notas médicas (Opcional)</label>
-            <input type="text" class="kid-medical-input w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus-theme focus:outline-none transition-all" maxlength="500" placeholder="Ej: Sin observaciones">
+            <label class="block text-xs font-bold text-slate-700 dark:text-gray-300">Alergias o Condiciones Médicas *</label>
+            <input type="text" class="kid-medical-input w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2 text-xs text-slate-900 dark:text-white focus-theme focus:outline-none transition-all" required maxlength="500" value="Ninguna" placeholder="Ej: Ninguna o describir condición médica">
+            <span class="text-[10px] text-slate-400 block">Si no presenta ninguna condición médica ni alergia, déjalo como "Ninguna".</span>
           </div>
         `;
 
@@ -843,6 +1016,7 @@
 
         setupDistanceSelection(div);
         setupAgeSelection(div);
+        setupShirtSizeSelection(div);
         return div;
       }
 
@@ -922,7 +1096,7 @@
         });
       }
 
-      // ─── Subida de Comprobante Asíncrona ─────────────────────────────────────
+      // ─── Subida de Comprobante Asíncrona (Límite 3 MB + Compresión Server) ─────
       const fileInput = document.getElementById('paymentFileInput');
       const idleState = document.getElementById('upload-idle-state');
       const loadingState = document.getElementById('upload-loading-state');
@@ -936,6 +1110,13 @@
         fileInput.addEventListener('change', async () => {
           if (!fileInput.files || fileInput.files.length === 0) return;
           const file = fileInput.files[0];
+
+          // Validación estricta en el cliente de 3 MB
+          if (file.size > 3 * 1024 * 1024) {
+            alert('La captura no debe superar los 3 MB. Por favor comprime la imagen o adjunta una captura de menor tamaño.');
+            fileInput.value = '';
+            return;
+          }
 
           idleState.classList.add('hidden');
           successState.classList.add('hidden');
@@ -985,17 +1166,23 @@
 
       // ─── Barra de Progreso Dinámica ──────────────────────────────────────────
       function updateFormProgress() {
-        let score = 25; // Paso 1 garantizado
-        const nameVal = document.getElementById('name')?.value || '';
+        let score = 20; // Base inicial
+        const tFn = document.getElementById('tutorFirstName')?.value || '';
+        const tLn = document.getElementById('tutorLastName')?.value || '';
         const rutVal = document.getElementById('tutorRut')?.value || '';
         const emailVal = document.getElementById('email')?.value || '';
         const phoneVal = document.getElementById('phone')?.value || '';
+        const emergencyVal = document.getElementById('emergencyContact')?.value || '';
         const proofVal = proofHidden?.value || '';
 
-        const firstKidName = document.querySelector('.kid-name-input')?.value || '';
-        if (firstKidName.length >= 2) score += 25;
-        if (nameVal.length >= 3 && emailVal.includes('@') && phoneVal.length >= 7) score += 25;
-        if (proofVal) score += 25;
+        const firstKid = document.querySelector('.kid-card');
+        const kFn = firstKid?.querySelector('.kid-firstname-input')?.value || '';
+        const kLn = firstKid?.querySelector('.kid-lastname-input')?.value || '';
+
+        if (kFn.length >= 2 && kLn.length >= 2) score += 25;
+        if (tFn.length >= 2 && tLn.length >= 2 && validateRut(rutVal)) score += 25;
+        if (emailVal.includes('@') && phoneVal.length >= 7 && emergencyVal.length >= 7) score += 15;
+        if (proofVal) score += 15;
 
         score = Math.min(100, score);
         const pBar = document.getElementById('form-progress-bar');
@@ -1004,7 +1191,7 @@
         if (pText) pText.textContent = score + '%';
       }
 
-      ['name', 'email', 'phone'].forEach(id => {
+      ['tutorFirstName', 'tutorLastName', 'email', 'phone', 'emergencyContact'].forEach(id => {
         document.getElementById(id)?.addEventListener('input', updateFormProgress);
       });
 
@@ -1012,28 +1199,28 @@
       function launchCelebration() {
         if (typeof confetti === 'function') {
           confetti({
-            particleCount: 80,
-            spread: 70,
+            particleCount: 90,
+            spread: 75,
             origin: { y: 0.6 }
           });
           setTimeout(() => {
             confetti({
               particleCount: 50,
               angle: 60,
-              spread: 55,
+              spread: 60,
               origin: { x: 0 }
             });
             confetti({
               particleCount: 50,
               angle: 120,
-              spread: 55,
+              spread: 60,
               origin: { x: 1 }
             });
           }, 250);
         }
       }
 
-      // ─── Envío del Formulario ─────────────────────────────────────────────────
+      // ─── Envío del Formulario con Validación de Campos Obligatorios ─────────
       const form = document.getElementById('registration-form');
       const submitBtn = document.getElementById('submit-btn');
       const successBox = document.getElementById('success-message');
@@ -1042,54 +1229,123 @@
         form.addEventListener('submit', async (e) => {
           e.preventDefault();
 
-          // Honeypot
+          // Honeypot anti-bots
           const honeypot = document.getElementById('website_url');
           if (honeypot && honeypot.value) { submitBtn.disabled = true; return; }
 
-          // Recolectar todos los hijos
+          // 1. Validar todos los niños (campos obligatorios)
           const kidCards = document.querySelectorAll('.kid-card');
           const children = [];
           let valid = true;
 
           kidCards.forEach((card, idx) => {
-            const nameInput = card.querySelector('.kid-name-input');
+            const fnInput = card.querySelector('.kid-firstname-input');
+            const lnInput = card.querySelector('.kid-lastname-input');
             const ageInput = card.querySelector('.kid-age-input');
             const distInput = card.querySelector('.kid-distance-input');
+            const shirtInput = card.querySelector('.kid-shirt-input');
             const medInput = card.querySelector('.kid-medical-input');
 
-            const kidName = (nameInput?.value || '').trim();
+            const kidFirstName = (fnInput?.value || '').trim();
+            const kidLastName  = (lnInput?.value || '').trim();
             const kidAge = parseInt(ageInput?.value || '5', 10);
+            const shirtSize = shirtInput?.value || '4';
             const distance = distInput?.value || '';
+            const medicalNotes = (medInput?.value || 'Ninguna').trim();
 
-            if (!kidName) {
-              alert(`Por favor ingresa el nombre del corredor #${idx + 1}.`);
-              nameInput?.focus();
+            if (!kidFirstName) {
+              alert(`Por favor ingresa el NOMBRE del participante #${idx + 1}.`);
+              fnInput?.focus();
+              valid = false;
+              return;
+            }
+
+            if (!kidLastName) {
+              alert(`Por favor ingresa el APELLIDO del participante #${idx + 1}.`);
+              lnInput?.focus();
+              valid = false;
+              return;
+            }
+
+            if (isNaN(kidAge) || kidAge < 0 || kidAge > 14) {
+              alert(`La edad del participante #${idx + 1} debe estar entre 0 y 14 años.`);
               valid = false;
               return;
             }
 
             children.push({
-              kidName,
+              kidFirstName,
+              kidLastName,
+              kidName: `${kidFirstName} ${kidLastName}`.trim(),
               kidAge: String(kidAge),
+              shirtSize,
               distance,
-              medicalNotes: (medInput?.value || '').trim()
+              medicalNotes
             });
           });
 
           if (!valid) return;
 
-          // Validar RUT si existe
-          const tutorRutVal = document.getElementById('tutorRut')?.value || '';
-          if (tutorRutVal && !validateRut(tutorRutVal)) {
-            alert('El RUT/DNI del apoderado no es válido. Por favor verifícalo antes de enviar.');
+          // 2. Validar Tutor (todos los campos obligatorios)
+          const tutorFirstName = (document.getElementById('tutorFirstName')?.value || '').trim();
+          const tutorLastName  = (document.getElementById('tutorLastName')?.value || '').trim();
+          if (!tutorFirstName) {
+            alert('Por favor ingresa el Nombre del padre/tutor.');
+            document.getElementById('tutorFirstName')?.focus();
+            return;
+          }
+          if (!tutorLastName) {
+            alert('Por favor ingresa el Apellido del padre/tutor.');
+            document.getElementById('tutorLastName')?.focus();
+            return;
+          }
+
+          const tutorRutVal = (document.getElementById('tutorRut')?.value || '').trim();
+          if (!tutorRutVal) {
+            alert('El RUN / RUT del apoderado o tutor es obligatorio.');
+            document.getElementById('tutorRut')?.focus();
+            return;
+          }
+          if (!validateRut(tutorRutVal)) {
+            alert('El RUN / RUT ingresado no es válido. Verifica el dígito verificador.');
             document.getElementById('tutorRut')?.focus();
             return;
           }
 
-          const tutorNameVal = (document.getElementById('name')?.value || '').trim();
           const tutorEmailVal = (document.getElementById('email')?.value || '').trim();
-          if (!tutorNameVal || !tutorEmailVal) {
-            alert('Por favor completa el nombre y correo del apoderado/tutor.');
+          if (!tutorEmailVal || !tutorEmailVal.includes('@')) {
+            alert('Por favor ingresa un correo electrónico válido de contacto.');
+            document.getElementById('email')?.focus();
+            return;
+          }
+
+          const phoneVal = (document.getElementById('phone')?.value || '').trim();
+          if (!phoneVal) {
+            alert('Por favor ingresa un teléfono / WhatsApp de contacto.');
+            document.getElementById('phone')?.focus();
+            return;
+          }
+
+          const emergencyVal = (document.getElementById('emergencyContact')?.value || '').trim();
+          if (!emergencyVal) {
+            alert('Por favor ingresa el teléfono de contacto de emergencia para el día de la corrida.');
+            document.getElementById('emergencyContact')?.focus();
+            return;
+          }
+
+          // 3. Validar Comprobante de Pago obligatorio
+          const proofVal = proofHidden?.value || '';
+          if (!proofVal) {
+            alert('Por favor adjunta la foto o captura del comprobante de transferencia antes de continuar.');
+            document.getElementById('paymentFileInput')?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            return;
+          }
+
+          // 4. Validar Consentimiento
+          const consentCheck = document.getElementById('consentCheck');
+          if (!consentCheck || !consentCheck.checked) {
+            alert('Debes confirmar la autorización y consentimiento informado para participar.');
+            consentCheck?.focus();
             return;
           }
 
@@ -1097,19 +1353,22 @@
           submitBtn.disabled = true;
           submitBtn.innerHTML = `
             <span class="inline-block animate-spin mr-2">⟳</span>
-            <span>Asegurando Cupos y Kits...</span>
+            <span>Generando Número de Inscripción y Asegurando Cupos...</span>
           `;
 
           const csrfToken = document.getElementById('csrfTokenField')?.value || '';
           const payload = {
             raceId: form.querySelector('input[name="raceId"]')?.value || '',
             raceName: form.querySelector('input[name="raceName"]')?.value || '',
-            name: tutorNameVal,
+            tutorFirstName,
+            tutorLastName,
+            name: `${tutorFirstName} ${tutorLastName}`.trim(),
             email: tutorEmailVal,
-            phone: document.getElementById('phone')?.value || '',
+            phone: phoneVal,
+            emergencyContact: emergencyVal,
             tutorRut: tutorRutVal,
-            paymentProof: proofHidden?.value || '',
-            consentGiven: document.getElementById('consentCheck')?.checked || true,
+            paymentProof: proofVal,
+            consentGiven: true,
             website_url: '',
             children
           };
@@ -1130,32 +1389,54 @@
               // Ocultar bloques del formulario y mostrar éxito
               document.querySelectorAll('.kid-card, #btn-add-kid, .space-y-4, .space-y-3, #dynamic-summary-bar, #submit-btn').forEach(el => el.classList.add('hidden'));
 
-              // Poblar lista de hijos en el cuadro de éxito
+              // Poblar lista de hijos con su Número de Inscripción correlativo en el cuadro de éxito
               const listContainer = document.getElementById('registered-children-list');
+              const tutorRutBadge = document.getElementById('registered-tutor-rut');
+              if (tutorRutBadge) {
+                tutorRutBadge.textContent = `Tutor RUT: ${tutorRutVal}`;
+              }
+
               if (listContainer) {
-                listContainer.innerHTML = children.map(c => `
-                  <div class="flex items-center justify-between py-1 border-b border-white/10">
-                    <span class="font-bold text-white">${c.kidName} (${c.kidAge} años)</span>
-                    <span class="bg-white/20 text-white px-2 py-0.5 rounded-full text-[10px] font-bold">${c.distance.split(' ')[0]}</span>
-                  </div>
-                `).join('');
+                const responseChildren = json.children || children;
+                listContainer.innerHTML = responseChildren.map((c, i) => {
+                  const bib = c.inscriptionNumber || c.bibNumber || `#010${i+1}`;
+                  const kidFullName = c.kidName || `${c.kidFirstName || ''} ${c.kidLastName || ''}`.trim();
+                  return `
+                    <div class="bg-black/30 backdrop-blur-md rounded-2xl p-4 border border-white/20 space-y-2">
+                      <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-1.5">
+                          <span class="text-[10px] font-black uppercase text-amber-300">N° INSCRIPCIÓN:</span>
+                          <span class="font-mono font-black text-xl text-yellow-300 bg-amber-950/80 px-2.5 py-0.5 rounded-xl border border-amber-400/50">#${bib}</span>
+                        </div>
+                        <span class="bg-emerald-500/30 text-emerald-200 border border-emerald-400/40 px-2 py-0.5 rounded-full text-[10px] font-black uppercase">Kit Asegurado</span>
+                      </div>
+                      <div class="text-sm font-black text-white">${kidFullName}</div>
+                      <div class="flex flex-wrap items-center gap-2 text-[11px] text-white/80">
+                        <span class="bg-white/20 px-2 py-0.5 rounded-lg font-bold">${c.distance}</span>
+                        <span class="bg-purple-500/40 text-purple-100 border border-purple-400/40 px-2 py-0.5 rounded-lg font-bold">Polera: Talla ${c.shirtSize || '4'}</span>
+                        <span class="bg-white/10 px-2 py-0.5 rounded-lg font-medium">${c.kidAge} años</span>
+                      </div>
+                    </div>
+                  `;
+                }).join('');
               }
 
               if (json.count && json.count > 1) {
                 const sTitle = document.getElementById('success-title');
-                if (sTitle) sTitle.textContent = `¡${json.count} Inscripciones Exitosas!`;
+                if (sTitle) sTitle.textContent = `¡${json.count} Inscripciones Confirmadas!`;
               }
 
               successBox.classList.remove('hidden');
+              if (window.lucide) window.lucide.createIcons();
               launchCelebration();
-              window.scrollTo({ top: successBox.offsetTop - 80, behavior: 'smooth' });
+              window.scrollTo({ top: successBox.offsetTop - 60, behavior: 'smooth' });
 
               // Configurar botón compartir WhatsApp
               const btnShare = document.getElementById('btn-share-whatsapp');
               if (btnShare) {
                 btnShare.addEventListener('click', () => {
                   const names = children.map(c => c.kidName).join(' y ');
-                  const text = encodeURIComponent(`¡Listo! Inscribí a ${names} en ${payload.raceName || 'KidsRun'}. ¡Nos vemos en la meta! 🏅🏃‍♂️ ${window.location.origin}`);
+                  const text = encodeURIComponent(`¡Listo! Inscribí a ${names} en ${payload.raceName || 'KidsRun 2026'}. N° Inscripción confirmado. ¡Nos vemos en la meta! 🏅🏃‍♂️ ${window.location.origin}`);
                   window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
                 });
               }

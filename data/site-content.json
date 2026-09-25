@@ -883,12 +883,12 @@
     "description": "Encuéntranos en el lugar del evento. ¡Llega con tiempo para disfrutar la previa!",
     "name": "Costanera",
     "address": "Costanera, Puerto Varas",
-    "lat": -33.3975,
-    "lng": -70.5787,
+    "lat": -41.3195,
+    "lng": -72.9854,
     "zoom": 15,
     "doorsOpen": "08:00 AM",
-    "parking": "Estacionamiento disponible en los alrededores del parque.",
-    "transit": "Acceso en Metro (L1, estación Tobalaba) y buses del Transantiago."
+    "parking": "Estacionamientos habilitados en calles aledañas a la Costanera.",
+    "transit": "Acceso por Av. Vicente Pérez Rosales y Costanera."
   },
   "video": {
     "url": "",
