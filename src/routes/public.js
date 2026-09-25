@@ -362,7 +362,7 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
 
   const email            = sanitizeField(req.body.email, 254);
   const phone            = sanitizeField(req.body.phone, 30);
-  const emergencyContact = sanitizeField(req.body.emergencyContact, 30);
+  const emergencyContact = sanitizeField(req.body.emergencyContact, 30) || phone;
   const tutorRut         = sanitizeField(req.body.tutorRut, 20);
   const paymentProof     = sanitizeField(req.body.paymentProof, 500);
   const consentGiven     = req.body.consentGiven;
@@ -408,13 +408,6 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
     return res.status(400).json({
       success: false,
       error: 'El teléfono / WhatsApp de contacto es obligatorio.'
-    });
-  }
-
-  if (!emergencyContact) {
-    return res.status(400).json({
-      success: false,
-      error: 'El teléfono de contacto de emergencia para el día de la corrida es obligatorio.'
     });
   }
 

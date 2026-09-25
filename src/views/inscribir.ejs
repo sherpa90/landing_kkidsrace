@@ -72,29 +72,6 @@
       box-shadow: 0 0 0 3px color-mix(in srgb, var(--theme-primary) 25%, transparent) !important;
     }
 
-    /* Tarjeta de Número de Inscripción */
-    .bib-card {
-      background: #ffffff;
-      box-shadow: 0 20px 35px -10px rgba(0,0,0,0.12), 0 0 0 1px rgba(0,0,0,0.05);
-      position: relative;
-    }
-    .dark .bib-card {
-      background: #111827;
-      box-shadow: 0 20px 35px -10px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.08);
-    }
-    .bib-pin {
-      width: 14px;
-      height: 14px;
-      border-radius: 9999px;
-      background: #e2e8f0;
-      border: 1.5px solid #94a3b8;
-      box-shadow: inset 0 1px 2px rgba(0,0,0,0.25);
-    }
-    .dark .bib-pin {
-      background: #1f2937;
-      border-color: #4b5563;
-    }
-
     /* Brillo sutil de botón submit */
     @keyframes pulse-shimmer {
       0%, 100% { opacity: 0.95; }
@@ -266,64 +243,6 @@
       </div>
     </div>
 
-    <!-- PREVISUALIZACIÓN DE NÚMERO DE INSCRIPCIÓN EN TIEMPO REAL -->
-    <div class="space-y-2">
-      <div class="flex items-center justify-between px-1">
-        <div class="flex items-center gap-1.5 text-xs font-black text-slate-700 dark:text-gray-300 uppercase tracking-wide">
-          <i data-lucide="tag" class="w-3.5 h-3.5 theme-color"></i>
-          <span>Tu Número de Inscripción Oficial en Tiempo Real</span>
-        </div>
-        <span class="text-[10px] text-slate-400 font-bold">Correlativo único ✨</span>
-      </div>
-
-      <div class="bib-card rounded-3xl p-5 border border-slate-200/80 dark:border-gray-800 space-y-3 relative overflow-hidden transition-all">
-        <!-- 4 Perforaciones en las esquinas -->
-        <div class="absolute top-3.5 left-3.5 bib-pin"></div>
-        <div class="absolute top-3.5 right-3.5 bib-pin"></div>
-        <div class="absolute bottom-3.5 left-3.5 bib-pin"></div>
-        <div class="absolute bottom-3.5 right-3.5 bib-pin"></div>
-
-        <!-- Encabezado del Ticket / Número -->
-        <div class="flex items-center justify-between border-b border-slate-200 dark:border-gray-800 pb-2">
-          <div class="flex items-center gap-1.5">
-            <span class="text-[10px] font-black tracking-widest uppercase theme-color"><%= content.brand?.name || 'KidsRun 2026' %></span>
-          </div>
-          <span class="text-[10px] font-black tracking-wider uppercase bg-slate-100 dark:bg-gray-800 px-2 py-0.5 rounded-full text-slate-600 dark:text-gray-300">
-            N° DE INSCRIPCIÓN OFICIAL
-          </span>
-        </div>
-
-        <!-- Número Grande & Distancia / Talla -->
-        <div class="text-center py-1">
-          <div class="text-4xl sm:text-5xl font-black font-mono tracking-tight text-slate-900 dark:text-white" id="bib-number">
-            #0117
-          </div>
-          <div class="mt-1.5 flex items-center justify-center gap-2 flex-wrap">
-            <span id="bib-badge" class="inline-block px-3 py-0.5 rounded-full text-[11px] font-black uppercase tracking-wider text-white shadow-sm theme-bg">
-              500 Metros (0-5 años)
-            </span>
-            <span id="bib-shirt-badge" class="inline-block px-2.5 py-0.5 rounded-full text-[10px] font-black uppercase tracking-wider text-purple-200 bg-purple-950 border border-purple-500/40">
-              Polera: Talla 4
-            </span>
-          </div>
-        </div>
-
-        <!-- Nombre del Atleta -->
-        <div class="bg-slate-100/80 dark:bg-gray-800/80 rounded-2xl py-2 px-4 text-center border border-slate-200/60 dark:border-gray-700">
-          <p class="text-[9px] uppercase tracking-wider text-slate-400 font-black">NOMBRE OFICIAL EN CARRERA</p>
-          <p id="bib-runner-name" class="text-base sm:text-lg font-black text-slate-900 dark:text-white truncate">
-            TU PEQUEÑO/A CAMPEÓN/A
-          </p>
-        </div>
-
-        <!-- Pie identificatorio -->
-        <div class="pt-1 flex items-center justify-between text-[9px] font-bold text-slate-400 uppercase tracking-wider border-t border-slate-100 dark:border-gray-800">
-          <span>ID Niño: N° de Inscripción</span>
-          <span>ID Tutor: RUN / RUT</span>
-        </div>
-      </div>
-    </div>
-
     <!-- FORMULARIO PRINCIPAL -->
     <form id="registration-form" class="space-y-5" novalidate>
       <input type="hidden" name="raceId" value="<%= activeRace ? activeRace.id : 'race-2026-primavera' %>">
@@ -382,23 +301,34 @@
             </div>
           </div>
 
-          <!-- EDAD DEL PARTICIPANTE (0 A 14 AÑOS) -->
+          <!-- EDAD DEL PARTICIPANTE (0 A 14 AÑOS CON BOTÓN PARA VER TODAS) -->
           <div class="space-y-1.5">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-2">
               <label class="text-xs font-bold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
                 <i data-lucide="cake" class="w-3.5 h-3.5 theme-color"></i>
-                <span>Edad del Niño/a (0 a 14 años) *</span>
+                <span>Edad (0 a 14 años) *</span>
               </label>
-              <span class="text-[10px] font-bold text-slate-400 age-selected-hint">Seleccionada: <strong class="theme-color font-black">5 años</strong></span>
+              <div class="flex items-center gap-2">
+                <button type="button" class="btn-toggle-all-ages text-[11px] font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 border border-blue-200 dark:border-blue-800/80 px-2 py-0.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer">
+                  <span>Ver todas (0 a 14)</span>
+                  <i data-lucide="chevrons-down" class="w-3 h-3"></i>
+                </button>
+                <span class="text-[10px] font-bold text-slate-400 age-selected-hint">Edad: <strong class="theme-color font-black">5 años</strong></span>
+              </div>
             </div>
 
-            <!-- Chips táctiles de edad (0 a 14) con scroll horizontal suave -->
-            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 age-pills-container">
-              <% [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].forEach(ageVal => { %>
-              <button type="button" class="age-pill shrink-0 px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 text-slate-700 dark:text-gray-300 transition-all cursor-pointer <%= ageVal === 5 ? 'active' : '' %>" data-age="<%= ageVal %>">
-                <%= ageVal === 0 ? '0 años (Bebé/Coche)' : `${ageVal} años` %>
+            <!-- Contenedor táctil con botón deslizable -->
+            <div class="relative">
+              <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 age-pills-container scroll-smooth">
+                <% [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14].forEach(ageVal => { %>
+                <button type="button" class="age-pill shrink-0 px-3 py-1.5 text-xs font-bold rounded-xl border border-slate-200 dark:border-gray-800 bg-slate-50 dark:bg-gray-950 text-slate-700 dark:text-gray-300 transition-all cursor-pointer <%= ageVal === 5 ? 'active' : '' %>" data-age="<%= ageVal %>">
+                  <%= ageVal === 0 ? '0 años (Bebé/Coche)' : `${ageVal} años` %>
+                </button>
+                <% }); %>
+              </div>
+              <button type="button" class="btn-scroll-more-ages absolute right-0 top-1/2 -translate-y-1/2 bg-gradient-to-l from-slate-900 via-slate-900/90 to-transparent pl-4 pr-1 py-1 text-[10px] font-black text-amber-400 flex items-center gap-1 rounded-r-xl transition-all cursor-pointer">
+                <span>Más 👉</span>
               </button>
-              <% }); %>
             </div>
             <input type="hidden" class="kid-age-input" value="5">
           </div>
@@ -424,7 +354,7 @@
             <input type="hidden" class="kid-shirt-input" value="4">
           </div>
 
-          <!-- SELECCIÓN TÁCTIL DE CIRCUITO DEL HIJO -->
+          <!-- SELECCIÓN TÁCTIL DE CIRCUITO (CON METROS CLARAMENTE INDICADOS) -->
           <div class="space-y-2">
             <div class="flex items-center justify-between">
               <label class="text-xs font-bold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
@@ -441,7 +371,8 @@
               %>
               <div class="touch-card kid-dist-option cursor-pointer p-3 rounded-2xl border <%= isFirst ? 'theme-border bg-blue-50/40 dark:bg-blue-950/30' : 'border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-950' %> relative" data-distance="<%= val %>">
                 <div class="flex items-center justify-between mb-1">
-                  <span class="text-xs font-black <%= isFirst ? 'theme-color' : 'text-slate-800 dark:text-white' %>"><%= (cat.distance || '').split(' ')[0] %></span>
+                  <!-- Mostrar la distancia completa con metros/kilómetros -->
+                  <span class="text-xs font-black <%= isFirst ? 'theme-color' : 'text-slate-800 dark:text-white' %>"><%= cat.distance %></span>
                   <span class="text-[10px] <%= isFirst ? 'theme-bg text-white' : 'bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300' %> font-bold px-1.5 py-0.5 rounded-full"><%= cat.badge %></span>
                 </div>
                 <p class="text-[11px] font-bold text-slate-800 dark:text-gray-200 leading-tight"><%= cat.title %></p>
@@ -514,7 +445,7 @@
             </div>
           </div>
 
-          <!-- RUT Y CORREO -->
+          <!-- RUT Y TELÉFONO DE CONTACTO -->
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <div class="flex items-center justify-between mb-1">
@@ -528,28 +459,19 @@
             </div>
 
             <div>
-              <label for="email" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
-                <%= content.registrationForm?.step3EmailLabel || 'Correo Electrónico *' %>
-              </label>
-              <input type="email" id="email" name="email" required maxlength="254" placeholder="tu@correo.com" autocomplete="email" inputmode="email" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all">
-            </div>
-          </div>
-
-          <!-- TELÉFONO WHATSAPP Y TELÉFONO DE EMERGENCIA -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div>
               <label for="phone" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
                 <%= content.registrationForm?.step3PhoneLabel || 'WhatsApp / Teléfono *' %>
               </label>
               <input type="tel" id="phone" name="phone" required maxlength="30" placeholder="+56 9 1234 5678" autocomplete="tel" inputmode="tel" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all">
             </div>
+          </div>
 
-            <div>
-              <label for="emergencyContact" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
-                Teléfono de Emergencia (Día de Carrera) *
-              </label>
-              <input type="tel" id="emergencyContact" name="emergencyContact" required maxlength="30" placeholder="+56 9 8765 4321" inputmode="tel" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all">
-            </div>
+          <!-- CORREO ELECTRÓNICO -->
+          <div>
+            <label for="email" class="block text-xs font-bold text-slate-700 dark:text-gray-300 mb-1">
+              <%= content.registrationForm?.step3EmailLabel || 'Correo Electrónico *' %>
+            </label>
+            <input type="email" id="email" name="email" required maxlength="254" placeholder="tu@correo.com" autocomplete="email" inputmode="email" class="w-full bg-slate-50 dark:bg-gray-950 border border-slate-200 dark:border-gray-800 rounded-2xl px-3.5 py-2.5 text-sm text-slate-900 dark:text-white focus-theme focus:outline-none transition-all">
           </div>
         </div>
       </div>
@@ -668,7 +590,7 @@
       </button>
       <% } %>
 
-      <!-- MENSAJE DE ÉXITO FINAL MODAL/INLINE CON CONFETTI Y LEYENDA DE CAPTURA -->
+      <!-- MENSAJE DE ÉXITO FINAL CON N° DE INSCRIPCIÓN Y BOTÓN DE DESCARGA -->
       <div id="success-message" class="hidden p-6 sm:p-8 rounded-3xl bg-gradient-to-br from-emerald-600 to-teal-700 text-white text-center space-y-5 shadow-2xl">
         <div class="w-16 h-16 bg-white text-emerald-600 rounded-full mx-auto flex items-center justify-center font-black text-3xl shadow-xl animate-bounce">
           ✓
@@ -700,19 +622,23 @@
           <div id="registered-children-list" class="space-y-2.5"></div>
         </div>
 
+        <!-- BOTONES DE ACCIÓN POST-INSCRIPCIÓN: DESCARGAR TICKET / COMPARTIR -->
         <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <button type="button" onclick="window.print()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-emerald-800 hover:bg-emerald-50 font-black text-xs px-6 py-3.5 rounded-2xl shadow-md transition-all cursor-pointer">
+          <!-- Botón de Descarga Directa como Imagen PNG -->
+          <button type="button" id="btn-download-ticket" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-gradient-to-r from-amber-400 to-yellow-400 hover:from-amber-300 hover:to-yellow-300 text-slate-950 font-black text-xs px-6 py-3.5 rounded-2xl shadow-xl transition-all cursor-pointer active:scale-95">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Descargar Comprobante (PNG)</span>
+          </button>
+          
+          <button type="button" onclick="window.print()" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-white text-emerald-800 hover:bg-emerald-50 font-black text-xs px-5 py-3.5 rounded-2xl shadow-md transition-all cursor-pointer">
             <i data-lucide="printer" class="w-4 h-4"></i>
-            <span>Guardar / Imprimir Ticket</span>
+            <span>Imprimir / PDF</span>
           </button>
-          <button type="button" id="btn-share-whatsapp" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs px-6 py-3.5 rounded-2xl border border-white/30 shadow-md transition-all cursor-pointer">
+
+          <button type="button" id="btn-share-whatsapp" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs px-5 py-3.5 rounded-2xl border border-white/30 shadow-md transition-all cursor-pointer">
             <i data-lucide="share-2" class="w-4 h-4"></i>
-            <span>Compartir por WhatsApp</span>
+            <span>WhatsApp</span>
           </button>
-          <a href="/" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-black/30 hover:bg-black/40 text-white font-bold text-xs px-5 py-3.5 rounded-2xl border border-white/20 transition-all">
-            <i data-lucide="home" class="w-4 h-4"></i>
-            <span>Volver a Portada</span>
-          </a>
         </div>
       </div>
     </form>
@@ -732,33 +658,8 @@
       const categoriesData = <%- JSON.stringify(categoriesList) %>;
       const SHIRT_SIZES = ['2', '4', '8', '12', '16', 'S', 'M'];
 
-      // ─── Elementos del Dorsal / Ticket en Tiempo Real ──────────────────────────
-      const bibNumberDisplay = document.getElementById('bib-number');
-      const bibBadgeDisplay  = document.getElementById('bib-badge');
-      const bibShirtDisplay  = document.getElementById('bib-shirt-badge');
-      const bibNameDisplay   = document.getElementById('bib-runner-name');
-
-      function updateBibLive() {
-        const firstKidCard = document.querySelector('.kid-card');
-        if (!firstKidCard) return;
-
-        const fnInput = firstKidCard.querySelector('.kid-firstname-input');
-        const lnInput = firstKidCard.querySelector('.kid-lastname-input');
-        const distInput = firstKidCard.querySelector('.kid-distance-input');
-        const shirtInput = firstKidCard.querySelector('.kid-shirt-input');
-        const ageInput = firstKidCard.querySelector('.kid-age-input');
-
-        const fn = (fnInput?.value || '').trim();
-        const ln = (lnInput?.value || '').trim();
-        const fullName = (fn || ln) ? `${fn} ${ln}`.trim().toUpperCase() : 'TU PEQUEÑO/A CAMPEÓN/A';
-        const dist = distInput?.value || '500 Metros (0-5 años)';
-        const shirt = shirtInput?.value || '4';
-        const age = ageInput?.value || '5';
-
-        if (bibNameDisplay) bibNameDisplay.textContent = fullName;
-        if (bibBadgeDisplay) bibBadgeDisplay.textContent = `${dist.split(' ')[0]} • ${age} años`;
-        if (bibShirtDisplay) bibShirtDisplay.textContent = `Polera: Talla ${shirt}`;
-      }
+      // Variable para almacenar el resultado exitoso para descarga
+      let latestRegistrationResult = null;
 
       // ─── Manejador de selección táctil de distancia por hijo ─────────────────
       function setupDistanceSelection(kidCard) {
@@ -786,17 +687,19 @@
             const val = opt.getAttribute('data-distance');
             if (distInput) distInput.value = val;
 
-            updateBibLive();
             updateFormProgress();
           });
         });
       }
 
-      // ─── Manejador de selección táctil de edad rápida (0 a 14) ───────────────
+      // ─── Manejador de selección táctil de edad rápida (0 a 14) con botón 'Ver todas' ───
       function setupAgeSelection(kidCard) {
         const pills = kidCard.querySelectorAll('.age-pill');
         const ageInput = kidCard.querySelector('.kid-age-input');
         const ageHint = kidCard.querySelector('.age-selected-hint');
+        const pillsContainer = kidCard.querySelector('.age-pills-container');
+        const toggleAllBtn = kidCard.querySelector('.btn-toggle-all-ages');
+        const scrollMoreBtn = kidCard.querySelector('.btn-scroll-more-ages');
 
         pills.forEach(pill => {
           pill.addEventListener('click', () => {
@@ -805,7 +708,7 @@
             const ageVal = pill.getAttribute('data-age');
             if (ageInput) ageInput.value = ageVal;
             if (ageHint) {
-              ageHint.innerHTML = `Seleccionada: <strong class="theme-color font-black">${ageVal === '0' ? '0 años (Bebé)' : ageVal + ' años'}</strong>`;
+              ageHint.innerHTML = `Edad: <strong class="theme-color font-black">${ageVal === '0' ? '0 años (Bebé)' : ageVal + ' años'}</strong>`;
             }
 
             // Auto-seleccionar circuito sugerido según edad
@@ -821,10 +724,35 @@
               distOptions[suggestedIdx].click();
             }
 
-            updateBibLive();
             updateFormProgress();
           });
         });
+
+        // Botón 'Ver todas las edades'
+        if (toggleAllBtn && pillsContainer) {
+          toggleAllBtn.addEventListener('click', () => {
+            const isWrapped = pillsContainer.classList.contains('flex-wrap');
+            if (isWrapped) {
+              pillsContainer.classList.remove('flex-wrap');
+              pillsContainer.classList.add('overflow-x-auto', 'no-scrollbar');
+              toggleAllBtn.innerHTML = `<span>Ver todas (0 a 14)</span><i data-lucide="chevrons-down" class="w-3 h-3"></i>`;
+              if (scrollMoreBtn) scrollMoreBtn.classList.remove('hidden');
+            } else {
+              pillsContainer.classList.add('flex-wrap');
+              pillsContainer.classList.remove('overflow-x-auto', 'no-scrollbar');
+              toggleAllBtn.innerHTML = `<span>Cerrar cuadrícula</span><i data-lucide="chevrons-up" class="w-3 h-3"></i>`;
+              if (scrollMoreBtn) scrollMoreBtn.classList.add('hidden');
+            }
+            if (window.lucide) window.lucide.createIcons();
+          });
+        }
+
+        // Botón 'Más 👉'
+        if (scrollMoreBtn && pillsContainer) {
+          scrollMoreBtn.addEventListener('click', () => {
+            pillsContainer.scrollBy({ left: 180, behavior: 'smooth' });
+          });
+        }
       }
 
       // ─── Manejador del Selector Novedoso de Tallas de Camisetas ───────────────
@@ -849,7 +777,6 @@
               shirtHint.innerHTML = `Seleccionada: <strong class="theme-color font-black">Talla ${selectedSize}</strong>`;
             }
 
-            updateBibLive();
             updateFormProgress();
           });
         });
@@ -861,10 +788,6 @@
         setupDistanceSelection(firstKid);
         setupAgeSelection(firstKid);
         setupShirtSizeSelection(firstKid);
-        const fnInput = firstKid.querySelector('.kid-firstname-input');
-        const lnInput = firstKid.querySelector('.kid-lastname-input');
-        if (fnInput) fnInput.addEventListener('input', updateBibLive);
-        if (lnInput) lnInput.addEventListener('input', updateBibLive);
       }
 
       // ─── Multi-Hijo: Agregar y Eliminar Hijos ─────────────────────────────────
@@ -908,7 +831,8 @@
           return `
             <div class="touch-card kid-dist-option cursor-pointer p-3 rounded-2xl border ${isFirst ? 'theme-border bg-blue-50/40 dark:bg-blue-950/30' : 'border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-950'} relative" data-distance="${val}">
               <div class="flex items-center justify-between mb-1">
-                <span class="text-xs font-black ${isFirst ? 'theme-color' : 'text-slate-800 dark:text-white'}">${(cat.distance || '').split(' ')[0]}</span>
+                <!-- Distancia completa con metros -->
+                <span class="text-xs font-black ${isFirst ? 'theme-color' : 'text-slate-800 dark:text-white'}">${cat.distance}</span>
                 <span class="text-[10px] ${isFirst ? 'theme-bg text-white' : 'bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300'} font-bold px-1.5 py-0.5 rounded-full">${cat.badge}</span>
               </div>
               <p class="text-[11px] font-bold text-slate-800 dark:text-gray-200 leading-tight">${cat.title}</p>
@@ -960,15 +884,26 @@
           </div>
 
           <div class="space-y-1.5">
-            <div class="flex items-center justify-between">
+            <div class="flex items-center justify-between gap-2">
               <label class="text-xs font-bold text-slate-700 dark:text-gray-300 flex items-center gap-1.5">
                 <i data-lucide="cake" class="w-3.5 h-3.5 theme-color"></i>
-                <span>Edad del Niño/a (0 a 14 años) *</span>
+                <span>Edad (0 a 14 años) *</span>
               </label>
-              <span class="text-[10px] font-bold text-slate-400 age-selected-hint">Seleccionada: <strong class="theme-color font-black">6 años</strong></span>
+              <div class="flex items-center gap-2">
+                <button type="button" class="btn-toggle-all-ages text-[11px] font-black text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-950/60 hover:bg-blue-100 border border-blue-200 dark:border-blue-800/80 px-2 py-0.5 rounded-lg transition-all flex items-center gap-1 cursor-pointer">
+                  <span>Ver todas (0 a 14)</span>
+                  <i data-lucide="chevrons-down" class="w-3 h-3"></i>
+                </button>
+                <span class="text-[10px] font-bold text-slate-400 age-selected-hint">Edad: <strong class="theme-color font-black">6 años</strong></span>
+              </div>
             </div>
-            <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 age-pills-container">
-              ${agePillsHtml}
+            <div class="relative">
+              <div class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-1 age-pills-container scroll-smooth">
+                ${agePillsHtml}
+              </div>
+              <button type="button" class="btn-scroll-more-ages absolute right-0 top-1/2 -translate-y-1/2 bg-gradient-to-l from-slate-900 via-slate-900/90 to-transparent pl-4 pr-1 py-1 text-[10px] font-black text-amber-400 flex items-center gap-1 rounded-r-xl transition-all cursor-pointer">
+                <span>Más 👉</span>
+              </button>
             </div>
             <input type="hidden" class="kid-age-input" value="6">
           </div>
@@ -1172,17 +1107,16 @@
         const rutVal = document.getElementById('tutorRut')?.value || '';
         const emailVal = document.getElementById('email')?.value || '';
         const phoneVal = document.getElementById('phone')?.value || '';
-        const emergencyVal = document.getElementById('emergencyContact')?.value || '';
         const proofVal = proofHidden?.value || '';
 
         const firstKid = document.querySelector('.kid-card');
         const kFn = firstKid?.querySelector('.kid-firstname-input')?.value || '';
         const kLn = firstKid?.querySelector('.kid-lastname-input')?.value || '';
 
-        if (kFn.length >= 2 && kLn.length >= 2) score += 25;
-        if (tFn.length >= 2 && tLn.length >= 2 && validateRut(rutVal)) score += 25;
-        if (emailVal.includes('@') && phoneVal.length >= 7 && emergencyVal.length >= 7) score += 15;
-        if (proofVal) score += 15;
+        if (kFn.length >= 2 && kLn.length >= 2) score += 30;
+        if (tFn.length >= 2 && tLn.length >= 2 && validateRut(rutVal)) score += 30;
+        if (emailVal.includes('@') && phoneVal.length >= 7) score += 20;
+        if (proofVal) score += 20;
 
         score = Math.min(100, score);
         const pBar = document.getElementById('form-progress-bar');
@@ -1191,7 +1125,7 @@
         if (pText) pText.textContent = score + '%';
       }
 
-      ['tutorFirstName', 'tutorLastName', 'email', 'phone', 'emergencyContact'].forEach(id => {
+      ['tutorFirstName', 'tutorLastName', 'email', 'phone'].forEach(id => {
         document.getElementById(id)?.addEventListener('input', updateFormProgress);
       });
 
@@ -1218,6 +1152,144 @@
             });
           }, 250);
         }
+      }
+
+      // ─── Función para Descargar el Comprobante como Imagen PNG ───────────────
+      function downloadTicketAsImage() {
+        if (!latestRegistrationResult) {
+          window.print();
+          return;
+        }
+
+        const { children, tutorName, tutorRut, raceName } = latestRegistrationResult;
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        const width = 900;
+        const cardHeight = 150;
+        const height = 360 + (children.length * cardHeight);
+
+        canvas.width = width;
+        canvas.height = height;
+
+        // Fondo oscuro elegante
+        const bgGrad = ctx.createLinearGradient(0, 0, width, height);
+        bgGrad.addColorStop(0, '#0f172a');
+        bgGrad.addColorStop(1, '#020617');
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, width, height);
+
+        // Borde decorativo
+        ctx.strokeStyle = '#38bdf8';
+        ctx.lineWidth = 4;
+        ctx.strokeRect(15, 15, width - 30, height - 30);
+
+        // Barra superior dorada
+        const headerGrad = ctx.createLinearGradient(15, 15, width - 15, 90);
+        headerGrad.addColorStop(0, '#2563eb');
+        headerGrad.addColorStop(1, '#1d4ed8');
+        ctx.fillStyle = headerGrad;
+        ctx.fillRect(17, 17, width - 34, 90);
+
+        // Título del evento
+        ctx.fillStyle = '#ffffff';
+        ctx.font = '900 24px -apple-system, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText(raceName.toUpperCase(), width / 2, 54);
+
+        ctx.fillStyle = '#fde047';
+        ctx.font = 'bold 13px -apple-system, sans-serif';
+        ctx.fillText('COMPROBANTE OFICIAL DE INSCRIPCIÓN Y RETIRO DE KIT', width / 2, 80);
+
+        // Datos del tutor
+        ctx.fillStyle = '#94a3b8';
+        ctx.font = 'bold 13px -apple-system, sans-serif';
+        ctx.textAlign = 'left';
+        ctx.fillText(`APODERADO / TUTOR: ${tutorName.toUpperCase()}`, 40, 140);
+        ctx.fillText(`RUN / RUT: ${tutorRut}`, 40, 162);
+        ctx.textAlign = 'right';
+        ctx.fillText(`FECHA: ${new Date().toLocaleDateString('es-CL')}`, width - 40, 140);
+        ctx.fillText(`ESTADO: RESERVADO Y CONFIRMADO ✓`, width - 40, 162);
+
+        // Línea divisoria
+        ctx.strokeStyle = '#334155';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(40, 180);
+        ctx.lineTo(width - 40, 180);
+        ctx.stroke();
+
+        // Tarjetas de cada niño
+        let currentY = 205;
+        children.forEach((c, idx) => {
+          // Fondo tarjeta
+          ctx.fillStyle = '#1e293b';
+          ctx.beginPath();
+          ctx.roundRect(40, currentY, width - 80, cardHeight - 20, 16);
+          ctx.fill();
+          ctx.strokeStyle = '#475569';
+          ctx.lineWidth = 1.5;
+          ctx.stroke();
+
+          // Número de inscripción en dorado
+          ctx.fillStyle = '#facc15';
+          ctx.font = '900 13px monospace';
+          ctx.textAlign = 'left';
+          ctx.fillText(`N° DE INSCRIPCIÓN OFICIAL`, 65, currentY + 32);
+
+          ctx.fillStyle = '#fef08a';
+          ctx.font = '900 28px monospace';
+          const bibText = `#${c.inscriptionNumber || c.bibNumber || '0100'}`;
+          ctx.fillText(bibText, 65, currentY + 68);
+
+          // Nombre del niño
+          ctx.fillStyle = '#ffffff';
+          ctx.font = '900 20px -apple-system, sans-serif';
+          ctx.fillText(c.kidName.toUpperCase(), 280, currentY + 45);
+
+          // Detalles: circuito, talla, edad
+          ctx.fillStyle = '#38bdf8';
+          ctx.font = 'bold 14px -apple-system, sans-serif';
+          ctx.fillText(`Circuito: ${c.distance}`, 280, currentY + 75);
+
+          ctx.fillStyle = '#c084fc';
+          ctx.fillText(`Polera: Talla ${c.shirtSize || '4'}`, 520, currentY + 75);
+
+          ctx.fillStyle = '#94a3b8';
+          ctx.fillText(`Edad: ${c.kidAge} años`, 680, currentY + 75);
+
+          // Badge 'Kit Asegurado'
+          ctx.fillStyle = '#10b981';
+          ctx.textAlign = 'right';
+          ctx.font = 'bold 12px -apple-system, sans-serif';
+          ctx.fillText('🏅 KIT ASEGURADO', width - 65, currentY + 40);
+
+          currentY += cardHeight;
+        });
+
+        // Pie de página de seguridad
+        ctx.fillStyle = '#f59e0b';
+        ctx.textAlign = 'center';
+        ctx.font = 'bold 12px -apple-system, sans-serif';
+        ctx.fillText('📸 CONSERVA ESTE COMPROBANTE: PRESÉNTALO AL RETIRAR EL KIT OFICIAL DE COMPETENCIA', width / 2, height - 45);
+
+        ctx.fillStyle = '#64748b';
+        ctx.font = '11px -apple-system, sans-serif';
+        ctx.fillText('KidsRun • Evento Deportivo Familiar Seguro • https://kkidsrace.cl', width / 2, height - 26);
+
+        // Disparar descarga automática
+        const dataUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        const firstBib = children[0]?.inscriptionNumber || children[0]?.bibNumber || 'inscripcion';
+        link.download = `comprobante-kidsrun-${firstBib}.png`;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+
+      const btnDownloadTicket = document.getElementById('btn-download-ticket');
+      if (btnDownloadTicket) {
+        btnDownloadTicket.addEventListener('click', downloadTicketAsImage);
       }
 
       // ─── Envío del Formulario con Validación de Campos Obligatorios ─────────
@@ -1286,7 +1358,7 @@
 
           if (!valid) return;
 
-          // 2. Validar Tutor (todos los campos obligatorios)
+          // 2. Validar Tutor (campos obligatorios)
           const tutorFirstName = (document.getElementById('tutorFirstName')?.value || '').trim();
           const tutorLastName  = (document.getElementById('tutorLastName')?.value || '').trim();
           if (!tutorFirstName) {
@@ -1326,13 +1398,6 @@
             return;
           }
 
-          const emergencyVal = (document.getElementById('emergencyContact')?.value || '').trim();
-          if (!emergencyVal) {
-            alert('Por favor ingresa el teléfono de contacto de emergencia para el día de la corrida.');
-            document.getElementById('emergencyContact')?.focus();
-            return;
-          }
-
           // 3. Validar Comprobante de Pago obligatorio
           const proofVal = proofHidden?.value || '';
           if (!proofVal) {
@@ -1365,7 +1430,6 @@
             name: `${tutorFirstName} ${tutorLastName}`.trim(),
             email: tutorEmailVal,
             phone: phoneVal,
-            emergencyContact: emergencyVal,
             tutorRut: tutorRutVal,
             paymentProof: proofVal,
             consentGiven: true,
@@ -1389,6 +1453,14 @@
               // Ocultar bloques del formulario y mostrar éxito
               document.querySelectorAll('.kid-card, #btn-add-kid, .space-y-4, .space-y-3, #dynamic-summary-bar, #submit-btn').forEach(el => el.classList.add('hidden'));
 
+              const responseChildren = json.children || children;
+              latestRegistrationResult = {
+                children: responseChildren,
+                tutorName: payload.name,
+                tutorRut: tutorRutVal,
+                raceName: payload.raceName || 'KidsRun 2026'
+              };
+
               // Poblar lista de hijos con su Número de Inscripción correlativo en el cuadro de éxito
               const listContainer = document.getElementById('registered-children-list');
               const tutorRutBadge = document.getElementById('registered-tutor-rut');
@@ -1397,7 +1469,6 @@
               }
 
               if (listContainer) {
-                const responseChildren = json.children || children;
                 listContainer.innerHTML = responseChildren.map((c, i) => {
                   const bib = c.inscriptionNumber || c.bibNumber || `#010${i+1}`;
                   const kidFullName = c.kidName || `${c.kidFirstName || ''} ${c.kidLastName || ''}`.trim();
