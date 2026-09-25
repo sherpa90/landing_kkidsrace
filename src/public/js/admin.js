@@ -17,6 +17,7 @@ function initAllAdminModules() {
     ['Escáner RUT', initRutScanner],
     ['Usuarios', initUsersManager],
     ['Cronograma', initScheduleManager],
+    ['Circuitos', initCircuitsManager],
     ['Preguntas Frecuentes', initFaqsManager],
     ['Hero Preview', initHeroLivePreview],
     ['Pestaña Navegador', initBrowserTabLivePreview]
@@ -454,18 +455,10 @@ function collectCmsFormData() {
     });
   });
 
-  // 6. Categorías / Circuitos
-  const categories = [];
-  document.querySelectorAll('.category-item').forEach((item, idx) => {
-    categories.push({
-      id: item.querySelector('input[name*="[id]"]')?.value || ('cat-' + idx),
-      distance: item.querySelector('input[name*="[distance]"]')?.value || '',
-      badge: item.querySelector('input[name*="[badge]"]')?.value || '',
-      title: item.querySelector('input[name*="[title]"]')?.value || '',
-      description: item.querySelector('textarea[name*="[description]"]')?.value || '',
-      icon: idx === 0 ? 'smile' : (idx === 1 ? 'zap' : (idx === 2 ? 'trophy' : 'flame'))
-    });
-  });
+  // 6. Categorías / Circuitos (usa el gestor de circuitos si está disponible)
+  const categories = typeof window._collectCircuits === 'function'
+    ? window._collectCircuits()
+    : [];
 
   // 7. Kits / Precios
   const plans = [];
@@ -2207,6 +2200,175 @@ function initUsersManager() {
   const existingCards = container.querySelectorAll('.user-card-item');
   if (sidebarCountBadge) sidebarCountBadge.textContent = existingCards.length;
 }
+// 14. Gestor de Circuitos y Categorías por Edades (SOLO Administrador)
+function initCircuitsManager() {
+  const container = document.getElementById('circuits-admin-container');
+  const addBtn    = document.getElementById('btn-add-circuit');
+  const addBtnBot = document.getElementById('btn-add-circuit-bottom');
+  const saveBtn   = document.getElementById('btn-save-circuits');
+  const emptyState = document.getElementById('circuits-empty-state');
+
+  if (!container) return;
+
+  // --- Helpers ---
+  function renumberItems() {
+    container.querySelectorAll('.circuit-admin-item').forEach((el, i) => {
+      const numBadge = el.querySelector('.circuit-item-number');
+      const numText  = el.querySelector('.circuit-item-num-text');
+      if (numBadge) numBadge.textContent = i + 1;
+      if (numText)  numText.textContent  = i + 1;
+    });
+    checkEmpty();
+  }
+
+  function checkEmpty() {
+    const count = container.querySelectorAll('.circuit-admin-item').length;
+    if (emptyState) emptyState.classList.toggle('hidden', count > 0);
+  }
+
+  function createCircuitItem(data = {}) {
+    const idx = Date.now(); // unique temp key for the item
+    const el = document.createElement('div');
+    el.className = 'circuit-admin-item p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-3 group hover:border-gray-700 transition-all';
+    el.innerHTML = `
+      <input type="hidden" class="circuit-id-input" value="${data.id || ('cat-new-' + idx)}">
+      <div class="flex items-center justify-between gap-3 pb-2 border-b border-gray-800/80">
+        <div class="flex items-center gap-2">
+          <span class="circuit-item-number w-6 h-6 rounded-lg bg-emerald-600/20 text-emerald-400 font-mono text-xs font-bold flex items-center justify-center">?</span>
+          <span class="text-xs font-bold text-slate-300">Circuito #<span class="circuit-item-num-text">?</span></span>
+        </div>
+        <div class="flex items-center gap-1.5">
+          <button type="button" class="btn-move-up-circuit p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer" title="Mover arriba">
+            <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
+          </button>
+          <button type="button" class="btn-move-down-circuit p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer" title="Mover abajo">
+            <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+          </button>
+          <button type="button" class="btn-remove-circuit p-1.5 rounded-lg bg-red-950/60 hover:bg-red-900 border border-red-500/30 text-red-300 transition-all ml-1 cursor-pointer" title="Eliminar circuito">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Distancia (ej: 500 Metros)</label>
+          <input type="text" class="circuit-distance w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-emerald-500" value="${data.distance || ''}" placeholder="1 Km">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Rango de Edad</label>
+          <input type="text" class="circuit-badge w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" value="${data.badge || ''}" placeholder="6 a 8 años">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Nombre Categoría</label>
+          <input type="text" class="circuit-title w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" value="${data.title || ''}" placeholder="Pequeños Rayos">
+        </div>
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Icono Lucide</label>
+          <input type="text" class="circuit-icon w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-emerald-500" value="${data.icon || 'flag'}" placeholder="flag">
+        </div>
+      </div>
+      <div>
+        <label class="block text-xs text-gray-400 mb-1">Descripción del Circuito</label>
+        <textarea class="circuit-description w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" rows="2" placeholder="Describe el circuito, condiciones y características...">${data.description || ''}</textarea>
+      </div>`;
+    return el;
+  }
+
+  function addNewCircuit(data = {}) {
+    const el = createCircuitItem(data);
+    container.appendChild(el);
+    renumberItems();
+    if (window.lucide) window.lucide.createIcons();
+    // Scroll suave al nuevo item
+    el.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  }
+
+  // --- Delegación de eventos (remove + move) ---
+  container.addEventListener('click', (e) => {
+    const removeBtn = e.target.closest('.btn-remove-circuit');
+    const upBtn     = e.target.closest('.btn-move-up-circuit');
+    const downBtn   = e.target.closest('.btn-move-down-circuit');
+    const item      = e.target.closest('.circuit-admin-item');
+    if (!item) return;
+
+    if (removeBtn) {
+      if (!confirm('¿Eliminar este circuito?')) return;
+      item.remove();
+      renumberItems();
+      showAdminToast('Circuito eliminado. Guarda para aplicar los cambios.', 'info');
+      return;
+    }
+    if (upBtn) {
+      const prev = item.previousElementSibling;
+      if (prev && prev.classList.contains('circuit-admin-item')) {
+        container.insertBefore(item, prev);
+        renumberItems();
+      }
+      return;
+    }
+    if (downBtn) {
+      const next = item.nextElementSibling;
+      if (next && next.classList.contains('circuit-admin-item')) {
+        container.insertBefore(next, item);
+        renumberItems();
+      }
+    }
+  });
+
+  // --- Botones Agregar ---
+  if (addBtn)    addBtn.addEventListener('click',    () => addNewCircuit());
+  if (addBtnBot) addBtnBot.addEventListener('click', () => addNewCircuit());
+
+  // --- Guardar circuitos ---
+  function collectCircuits() {
+    const items = container.querySelectorAll('.circuit-admin-item');
+    return Array.from(items).map((el, i) => ({
+      id:          el.querySelector('.circuit-id-input')?.value || `cat-${i + 1}`,
+      distance:    el.querySelector('.circuit-distance')?.value?.trim() || '',
+      badge:       el.querySelector('.circuit-badge')?.value?.trim() || '',
+      title:       el.querySelector('.circuit-title')?.value?.trim() || '',
+      icon:        el.querySelector('.circuit-icon')?.value?.trim() || 'flag',
+      description: el.querySelector('.circuit-description')?.value?.trim() || '',
+    }));
+  }
+
+  if (saveBtn) {
+    saveBtn.addEventListener('click', async () => {
+      saveBtn.disabled = true;
+      const origText = saveBtn.innerHTML;
+      saveBtn.innerHTML = '<i data-lucide="loader" class="w-4 h-4 animate-spin"></i><span>Guardando...</span>';
+      if (window.lucide) window.lucide.createIcons();
+
+      try {
+        const csrf = getCsrfToken();
+        const payload = { categories: collectCircuits() };
+        const res = await cmsFetch('/admin/api/content', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
+          body: JSON.stringify(payload),
+        });
+        const json = await res.json();
+        if (json.success) {
+          showAdminToast('Circuitos guardados correctamente ✅', 'success');
+        } else {
+          showAdminToast(json.error || 'Error al guardar', 'error');
+        }
+      } catch (err) {
+        showAdminToast(err.message || 'Error de conexión', 'error');
+      } finally {
+        saveBtn.disabled = false;
+        saveBtn.innerHTML = origText;
+        if (window.lucide) window.lucide.createIcons();
+      }
+    });
+  }
+
+  // Exponer collector para que collectCmsFormData lo use
+  window._collectCircuits = collectCircuits;
+
+  checkEmpty();
+}
+
 // 13. Gestor de Cronograma de Actividades (SOLO Administrador)
 function initScheduleManager() {
   const container = document.getElementById('schedule-admin-container');

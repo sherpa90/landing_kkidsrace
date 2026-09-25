@@ -1031,38 +1031,98 @@
 
         <!-- PESTAÑA: CIRCUITOS Y EDADES -->
         <div id="tab-circuits" class="tab-pane hidden space-y-6">
-          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
-            <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
-              <i data-lucide="flag" class="w-4 h-4 text-emerald-400"></i>
-              Categorías y Circuitos por Edades
-            </h2>
-            <p class="text-xs text-gray-400 mb-6">Las 4 distancias adaptadas para los pequeños corredores.</p>
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800 space-y-6">
 
-            <div id="categories-container" class="space-y-4">
+            <!-- Encabezado con botón Agregar -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-800">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                  <i data-lucide="flag" class="w-5 h-5 text-emerald-400"></i>
+                  Circuitos y Categorías por Edades
+                </h2>
+                <p class="text-xs text-gray-400 mt-1">Define las distancias, rangos de edad y descripciones de cada circuito. Puedes agregar, eliminar y reordenar.</p>
+              </div>
+              <button type="button" id="btn-add-circuit"
+                class="shrink-0 px-4 py-2.5 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/20 active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Agregar Circuito</span>
+              </button>
+            </div>
+
+            <!-- Lista de circuitos -->
+            <div id="circuits-admin-container" class="space-y-4">
               <% (content.categories || []).forEach((cat, idx) => { %>
-              <div class="category-item p-4 rounded-3xl bg-gray-900/60 border border-gray-800 space-y-3">
-                <input type="hidden" name="categories[<%= idx %>][id]" value="<%= cat.id %>">
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+              <div class="circuit-admin-item p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-3 group hover:border-gray-700 transition-all">
+                <input type="hidden" class="circuit-id-input" value="<%= cat.id || ('cat-' + (idx+1)) %>">
+
+                <!-- Cabecera del item -->
+                <div class="flex items-center justify-between gap-3 pb-2 border-b border-gray-800/80">
+                  <div class="flex items-center gap-2">
+                    <span class="circuit-item-number w-6 h-6 rounded-lg bg-emerald-600/20 text-emerald-400 font-mono text-xs font-bold flex items-center justify-center"><%= idx + 1 %></span>
+                    <span class="text-xs font-bold text-slate-300">Circuito #<span class="circuit-item-num-text"><%= idx + 1 %></span></span>
+                    <span class="text-xs text-slate-500 font-medium truncate max-w-[140px]"><%= cat.distance %> &bull; <%= cat.badge %></span>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <button type="button" class="btn-move-up-circuit p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer" title="Mover arriba">
+                      <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button type="button" class="btn-move-down-circuit p-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 text-slate-300 transition-all cursor-pointer" title="Mover abajo">
+                      <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
+                    </button>
+                    <button type="button" class="btn-remove-circuit p-1.5 rounded-lg bg-red-950/60 hover:bg-red-900 border border-red-500/30 text-red-300 transition-all ml-1 cursor-pointer" title="Eliminar circuito">
+                      <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Campos del circuito -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
                   <div>
-                    <label class="block text-xs text-gray-400 mb-1">Distancia (ej: 500 Metros, 1 Km)</label>
-                    <input type="text" name="categories[<%= idx %>][distance]" value="<%= cat.distance %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-bold">
+                    <label class="block text-xs text-gray-400 mb-1">Distancia (ej: 500 Metros)</label>
+                    <input type="text" class="circuit-distance w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-emerald-500" value="<%= cat.distance %>" placeholder="1 Km">
                   </div>
                   <div>
                     <label class="block text-xs text-gray-400 mb-1">Rango de Edad</label>
-                    <input type="text" name="categories[<%= idx %>][badge]" value="<%= cat.badge %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                    <input type="text" class="circuit-badge w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= cat.badge %>" placeholder="6 a 8 años">
                   </div>
                   <div>
                     <label class="block text-xs text-gray-400 mb-1">Nombre Categoría</label>
-                    <input type="text" name="categories[<%= idx %>][title]" value="<%= cat.title %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
+                    <input type="text" class="circuit-title w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= cat.title %>" placeholder="Pequeños Rayos">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Icono Lucide</label>
+                    <input type="text" class="circuit-icon w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-mono focus:outline-none focus:border-emerald-500" value="<%= cat.icon || 'flag' %>" placeholder="flag">
                   </div>
                 </div>
                 <div>
                   <label class="block text-xs text-gray-400 mb-1">Descripción del Circuito</label>
-                  <textarea name="categories[<%= idx %>][description]" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white"><%= cat.description %></textarea>
+                  <textarea class="circuit-description w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" rows="2" placeholder="Describe el circuito, condiciones y características..."><%= cat.description %></textarea>
                 </div>
               </div>
               <% }); %>
             </div>
+
+            <!-- Estado vacío -->
+            <div id="circuits-empty-state" class="<%= (!content.categories || content.categories.length === 0) ? '' : 'hidden' %> text-center py-10 bg-slate-950/40 rounded-2xl border border-slate-800 text-slate-400 space-y-2">
+              <i data-lucide="flag-off" class="w-8 h-8 mx-auto text-slate-600"></i>
+              <p class="text-sm font-bold text-slate-300">No hay circuitos definidos</p>
+              <p class="text-xs text-slate-500">Haz clic en &ldquo;Agregar Circuito&rdquo; para crear el primero.</p>
+            </div>
+
+            <!-- Acciones al pie -->
+            <div class="flex flex-col sm:flex-row items-center justify-between gap-3 pt-4 border-t border-gray-800">
+              <button type="button" id="btn-add-circuit-bottom"
+                class="w-full sm:w-auto px-4 py-2.5 rounded-2xl text-xs font-semibold text-slate-300 bg-slate-800 hover:bg-slate-700 hover:text-white transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="plus" class="w-4 h-4"></i>
+                <span>Agregar otro circuito</span>
+              </button>
+              <button type="button" id="btn-save-circuits"
+                class="w-full sm:w-auto px-6 py-2.5 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>Guardar Circuitos</span>
+              </button>
+            </div>
+
           </div>
         </div>
 

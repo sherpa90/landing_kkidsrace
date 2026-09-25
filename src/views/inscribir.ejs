@@ -148,7 +148,7 @@
     <form id="registration-form" class="space-y-6">
       <input type="hidden" name="raceId" value="<%= activeRace ? activeRace.id : 'race-2026-primavera' %>">
       <input type="hidden" name="raceName" value="<%= activeRace ? activeRace.name : 'KidsRun 2026' %>">
-      <input type="hidden" id="selectedDistance" name="distance" value="500 Metros (3-5 años)">
+      <input type="hidden" id="selectedDistance" name="distance" value="<%= (content.categories && content.categories.length > 0) ? `${content.categories[0].distance} (${content.categories[0].badge})` : '500 Metros (3-5 años)' %>">
       <input type="hidden" id="paymentProofUrl" name="paymentProof" value="">
       <!-- CSRF Token para protección contra ataques de sitios cruzados -->
       <input type="hidden" id="csrfTokenField" name="csrfToken" value="<%= csrfToken %>">
@@ -169,45 +169,25 @@
         </div>
 
         <div class="grid grid-cols-2 gap-2.5" id="distance-selector">
-          <!-- 500m -->
-          <div class="touch-card distance-option cursor-pointer p-3.5 rounded-2xl border-2 border-blue-600 bg-blue-50/50 dark:bg-blue-950/40 relative" data-distance="500 Metros (3-5 años)">
+          <% const formCategories = (content.categories && content.categories.length > 0) ? content.categories : [
+            { distance: '500 Metros', badge: '3-5 años', title: 'Mini Runners', description: 'Acompañado de papás' },
+            { distance: '1 Kilómetro', badge: '6-8 años', title: 'Pequeños Rayos', description: 'Circuito plano seguro' },
+            { distance: '2 Kilómetros', badge: '9-11 años', title: 'Súper Campeones', description: 'Con cronometraje' },
+            { distance: '3 Kilómetros', badge: '12-14 años', title: 'Jóvenes Titanes', description: 'Gran desafío atlético' }
+          ]; %>
+          <% formCategories.forEach((cat, idx) => {
+               const val = `${cat.distance} (${cat.badge})`;
+               const isFirst = idx === 0;
+          %>
+          <div class="touch-card distance-option cursor-pointer p-3.5 rounded-2xl border <%= isFirst ? 'border-2 border-blue-600 bg-blue-50/50 dark:bg-blue-950/40' : 'border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-950' %> relative" data-distance="<%= val %>">
             <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-black text-blue-700 dark:text-yellow-300">500m</span>
-              <span class="text-[10px] bg-blue-600 text-white font-bold px-1.5 py-0.5 rounded-full">3-5 años</span>
+              <span class="text-xs font-black <%= isFirst ? 'text-blue-700 dark:text-yellow-300' : 'text-slate-800 dark:text-white' %>"><%= (cat.distance || '').split(' ')[0] %></span>
+              <span class="text-[10px] <%= isFirst ? 'bg-blue-600 text-white' : 'bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300' %> font-bold px-1.5 py-0.5 rounded-full"><%= cat.badge %></span>
             </div>
-            <p class="text-[11px] font-semibold text-slate-800 dark:text-gray-200">Mini Runners</p>
-            <p class="text-[10px] text-slate-400 mt-0.5">Acompañado de papás</p>
+            <p class="text-[11px] font-semibold text-slate-800 dark:text-gray-200"><%= cat.title %></p>
+            <p class="text-[10px] text-slate-400 mt-0.5 truncate"><%= cat.description %></p>
           </div>
-
-          <!-- 1K -->
-          <div class="touch-card distance-option cursor-pointer p-3.5 rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-950 relative" data-distance="1 Kilómetro (6-8 años)">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-black text-slate-800 dark:text-white">1K</span>
-              <span class="text-[10px] bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 font-bold px-1.5 py-0.5 rounded-full">6-8 años</span>
-            </div>
-            <p class="text-[11px] font-semibold text-slate-800 dark:text-gray-200">Pequeños Rayos</p>
-            <p class="text-[10px] text-slate-400 mt-0.5">Circuito plano seguro</p>
-          </div>
-
-          <!-- 2K -->
-          <div class="touch-card distance-option cursor-pointer p-3.5 rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-950 relative" data-distance="2 Kilómetros (9-11 años)">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-black text-slate-800 dark:text-white">2K</span>
-              <span class="text-[10px] bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 font-bold px-1.5 py-0.5 rounded-full">9-11 años</span>
-            </div>
-            <p class="text-[11px] font-semibold text-slate-800 dark:text-gray-200">Súper Campeones</p>
-            <p class="text-[10px] text-slate-400 mt-0.5">Con cronometraje</p>
-          </div>
-
-          <!-- 3K -->
-          <div class="touch-card distance-option cursor-pointer p-3.5 rounded-2xl border border-slate-200 dark:border-gray-800 bg-white dark:bg-gray-950 relative" data-distance="3 Kilómetros (12-14 años)">
-            <div class="flex items-center justify-between mb-1">
-              <span class="text-xs font-black text-slate-800 dark:text-white">3K</span>
-              <span class="text-[10px] bg-slate-100 dark:bg-gray-800 text-slate-600 dark:text-gray-300 font-bold px-1.5 py-0.5 rounded-full">12-14 años</span>
-            </div>
-            <p class="text-[11px] font-semibold text-slate-800 dark:text-gray-200">Jóvenes Titanes</p>
-            <p class="text-[10px] text-slate-400 mt-0.5">Gran desafío atlético</p>
-          </div>
+          <% }); %>
         </div>
       </div>
 
