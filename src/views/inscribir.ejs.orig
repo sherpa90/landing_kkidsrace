@@ -622,11 +622,6 @@
           <div id="registered-children-list" class="space-y-2.5"></div>
         </div>
 
-        <!-- VISOR DEL COMPROBANTE GENERADO -->
-        <div id="ticket-preview-container" class="hidden w-full overflow-hidden rounded-2xl border-2 border-white/20 bg-slate-900 mx-auto mt-4 mb-2 max-w-full">
-          <img id="ticket-preview-img" src="" alt="Comprobante Oficial" class="w-full h-auto object-contain">
-        </div>
-
         <!-- BOTONES DE ACCIÓN POST-INSCRIPCIÓN: DESCARGAR TICKET / COMPARTIR -->
         <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
           <!-- Botón de Descarga Directa como Imagen PNG -->
@@ -643,16 +638,6 @@
           <button type="button" id="btn-share-whatsapp" class="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-emerald-500 hover:bg-emerald-400 text-white font-bold text-xs px-5 py-3.5 rounded-2xl border border-white/30 shadow-md transition-all cursor-pointer">
             <i data-lucide="share-2" class="w-4 h-4"></i>
             <span>WhatsApp</span>
-          </button>
-        </div>
-
-        <!-- BOTÓN PARA INSCRIBIR MÁS HIJOS DEL MISMO APODERADO -->
-        <div class="pt-4 border-t border-white/20 mt-4">
-          <p class="text-xs text-white/60 mb-3 text-center">¿Tienes más hijos que inscribir con el mismo apoderado?</p>
-          <button type="button" id="btn-register-more-kids"
-            class="w-full inline-flex items-center justify-center gap-2 bg-white/10 hover:bg-white/20 text-white font-black text-sm px-6 py-4 rounded-2xl border border-white/30 transition-all cursor-pointer active:scale-95 backdrop-blur-md">
-            <i data-lucide="user-plus" class="w-5 h-5 text-amber-300"></i>
-            <span>Inscribir más hijos con el mismo apoderado</span>
           </button>
         </div>
       </div>
@@ -1170,7 +1155,7 @@
       }
 
       // ─── Función para Descargar el Comprobante como Imagen PNG ───────────────
-      function generateTicketDataUrl() {
+      function downloadTicketAsImage() {
         if (!latestRegistrationResult) {
           window.print();
           return;
@@ -1291,25 +1276,20 @@
         ctx.font = '11px -apple-system, sans-serif';
         ctx.fillText('Kids Race • Evento Deportivo Familiar Seguro • https://kkidsrace.cl', width / 2, height - 26);
 
-        return canvas.toDataURL('image/png');
+        // Disparar descarga automática
+        const dataUrl = canvas.toDataURL('image/png');
+        const link = document.createElement('a');
+        const firstBib = children[0]?.inscriptionNumber || children[0]?.bibNumber || 'inscripcion';
+        link.download = `comprobante-kidsrace-${firstBib}.png`;
+        link.href = dataUrl;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
       }
 
       const btnDownloadTicket = document.getElementById('btn-download-ticket');
       if (btnDownloadTicket) {
-        btnDownloadTicket.addEventListener('click', () => {
-          const img = document.getElementById('ticket-preview-img');
-          if (img && img.src) {
-            const link = document.createElement('a');
-            const firstBib = latestRegistrationResult?.children?.[0]?.inscriptionNumber || 'inscripcion';
-            link.download = `comprobante-kidsrace-${firstBib}.png`;
-            link.href = img.src;
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-          } else {
-            window.print();
-          }
-        });
+        btnDownloadTicket.addEventListener('click', downloadTicketAsImage);
       }
 
       // ─── Envío del Formulario con Validación de Campos Obligatorios ─────────
@@ -1516,19 +1496,6 @@
                 const sTitle = document.getElementById('success-title');
                 if (sTitle) sTitle.textContent = `¡${json.count} Inscripciones Confirmadas!`;
               }
-              
-              // Renderizar y mostrar el comprobante en pantalla
-              setTimeout(() => {
-                const dataUrl = generateTicketDataUrl();
-                if (dataUrl) {
-                  const previewImg = document.getElementById('ticket-preview-img');
-                  const previewContainer = document.getElementById('ticket-preview-container');
-                  if (previewImg && previewContainer) {
-                    previewImg.src = dataUrl;
-                    previewContainer.classList.remove('hidden');
-                  }
-                }
-              }, 100);
 
               successBox.classList.remove('hidden');
               if (window.lucide) window.lucide.createIcons();
@@ -1554,61 +1521,6 @@
             submitBtn.disabled = false;
             submitBtn.innerHTML = originalContent;
           }
-        });
-      }
-
-      // ─── Inscribir más hijos del mismo apoderado ─────────────────────────────
-      const btnMoreKids = document.getElementById('btn-register-more-kids');
-      if (btnMoreKids) {
-        btnMoreKids.addEventListener('click', () => {
-          // Ocultar caja de éxito
-          const successBox = document.getElementById('success-message');
-          if (successBox) successBox.classList.add('hidden');
-
-          // Ocultar visor del comprobante generado
-          const previewContainer = document.getElementById('ticket-preview-container');
-          if (previewContainer) previewContainer.classList.add('hidden');
-
-          // Restablecer el submit button
-          const submitBtn = document.getElementById('submit-btn');
-          if (submitBtn) {
-            submitBtn.disabled = false;
-            submitBtn.classList.remove('hidden');
-          }
-
-          // Mostrar el botón de agregar hijo y el botón de enviar
-          const btnAddKid = document.getElementById('btn-add-kid');
-          if (btnAddKid) btnAddKid.classList.remove('hidden');
-
-          // Mostrar la sección de datos del apoderado y comprobante de pago (pero no los kid-cards)
-          document.querySelectorAll('.space-y-4, .space-y-3, #dynamic-summary-bar, #submit-btn').forEach(el => el.classList.remove('hidden'));
-
-          // Limpiar los kid-cards actuales excepto el primero, y resetear el primero
-          const allCards = document.querySelectorAll('.kid-card');
-          allCards.forEach((card, idx) => {
-            if (idx === 0) {
-              // Resetear campos del primer hijo
-              card.querySelectorAll('input, select, textarea').forEach(inp => { inp.value = ''; });
-              // Resetear selector de talla visual si existe
-              card.querySelectorAll('[data-shirt]').forEach(btn => btn.classList.remove('ring-2', 'ring-offset-2', 'ring-blue-500', 'dark:ring-yellow-400'));
-            } else {
-              card.remove();
-            }
-          });
-
-          // Resetear validación de comprobante de pago (dejar el ya subido si existe)
-          // No limpiar el payment proof para que no tenga que subir otro comprobante
-
-          // Restablecer botón con el texto correcto
-          if (submitBtn) {
-            submitBtn.innerHTML = `<i data-lucide="check-circle" class="w-4 h-4 shrink-0"></i><span>Confirmar Inscripción</span>`;
-          }
-
-          if (window.lucide) window.lucide.createIcons();
-
-          // Scroll hasta la sección de niños
-          const firstCard = document.querySelector('.kid-card');
-          if (firstCard) window.scrollTo({ top: firstCard.offsetTop - 80, behavior: 'smooth' });
         });
       }
     });
