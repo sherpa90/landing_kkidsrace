@@ -964,13 +964,10 @@ function initLeadsManager() {
       if (window.lucide) window.lucide.createIcons();
 
       try {
-        const csrf = getCsrfToken();
-        const res = await cmsFetch('/admin/api/leads/bulk-delete', {
+        const json = await cmsFetch('/admin/api/leads/bulk-delete', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
           body: JSON.stringify({ ids, securityWord })
         });
-        const json = await res.json();
 
         if (json.success) {
           showAdminToast(json.message || 'Eliminación masiva completada con éxito', 'success');
@@ -2619,14 +2616,11 @@ function initCircuitsManager() {
       if (window.lucide) window.lucide.createIcons();
 
       try {
-        const csrf = getCsrfToken();
         const payload = { categories: collectCircuits() };
-        const res = await cmsFetch('/admin/api/content', {
+        const json = await cmsFetch('/admin/api/content', {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': csrf },
           body: JSON.stringify(payload),
         });
-        const json = await res.json();
         if (json.success) {
           showAdminToast('Circuitos guardados correctamente ✅', 'success');
         } else {
