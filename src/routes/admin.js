@@ -435,7 +435,7 @@ router.get('/api/inscriptions/export', auth.requireAuth, async (req, res) => {
   
   const rows = leads.map(l => [
     sanitizeCsvCell(l.bibNumber || ''),
-    sanitizeCsvCell(l.raceName || 'KidsRun 2026'),
+    sanitizeCsvCell(l.raceName || 'Kids Race 2026'),
     sanitizeCsvCell(l.tutorRut || ''),
     sanitizeCsvCell(l.tutorFirstName || l.name || ''),
     sanitizeCsvCell(l.tutorLastName || ''),
@@ -455,7 +455,7 @@ router.get('/api/inscriptions/export', auth.requireAuth, async (req, res) => {
   const csvContent = '\uFEFF' + [headers.join(','), ...rows.map(r => r.join(','))].join('\r\n');
 
   res.header('Content-Type', 'text/csv; charset=utf-8');
-  res.attachment(`inscripciones_kidsrun_${new Date().toISOString().split('T')[0]}.csv`);
+  res.attachment(`inscripciones_kidsrace_${new Date().toISOString().split('T')[0]}.csv`);
   res.send(csvContent);
 });
 

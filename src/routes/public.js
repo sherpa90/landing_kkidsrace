@@ -139,7 +139,7 @@ router.get('/', (req, res) => {
       {
         "@type": "SportsEvent",
         "@id": `${siteUrl}/#sportsevent`,
-        "name": content.brand?.name || "KidsRun 2026",
+        "name": content.brand?.name || "Kids Race 2026",
         "description": content.seo?.metaDescription || "",
         "startDate": content.countdown?.targetDate || "2026-11-15T09:00:00",
         "eventStatus": "https://schema.org/EventScheduled",
@@ -169,7 +169,7 @@ router.get('/', (req, res) => {
         "@type": "WebSite",
         "@id": `${siteUrl}/#website`,
         "url": siteUrl,
-        "name": content.brand?.name || "KidsRun 2026",
+        "name": content.brand?.name || "Kids Race 2026",
         "description": content.seo?.metaDescription || "",
         "inLanguage": "es"
       }
@@ -319,7 +319,7 @@ router.post('/api/inquiry', contactLimiter, validateCsrf, async (req, res) => {
           'Accept': 'application/json'
         },
         body: JSON.stringify({
-          _subject: `[KidsRun Contacto] ${subject || 'Nueva consulta web'}`,
+          _subject: `[Kids Race Contacto] ${subject || 'Nueva consulta web'}`,
           Nombre: name,
           Email: email,
           Telefono: phone || 'No informado',
@@ -448,7 +448,7 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
   }
 
   const targetRaceId = raceId || (activeRace ? activeRace.id : 'race-2026-primavera');
-  const targetRaceName = raceName || (activeRace ? activeRace.name : 'KidsRun 2026');
+  const targetRaceName = raceName || (activeRace ? activeRace.name : 'Kids Race 2026');
 
   const allowedDistances = getAllowedDistances();
   const ALLOWED_SHIRT_SIZES = ['2', '4', '8', '12', '16', 'S', 'M'];

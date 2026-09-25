@@ -18,7 +18,7 @@
   </script>
 
   <!-- Metadatos SEO Principales y Pestaña del Navegador -->
-  <title><%= content.seo?.metaTitle || 'KidsRun 2026 | La Gran Corrida Infantil y Familiar' %></title>
+  <title><%= content.seo?.metaTitle || 'Kids Race 2026 | La Gran Corrida Infantil y Familiar' %></title>
   <link rel="icon" type="image/x-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
   <link rel="shortcut icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
   <link rel="apple-touch-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
@@ -34,14 +34,14 @@
   <!-- Open Graph / Redes Sociales (WhatsApp, Facebook, LinkedIn) -->
   <meta property="og:type" content="<%= content.seo?.ogType || 'website' %>">
   <meta property="og:url" content="<%= content.seo?.canonicalUrl || siteUrl %>">
-  <meta property="og:title" content="<%= content.seo?.metaTitle || 'KidsRun 2026' %>">
+  <meta property="og:title" content="<%= content.seo?.metaTitle || 'Kids Race 2026' %>">
   <meta property="og:description" content="<%= content.seo?.metaDescription || '' %>">
   <meta property="og:image" content="<%= content.seo?.ogImage || '' %>">
-  <meta property="og:site_name" content="<%= content.brand?.name || 'KidsRun 2026' %>">
+  <meta property="og:site_name" content="<%= content.brand?.name || 'Kids Race 2026' %>">
 
   <!-- Twitter Cards (X) -->
   <meta name="twitter:card" content="<%= content.seo?.twitterCard || 'summary_large_image' %>">
-  <meta name="twitter:title" content="<%= content.seo?.metaTitle || 'KidsRun 2026' %>">
+  <meta name="twitter:title" content="<%= content.seo?.metaTitle || 'Kids Race 2026' %>">
   <meta name="twitter:description" content="<%= content.seo?.metaDescription || '' %>">
   <meta name="twitter:image" content="<%= content.seo?.ogImage || '' %>">
   <% if (content.seo?.twitterHandle) { %>
@@ -120,7 +120,7 @@
       <!-- Logotipo: Soporta Imagen Personalizada o Icono + Texto -->
       <a href="/" class="flex items-center gap-2 sm:gap-3 group min-w-0 shrink-0">
         <% if (content.brand?.logoUrl) { %>
-        <img src="<%= content.brand.logoUrl %>" alt="<%= content.brand?.name || 'KidsRun' %>" class="h-8 sm:h-11 w-auto max-w-[110px] sm:max-w-[180px] object-contain">
+        <img src="<%= content.brand.logoUrl %>" alt="<%= content.brand?.name || 'Kids Race' %>" class="h-8 sm:h-11 w-auto max-w-[110px] sm:max-w-[180px] object-contain">
         <% } else { %>
         <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl sm:rounded-2xl bg-gradient-to-tr <%= theme.gradient %> p-[2px] shadow-md shadow-blue-500/20 group-hover:scale-105 transition-transform shrink-0">
           <div class="w-full h-full bg-white dark:bg-gray-950 rounded-[10px] sm:rounded-2xl flex items-center justify-center">
@@ -129,7 +129,7 @@
         </div>
         <div class="flex flex-col min-w-0">
           <span class="text-base sm:text-xl font-black tracking-tight text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-yellow-400 transition-colors leading-tight truncate max-w-[130px] sm:max-w-none">
-            <%= content.brand?.logoText || 'KidsRun 2026' %>
+            <%= content.brand?.logoText || 'Kids Race 2026' %>
           </span>
           <span class="text-[9px] sm:text-[10px] font-bold text-blue-600 dark:text-yellow-400 -mt-0.5 hidden sm:block tracking-wide uppercase truncate">
             <%= content.brand?.tagline || 'Corrida Infantil & Familiar' %>
@@ -558,7 +558,7 @@
                  data-img-src="<%= photo.url %>"
                  data-img-title="<%= photo.title %>"
                  data-img-caption="<%= photo.caption %>"
-                 data-img-category="<%= photo.category || 'KidsRun' %>">
+                 data-img-category="<%= photo.category || 'Kids Race' %>">
               
               <div class="aspect-w-16 aspect-h-11 w-full h-72 sm:h-80 overflow-hidden bg-slate-100 dark:bg-gray-900">
                 <img src="<%= photo.url %>" 
@@ -572,7 +572,7 @@
                 <div class="flex justify-between items-center">
                   <span class="text-[11px] font-mono font-bold text-white/80 bg-black/40 px-2.5 py-0.5 rounded-full border border-white/10">#<%= String(idx + 1).padStart(2, '0') %></span>
                   <span class="text-[10px] font-bold px-2.5 py-1 rounded-full bg-blue-600/90 text-white border border-blue-400/40 backdrop-blur-md">
-                    <%= photo.category || 'KidsRun' %>
+                    <%= photo.category || 'Kids Race' %>
                   </span>
                 </div>
                 <div>
@@ -898,7 +898,7 @@
                 </div>
                 <div>
                   <p class="text-xs text-slate-500 dark:text-gray-400">Correo Electrónico</p>
-                  <p class="font-bold text-slate-900 dark:text-white"><%= content.contact?.email || 'contacto@kidsrun2026.com' %></p>
+                  <p class="font-bold text-slate-900 dark:text-white"><%= content.contact?.email || 'contacto@kkidsrace.cl' %></p>
                 </div>
               </div>
 
@@ -1000,9 +1000,9 @@
           </div>
         </div>
         <% } %>
-        <span class="font-bold text-white"><%= content.brand?.name || 'KidsRun 2026' %></span>
+        <span class="font-bold text-white"><%= content.brand?.name || 'Kids Race 2026' %></span>
         <span class="text-slate-600">|</span>
-        <span><%= content.footer?.copyright || '© 2026 KidsRun. Todos los derechos reservados.' %></span>
+        <span><%= content.footer?.copyright || '© 2026 Kids Race. Todos los derechos reservados.' %></span>
       </div>
 
       <!-- Redes Sociales y Acceso Admin -->
@@ -1036,7 +1036,7 @@
     <div class="bg-white/95 dark:bg-gray-950/95 border border-slate-200/90 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.18)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.6)] rounded-2xl p-2.5 backdrop-blur-lg flex items-center justify-between gap-2.5 max-w-sm mx-auto">
       <div class="flex flex-col min-w-0 pl-1">
         <span class="text-[11px] font-black uppercase text-blue-600 dark:text-yellow-400 tracking-wider truncate">
-          <%= activeRace ? activeRace.name : (content.brand?.name || 'KidsRun 2026') %>
+          <%= activeRace ? activeRace.name : (content.brand?.name || 'Kids Race 2026') %>
         </span>
         <span class="text-[10px] text-slate-500 dark:text-gray-400 font-medium truncate">
           🏅 Kit y medalla oficial

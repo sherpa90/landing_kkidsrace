@@ -484,7 +484,7 @@ function collectCmsFormData() {
     gallery.push({
       id: 'gal-' + (idx + 1),
       title: item.querySelector('input[name*="[title]"]')?.value || '',
-      category: item.querySelector('input[name*="[category]"]')?.value || 'KidsRun',
+      category: item.querySelector('input[name*="[category]"]')?.value || 'Kids Race',
       url: item.querySelector('input[name*="[url]"]')?.value || '',
       caption: item.querySelector('textarea[name*="[caption]"]')?.value || ''
     });
@@ -3237,7 +3237,7 @@ function initBrowserTabLivePreview() {
   const previewFaviconImg = document.getElementById('preview-favicon-img');
 
   function updateTitle(val) {
-    const displayVal = val || 'KidsRun 2026 | La Gran Corrida Infantil y Familiar';
+    const displayVal = val || 'Kids Race 2026 | La Gran Corrida Infantil y Familiar';
     if (previewTabTitle) previewTabTitle.textContent = displayVal;
     if (tabTitleInput && tabTitleInput.value !== val) tabTitleInput.value = val;
     if (metaTitleInput && metaTitleInput.value !== val) metaTitleInput.value = val;

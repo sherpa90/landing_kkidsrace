@@ -23,7 +23,7 @@ class EmailService {
   getConfig() {
     const content = contentStore.getContent();
     const apiKey = content.contact?.resendApiKey || process.env.RESEND_API_KEY || '';
-    const fromEmail = content.contact?.resendFromEmail || process.env.RESEND_FROM_EMAIL || 'KidsRun <onboarding@resend.dev>';
+    const fromEmail = content.contact?.resendFromEmail || process.env.RESEND_FROM_EMAIL || 'Kids Race <onboarding@resend.dev>';
     return { apiKey, fromEmail };
   }
 
@@ -76,7 +76,7 @@ class EmailService {
    */
   async sendInscriptionConfirmation(inscription) {
     const content = contentStore.getContent();
-    const brandName = content.brand?.name || 'KidsRun 2026';
+    const brandName = content.brand?.name || 'Kids Race 2026';
     const raceName = inscription.raceName || content.hero?.headlinePrefix || 'Gran Corrida Infantil';
     const location = content.countdown?.locationName ? `${content.countdown.locationName}, ${content.countdown.locationCity}` : 'Parque Bicentenario';
     const eventDate = content.countdown?.eventDateDisplay || 'Fecha por confirmar';

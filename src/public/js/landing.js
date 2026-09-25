@@ -293,7 +293,7 @@ function initLightbox() {
     const src = item.getAttribute('data-img-src');
     const title = item.getAttribute('data-img-title') || '';
     const caption = item.getAttribute('data-img-caption') || '';
-    const category = item.getAttribute('data-img-category') || 'KidsRun';
+    const category = item.getAttribute('data-img-category') || 'Kids Race';
 
     modalImg.style.opacity = '0.3';
     modalImg.src = src;

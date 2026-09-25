@@ -132,7 +132,7 @@ async function getNextInscriptionNumber() {
 async function saveInscription(data) {
   const id = data.id || (crypto.randomUUID ? crypto.randomUUID() : `insc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`);
   const raceId = data.raceId || 'race-2026-primavera';
-  const raceName = data.raceName || 'KidsRun 2026';
+  const raceName = data.raceName || 'Kids Race 2026';
   
   // Datos del tutor separados
   const tutorFirstName = (data.tutorFirstName || '').trim();
@@ -154,7 +154,7 @@ async function saveInscription(data) {
   // Asignar número de inscripción correlativo incremental
   const bibNumber = data.bibNumber || await getNextInscriptionNumber();
   const consentGiven = Boolean(data.consentGiven !== false);
-  const subject = (data.subject || (distance ? `Inscripción - ${distance}` : 'KidsRun')).trim();
+  const subject = (data.subject || (distance ? `Inscripción - ${distance}` : 'Kids Race')).trim();
   const message = (data.message || data.medicalNotes || '').trim();
   const paymentProof = (data.paymentProof || '').trim();
   const tutorRut = (data.tutorRut || data.rut || '').trim();

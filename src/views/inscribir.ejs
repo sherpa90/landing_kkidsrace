@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Inscripción Oficial | <%= activeRace ? activeRace.name : (content.brand?.name || 'KidsRun') %></title>
+  <title>Inscripción Oficial | <%= activeRace ? activeRace.name : (content.brand?.name || 'Kids Race') %></title>
   <link rel="icon" type="image/x-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
   <link rel="shortcut icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
   <link rel="apple-touch-icon" href="<%= content.brand?.faviconUrl || content.brand?.logoUrl || '/images/default-favicon.svg' %>">
@@ -127,12 +127,12 @@
 
       <div class="flex items-center gap-2">
         <% if (content.brand?.logoUrl) { %>
-        <img src="<%= content.brand.logoUrl %>" alt="<%= content.brand?.name || 'KidsRun' %>" class="h-7 w-auto object-contain max-w-[130px]">
+        <img src="<%= content.brand.logoUrl %>" alt="<%= content.brand?.name || 'Kids Race' %>" class="h-7 w-auto object-contain max-w-[130px]">
         <% } else { %>
         <div class="w-7 h-7 rounded-xl text-white flex items-center justify-center font-black text-xs shadow-sm theme-bg">
           <i data-lucide="medal" class="w-4 h-4"></i>
         </div>
-        <span class="text-xs font-black text-slate-900 dark:text-white tracking-tight uppercase"><%= content.brand?.name || 'KidsRun 2026' %></span>
+        <span class="text-xs font-black text-slate-900 dark:text-white tracking-tight uppercase"><%= content.brand?.name || 'Kids Race 2026' %></span>
         <% } %>
       </div>
     </div>
@@ -188,7 +188,7 @@
 
         <div>
           <h1 class="text-xl sm:text-2xl font-black tracking-tight text-white leading-tight">
-            <%= content.registrationForm?.heroTitle || (activeRace ? activeRace.name : 'KidsRun 2026 - Edición Oficial') %>
+            <%= content.registrationForm?.heroTitle || (activeRace ? activeRace.name : 'Kids Race 2026 - Edición Oficial') %>
           </h1>
           <% if (content.registrationForm?.heroSubtitle) { %>
           <p class="text-xs sm:text-sm text-white/85 font-medium mt-1">
@@ -246,7 +246,7 @@
     <!-- FORMULARIO PRINCIPAL -->
     <form id="registration-form" class="space-y-5" novalidate>
       <input type="hidden" name="raceId" value="<%= activeRace ? activeRace.id : 'race-2026-primavera' %>">
-      <input type="hidden" name="raceName" value="<%= activeRace ? activeRace.name : 'KidsRun 2026' %>">
+      <input type="hidden" name="raceName" value="<%= activeRace ? activeRace.name : 'Kids Race 2026' %>">
       <input type="hidden" id="paymentProofUrl" name="paymentProof" value="">
       <input type="hidden" id="csrfTokenField" name="csrfToken" value="<%= csrfToken %>">
       <!-- Honeypot anti-bots -->
@@ -646,7 +646,7 @@
 
   <!-- PIE DE PÁGINA MÓVIL DISCRETO -->
   <footer class="py-6 text-center text-xs text-slate-400 dark:text-gray-600 border-t border-slate-200 dark:border-gray-800/80">
-    <p><%= content.brand?.name || 'KidsRun 2026' %> • Evento Deportivo Familiar Seguro</p>
+    <p><%= content.brand?.name || 'Kids Race 2026' %> • Evento Deportivo Familiar Seguro</p>
   </footer>
 
   <!-- SCRIPT INTERACTIVO CLIENTE -->
@@ -1274,13 +1274,13 @@
 
         ctx.fillStyle = '#64748b';
         ctx.font = '11px -apple-system, sans-serif';
-        ctx.fillText('KidsRun • Evento Deportivo Familiar Seguro • https://kkidsrace.cl', width / 2, height - 26);
+        ctx.fillText('Kids Race • Evento Deportivo Familiar Seguro • https://kkidsrace.cl', width / 2, height - 26);
 
         // Disparar descarga automática
         const dataUrl = canvas.toDataURL('image/png');
         const link = document.createElement('a');
         const firstBib = children[0]?.inscriptionNumber || children[0]?.bibNumber || 'inscripcion';
-        link.download = `comprobante-kidsrun-${firstBib}.png`;
+        link.download = `comprobante-kidsrace-${firstBib}.png`;
         link.href = dataUrl;
         document.body.appendChild(link);
         link.click();
@@ -1458,7 +1458,7 @@
                 children: responseChildren,
                 tutorName: payload.name,
                 tutorRut: tutorRutVal,
-                raceName: payload.raceName || 'KidsRun 2026'
+                raceName: payload.raceName || 'Kids Race 2026'
               };
 
               // Poblar lista de hijos con su Número de Inscripción correlativo en el cuadro de éxito
@@ -1507,7 +1507,7 @@
               if (btnShare) {
                 btnShare.addEventListener('click', () => {
                   const names = children.map(c => c.kidName).join(' y ');
-                  const text = encodeURIComponent(`¡Listo! Inscribí a ${names} en ${payload.raceName || 'KidsRun 2026'}. N° Inscripción confirmado. ¡Nos vemos en la meta! 🏅🏃‍♂️ ${window.location.origin}`);
+                  const text = encodeURIComponent(`¡Listo! Inscribí a ${names} en ${payload.raceName || 'Kids Race 2026'}. N° Inscripción confirmado. ¡Nos vemos en la meta! 🏅🏃‍♂️ ${window.location.origin}`);
                   window.open(`https://api.whatsapp.com/send?text=${text}`, '_blank');
                 });
               }

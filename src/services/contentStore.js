@@ -96,7 +96,7 @@ function addLead(leadData) {
     const newLead = {
       id: leadData.id || (crypto.randomUUID ? crypto.randomUUID() : `insc_${Date.now()}_${Math.random().toString(36).substring(2, 7)}`),
       raceId: leadData.raceId || (activeRace ? activeRace.id : 'race-2026-primavera'),
-      raceName: leadData.raceName || (activeRace ? activeRace.name : 'KidsRun 2026'),
+      raceName: leadData.raceName || (activeRace ? activeRace.name : 'Kids Race 2026'),
       // Datos del tutor (organizados por nombre y apellido)
       tutorFirstName: (leadData.tutorFirstName || '').trim(),
       tutorLastName: (leadData.tutorLastName || '').trim(),
@@ -114,7 +114,7 @@ function addLead(leadData) {
       emergencyContact: (leadData.emergencyContact || leadData.phone || '').trim(),
       medicalNotes: (leadData.medicalNotes || leadData.message || '').trim(),
       message: (leadData.message || leadData.medicalNotes || '').trim(),
-      subject: (leadData.subject || `Inscripción - ${leadData.distance || 'KidsRun'}`).trim(),
+      subject: (leadData.subject || `Inscripción - ${leadData.distance || 'Kids Race'}`).trim(),
       paymentProof: (leadData.paymentProof || '').trim(),
       consentGiven: Boolean(leadData.consentGiven !== false), // Consentimiento de tutor legal
       createdAt: new Date().toISOString(),
@@ -179,7 +179,7 @@ function saveRace(raceData) {
     }
     races.unshift({
       id,
-      name: raceData.name || 'Nueva Corrida KidsRun',
+      name: raceData.name || 'Nueva Corrida Kids Race',
       year: new Date(raceData.date || Date.now()).getFullYear(),
       date: raceData.date || new Date().toISOString(),
       dateDisplay: raceData.dateDisplay || '',
@@ -324,7 +324,7 @@ function deleteLeadsBulk(ids) {
 // Colores corporativos: Rojo (#ef4444), Verde (#10b981), Amarillo (#facc15)
 const COLOR_THEMES = {
   blue_sport: {
-    name: 'Azul Deportivo, Amarillo y Rojo (KidsRun Oficial)',
+    name: 'Azul Deportivo, Amarillo y Rojo (Kids Race Oficial)',
     primary: 'blue-600',
     primaryHex: '#1d4ed8',
     secondaryHex: '#facc15',
