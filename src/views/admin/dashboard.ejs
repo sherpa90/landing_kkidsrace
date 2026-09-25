@@ -205,6 +205,14 @@
           <span>Circuitos & Edades</span>
         </button>
 
+        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="registration-form">
+          <div class="flex items-center gap-2.5">
+            <i data-lucide="file-text" class="w-4 h-4 text-emerald-400"></i>
+            <span>📝 Formulario /inscribir</span>
+          </div>
+          <span class="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded-full font-bold">Página</span>
+        </button>
+
         <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="schedule">
           <div class="flex items-center gap-2.5">
             <i data-lucide="calendar-clock" class="w-4 h-4 text-blue-400"></i>
@@ -1120,6 +1128,284 @@
                 class="w-full sm:w-auto px-6 py-2.5 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
                 <i data-lucide="save" class="w-4 h-4"></i>
                 <span>Guardar Circuitos</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+
+        <!-- PESTAÑA: FORMULARIO DE INSCRIPCIÓN /inscribir -->
+        <div id="tab-registration-form" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800 space-y-6">
+
+            <!-- Encabezado -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-800">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                  <i data-lucide="file-text" class="w-5 h-5 text-emerald-400"></i>
+                  Editor del Formulario de Inscripción (/inscribir)
+                </h2>
+                <p class="text-xs text-gray-400 mt-1">Personaliza todos los textos, títulos, placeholders, tarjetas de confianza y mensajes del proceso de inscripción.</p>
+              </div>
+              <div class="flex items-center gap-2">
+                <a href="/inscribir" target="_blank"
+                  class="shrink-0 px-3.5 py-2 rounded-xl text-xs font-bold text-emerald-400 hover:text-white bg-emerald-950/40 hover:bg-emerald-900 border border-emerald-500/30 transition-all flex items-center gap-1.5 cursor-pointer">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                  <span>Ver Página /inscribir</span>
+                </a>
+                <button type="button" id="btn-save-reg-form-top"
+                  class="shrink-0 px-4 py-2 rounded-xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/30 active:scale-95 transition-all flex items-center gap-1.5 cursor-pointer">
+                  <i data-lucide="save" class="w-3.5 h-3.5"></i>
+                  <span>Guardar</span>
+                </button>
+              </div>
+            </div>
+
+            <% const rf = content.registrationForm || {}; %>
+
+            <!-- SECCIÓN 1: CABECERA Y HERO -->
+            <div class="p-5 rounded-2xl bg-gray-900/50 border border-gray-800 space-y-4">
+              <div class="flex items-center gap-2 pb-2 border-b border-gray-800">
+                <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+                <h3 class="text-sm font-bold text-white">1. Cabecera y Hero del Formulario</h3>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título Principal del Hero</label>
+                  <input type="text" id="input-reg-heroTitle" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.heroTitle || 'Inscripción Oficial' %>" placeholder="Inscripción Oficial">
+                  <span class="text-[10px] text-gray-500 mt-1 block">Si se deja vacío, tomará el nombre de la corrida activa.</span>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Subtítulo / Bajada del Hero</label>
+                  <input type="text" id="input-reg-heroSubtitle" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.heroSubtitle || 'Asegura el cupo y kit oficial de tu pequeño/a corredor/a' %>" placeholder="Asegura el cupo...">
+                </div>
+              </div>
+            </div>
+
+            <!-- SECCIÓN 2: INSIGNIAS DE CONFIANZA (3 TARJETAS) -->
+            <div class="p-5 rounded-2xl bg-gray-900/50 border border-gray-800 space-y-4">
+              <div class="flex items-center gap-2 pb-2 border-b border-gray-800">
+                <i data-lucide="shield-check" class="w-4 h-4 text-emerald-400"></i>
+                <h3 class="text-sm font-bold text-white">2. Tarjetas de Confianza (Beneficios Móvil)</h3>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <!-- Tarjeta 1 -->
+                <div class="p-3.5 rounded-xl bg-gray-950 border border-gray-800 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-300">Tarjeta 1</span>
+                    <input type="text" id="input-reg-badge1Icon" class="w-24 bg-gray-900 border border-gray-800 rounded-lg px-2 py-1 text-[11px] text-gray-300 font-mono" value="<%= rf.badge1Icon || 'award' %>" placeholder="award">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Título</label>
+                    <input type="text" id="input-reg-badge1Text" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-white" value="<%= rf.badge1Text || 'Medalla Finisher' %>">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Subtítulo</label>
+                    <input type="text" id="input-reg-badge1Sub" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-white" value="<%= rf.badge1Sub || '100% garantizada' %>">
+                  </div>
+                </div>
+                <!-- Tarjeta 2 -->
+                <div class="p-3.5 rounded-xl bg-gray-950 border border-gray-800 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-300">Tarjeta 2</span>
+                    <input type="text" id="input-reg-badge2Icon" class="w-24 bg-gray-900 border border-gray-800 rounded-lg px-2 py-1 text-[11px] text-gray-300 font-mono" value="<%= rf.badge2Icon || 'shield-check' %>" placeholder="shield-check">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Título</label>
+                    <input type="text" id="input-reg-badge2Text" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-white" value="<%= rf.badge2Text || 'Circuito Seguro' %>">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Subtítulo</label>
+                    <input type="text" id="input-reg-badge2Sub" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-white" value="<%= rf.badge2Sub || '100% cerrado' %>">
+                  </div>
+                </div>
+                <!-- Tarjeta 3 -->
+                <div class="p-3.5 rounded-xl bg-gray-950 border border-gray-800 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-slate-300">Tarjeta 3</span>
+                    <input type="text" id="input-reg-badge3Icon" class="w-24 bg-gray-900 border border-gray-800 rounded-lg px-2 py-1 text-[11px] text-gray-300 font-mono" value="<%= rf.badge3Icon || 'shirt' %>" placeholder="shirt">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Título</label>
+                    <input type="text" id="input-reg-badge3Text" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-white" value="<%= rf.badge3Text || 'Polera Oficial' %>">
+                  </div>
+                  <div>
+                    <label class="block text-[11px] text-gray-400 mb-1">Subtítulo</label>
+                    <input type="text" id="input-reg-badge3Sub" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-white" value="<%= rf.badge3Sub || 'Incluida en Kit' %>">
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECCIÓN 3: PASO 1 - CIRCUITOS -->
+            <div class="p-5 rounded-2xl bg-gray-900/50 border border-gray-800 space-y-4">
+              <div class="flex items-center justify-between pb-2 border-b border-gray-800">
+                <div class="flex items-center gap-2">
+                  <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center">1</span>
+                  <h3 class="text-sm font-bold text-white">Paso 1: Selección de Circuito</h3>
+                </div>
+                <span class="text-[11px] text-emerald-400 font-medium">Circuitos administrables en tab &ldquo;Circuitos & Edades&rdquo;</span>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título del Paso 1</label>
+                  <input type="text" id="input-reg-step1Title" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step1Title || 'Selecciona el Circuito' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto de Ayuda / Hint</label>
+                  <input type="text" id="input-reg-step1Hint" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step1Hint || 'Por edad sugerida' %>">
+                </div>
+              </div>
+            </div>
+
+            <!-- SECCIÓN 4: PASO 2 - DATOS DEL NIÑO & MULTI-HIJO -->
+            <div class="p-5 rounded-2xl bg-gray-900/50 border border-gray-800 space-y-4">
+              <div class="flex items-center gap-2 pb-2 border-b border-gray-800">
+                <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center">2</span>
+                <h3 class="text-sm font-bold text-white">Paso 2: Datos del Pequeño / Pupilo & Multi-Hijo</h3>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título del Paso 2</label>
+                  <input type="text" id="input-reg-step2Title" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step2Title || 'Datos del Pequeño/a' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Etiqueta Nombre / Apodo</label>
+                  <input type="text" id="input-reg-step2KidNameLabel" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step2KidNameLabel || 'Nombre o Apodo *' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Placeholder Nombre</label>
+                  <input type="text" id="input-reg-step2KidNamePlaceholder" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step2KidNamePlaceholder || 'Ej: Mateo o Sofi' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto aclaratorio bajo Nombre</label>
+                  <input type="text" id="input-reg-step2KidNameHint" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step2KidNameHint || 'Se imprimirá en su número oficial de carrera.' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Etiqueta Edad</label>
+                  <input type="text" id="input-reg-step2KidAgeLabel" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step2KidAgeLabel || 'Edad *' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Etiqueta Alergias / Médicas</label>
+                  <input type="text" id="input-reg-step2MedicalLabel" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step2MedicalLabel || 'Alergias o notas médicas (Opcional)' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Placeholder Alergias</label>
+                  <input type="text" id="input-reg-step2MedicalPlaceholder" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step2MedicalPlaceholder || 'Ej: Asma leve, alergia al maní...' %>">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto Botón Multi-Hijo (&ldquo;Agregar otro hijo/a&rdquo;)</label>
+                  <input type="text" id="input-reg-addChildButtonText" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.addChildButtonText || 'Agregar otro hijo/a' %>">
+                </div>
+              </div>
+            </div>
+
+            <!-- SECCIÓN 5: PASO 3 - DATOS DEL PADRE / TUTOR -->
+            <div class="p-5 rounded-2xl bg-gray-900/50 border border-gray-800 space-y-4">
+              <div class="flex items-center gap-2 pb-2 border-b border-gray-800">
+                <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center">3</span>
+                <h3 class="text-sm font-bold text-white">Paso 3: Datos del Padre / Tutor Legal</h3>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div class="lg:col-span-2">
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título del Paso 3</label>
+                  <input type="text" id="input-reg-step3Title" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step3Title || 'Datos del Padre / Tutor' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Etiqueta Nombre</label>
+                  <input type="text" id="input-reg-step3NameLabel" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step3NameLabel || 'Nombre Completo *' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Placeholder Nombre</label>
+                  <input type="text" id="input-reg-step3NamePlaceholder" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step3NamePlaceholder || 'Tu Nombre y Apellido' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Etiqueta RUT/DNI</label>
+                  <input type="text" id="input-reg-step3RutLabel" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step3RutLabel || 'RUT o DNI del Padre/Tutor *' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Placeholder RUT/DNI</label>
+                  <input type="text" id="input-reg-step3RutPlaceholder" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step3RutPlaceholder || 'Ej: 12.345.678-9' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Etiqueta Correo</label>
+                  <input type="text" id="input-reg-step3EmailLabel" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step3EmailLabel || 'Correo Electrónico *' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Placeholder Correo</label>
+                  <input type="text" id="input-reg-step3EmailPlaceholder" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step3EmailPlaceholder || 'tu@correo.com' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Etiqueta Teléfono</label>
+                  <input type="text" id="input-reg-step3PhoneLabel" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step3PhoneLabel || 'WhatsApp / Teléfono *' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Placeholder Teléfono</label>
+                  <input type="text" id="input-reg-step3PhonePlaceholder" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step3PhonePlaceholder || '+56 9 1234 5678' %>">
+                </div>
+              </div>
+            </div>
+
+            <!-- SECCIÓN 6: PASO 4 - COMPROBANTE DE PAGO -->
+            <div class="p-5 rounded-2xl bg-gray-900/50 border border-gray-800 space-y-4">
+              <div class="flex items-center gap-2 pb-2 border-b border-gray-800">
+                <span class="w-5 h-5 rounded-full bg-emerald-600 text-white text-[11px] font-bold flex items-center justify-center">4</span>
+                <h3 class="text-sm font-bold text-white">Paso 4: Comprobante de Pago</h3>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título del Paso 4</label>
+                  <input type="text" id="input-reg-step4Title" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step4Title || 'Comprobante de Pago' %>">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Badge Superior</label>
+                  <input type="text" id="input-reg-step4Badge" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.step4Badge || 'Acreditación Rápida' %>">
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Descripción de la Carga de Comprobante</label>
+                  <textarea id="input-reg-step4Description" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"><%= rf.step4Description || 'Adjunta la foto o captura de transferencia del kit de inscripción. Nuestro servidor la optimizará y guardará de forma permanente.' %></textarea>
+                </div>
+                <div class="sm:col-span-2">
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Aviso de Pago Pendiente / WhatsApp</label>
+                  <textarea id="input-reg-step4PaymentHint" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"><%= rf.step4PaymentHint || '¿No realizaste la transferencia aún? Puedes enviar la inscripción ahora y coordinar el pago por WhatsApp antes del cierre de cupos.' %></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- SECCIÓN 7: CONSENTIMIENTO, ENVÍO & MENSAJE DE ÉXITO -->
+            <div class="p-5 rounded-2xl bg-gray-900/50 border border-gray-800 space-y-4">
+              <div class="flex items-center gap-2 pb-2 border-b border-gray-800">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i>
+                <h3 class="text-sm font-bold text-white">Consentimiento Legal y Mensajes Finales</h3>
+              </div>
+              <div class="space-y-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto de Consentimiento Informado (Checkbox)</label>
+                  <textarea id="input-reg-consentText" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"><%= rf.consentText || 'Confirmo que soy padre/madre o tutor legal del pupilo/a, autorizo su participación en la corrida y confirmo que cuenta con aptitud física para la actividad deportiva.' %></textarea>
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto del Botón de Envío</label>
+                  <input type="text" id="input-reg-submitButtonText" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.submitButtonText || 'Confirmar Inscripción Oficial' %>">
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título del Mensaje de Éxito</label>
+                    <input type="text" id="input-reg-successTitle" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2.5 text-sm text-white focus:outline-none focus:border-emerald-500" value="<%= rf.successTitle || '¡Inscripción Exitosa!' %>">
+                  </div>
+                  <div>
+                    <label class="block text-xs font-semibold text-gray-300 mb-1.5">Texto Detalle del Éxito</label>
+                    <textarea id="input-reg-successText" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3.5 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"><%= rf.successText || 'Hemos reservado el cupo y kit oficial. Te contactaremos al correo y WhatsApp indicados con las instrucciones de acreditación y número de dorsal.' %></textarea>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Acciones al pie -->
+            <div class="flex items-center justify-end pt-4 border-t border-gray-800">
+              <button type="button" id="btn-save-reg-form"
+                class="w-full sm:w-auto px-6 py-2.5 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md shadow-emerald-600/30 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>Guardar Cambios del Formulario</span>
               </button>
             </div>
 

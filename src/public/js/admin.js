@@ -18,6 +18,7 @@ function initAllAdminModules() {
     ['Usuarios', initUsersManager],
     ['Cronograma', initScheduleManager],
     ['Circuitos', initCircuitsManager],
+    ['Formulario Inscripción', initRegistrationFormManager],
     ['Preguntas Frecuentes', initFaqsManager],
     ['Hero Preview', initHeroLivePreview],
     ['Pestaña Navegador', initBrowserTabLivePreview]
@@ -637,6 +638,47 @@ function collectCmsFormData() {
       badge: getVal('input-scheduleBadge') || 'HORARIOS Y ACTIVIDADES',
       title: getVal('input-scheduleTitle') || 'Cronograma de la Gran Jornada',
       subtitle: getVal('input-scheduleSubtitle') || 'Ven temprano para disfrutar de todas las sorpresas preparadas para la familia.'
+    },
+    // 15. Formulario de Inscripción (/inscribir)
+    registrationForm: {
+      heroTitle: getVal('input-reg-heroTitle'),
+      heroSubtitle: getVal('input-reg-heroSubtitle'),
+      step1Title: getVal('input-reg-step1Title'),
+      step1Hint: getVal('input-reg-step1Hint'),
+      step2Title: getVal('input-reg-step2Title'),
+      step2KidNameLabel: getVal('input-reg-step2KidNameLabel'),
+      step2KidNamePlaceholder: getVal('input-reg-step2KidNamePlaceholder'),
+      step2KidNameHint: getVal('input-reg-step2KidNameHint'),
+      step2KidAgeLabel: getVal('input-reg-step2KidAgeLabel'),
+      step2MedicalLabel: getVal('input-reg-step2MedicalLabel'),
+      step2MedicalPlaceholder: getVal('input-reg-step2MedicalPlaceholder'),
+      addChildButtonText: getVal('input-reg-addChildButtonText'),
+      step3Title: getVal('input-reg-step3Title'),
+      step3NameLabel: getVal('input-reg-step3NameLabel'),
+      step3NamePlaceholder: getVal('input-reg-step3NamePlaceholder'),
+      step3RutLabel: getVal('input-reg-step3RutLabel'),
+      step3RutPlaceholder: getVal('input-reg-step3RutPlaceholder'),
+      step3EmailLabel: getVal('input-reg-step3EmailLabel'),
+      step3EmailPlaceholder: getVal('input-reg-step3EmailPlaceholder'),
+      step3PhoneLabel: getVal('input-reg-step3PhoneLabel'),
+      step3PhonePlaceholder: getVal('input-reg-step3PhonePlaceholder'),
+      step4Title: getVal('input-reg-step4Title'),
+      step4Badge: getVal('input-reg-step4Badge'),
+      step4Description: getVal('input-reg-step4Description'),
+      step4PaymentHint: getVal('input-reg-step4PaymentHint'),
+      badge1Icon: getVal('input-reg-badge1Icon') || 'award',
+      badge1Text: getVal('input-reg-badge1Text'),
+      badge1Sub: getVal('input-reg-badge1Sub'),
+      badge2Icon: getVal('input-reg-badge2Icon') || 'shield-check',
+      badge2Text: getVal('input-reg-badge2Text'),
+      badge2Sub: getVal('input-reg-badge2Sub'),
+      badge3Icon: getVal('input-reg-badge3Icon') || 'shirt',
+      badge3Text: getVal('input-reg-badge3Text'),
+      badge3Sub: getVal('input-reg-badge3Sub'),
+      consentText: getVal('input-reg-consentText'),
+      submitButtonText: getVal('input-reg-submitButtonText'),
+      successTitle: getVal('input-reg-successTitle'),
+      successText: getVal('input-reg-successText')
     }
   };
 }
@@ -3215,4 +3257,17 @@ function initBrowserTabLivePreview() {
       if (previewFaviconImg) previewFaviconImg.src = url;
     });
   }
+}
+
+
+// 18. Gestor de Formulario de Inscripción (/inscribir)
+function initRegistrationFormManager() {
+  const triggerSave = () => {
+    const cmsSaveBtn = document.getElementById('btn-save-cms');
+    if (cmsSaveBtn) cmsSaveBtn.click();
+  };
+  const saveBtn = document.getElementById('btn-save-reg-form');
+  const saveBtnTop = document.getElementById('btn-save-reg-form-top');
+  if (saveBtn) saveBtn.addEventListener('click', triggerSave);
+  if (saveBtnTop) saveBtnTop.addEventListener('click', triggerSave);
 }

@@ -18,14 +18,21 @@ const uploadLimiter = rateLimit({
   message: 'Demasiados intentos de subida. Inténtalo nuevamente en 10 minutos.'
 });
 
-// Distancias permitidas (whitelist para evitar datos arbitrarios en BD)
-const ALLOWED_DISTANCES = [
-  '500 Metros (3-5 años)',
-  '1 Kilómetro (6-8 años)',
-  '2 Kilómetros (9-11 años)',
-  '3 Kilómetros (12-14 años)',
-  'Contacto General'
-];
+// Distancias permitidas: se construyen dinámicamente desde el CMS para evitar datos arbitrarios en BD
+function getAllowedDistances() {
+  const content = contentStore.getContent();
+  const dynamic = (content.categories || []).map(c => `${c.distance} (${c.badge})`);
+  // Agregar valores de respaldo fijos para robustez
+  const fallback = [
+    '500 Metros (3-5 años)',
+    '1 Kilómetro (6-8 años)',
+    '2 Kilómetros (9-11 años)',
+    '3 Kilómetros (12-14 años)',
+    'Contacto General'
+  ];
+  const all = new Set([...dynamic, ...fallback]);
+  return Array.from(all);
+}
 
 /**
  * Sanitiza un campo de texto: trunca a maxLen, elimina caracteres de control
@@ -341,39 +348,15 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
   const name            = sanitizeField(req.body.name, 100);
   const email           = sanitizeField(req.body.email, 254);
   const phone           = sanitizeField(req.body.phone, 30);
-  const kidName         = sanitizeField(req.body.kidName, 100);
   const emergencyContact = sanitizeField(req.body.emergencyContact, 30);
-  const medicalNotes    = sanitizeField(req.body.medicalNotes, 500);
   const tutorRut        = sanitizeField(req.body.tutorRut, 20);
   const paymentProof    = sanitizeField(req.body.paymentProof, 500);
   const consentGiven    = req.body.consentGiven;
-
-  // Validar distancia contra whitelist
-  const rawDistance = sanitizeField(req.body.distance, 100);
-  const distance = ALLOWED_DISTANCES.includes(rawDistance) ? rawDistance : null;
-
-  // Validar kidAge como entero en rango
-  const kidAge = parseInt(req.body.kidAge, 10);
-  const validKidAge = (!isNaN(kidAge) && kidAge >= 2 && kidAge <= 15) ? kidAge : null;
 
   if (!name || !email) {
     return res.status(400).json({
       success: false,
       error: 'Por favor ingresa tu Nombre (Padre/Tutor) y Correo Electrónico de contacto.'
-    });
-  }
-
-  if (!kidName) {
-    return res.status(400).json({
-      success: false,
-      error: 'Por favor ingresa el Nombre o Apodo deportivo de tu pupilo.'
-    });
-  }
-
-  if (!distance) {
-    return res.status(400).json({
-      success: false,
-      error: 'Por favor selecciona una distancia válida.'
     });
   }
 
@@ -418,52 +401,98 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
   const targetRaceId = raceId || (activeRace ? activeRace.id : 'race-2026-primavera');
   const targetRaceName = raceName || (activeRace ? activeRace.name : 'KidsRun 2026');
 
-  const result = await db.saveInscription({
-    raceId: targetRaceId,
-    raceName: targetRaceName,
-    name,
-    email,
-    phone,
-    tutorRut,
-    kidName,
-    kidAge: validKidAge,
-    distance,
-    emergencyContact: emergencyContact || phone,
-    medicalNotes,
-    paymentProof: paymentProof || '',
-    consentGiven: Boolean(consentGiven === 'true' || consentGiven === true || consentGiven === 'on'),
-    subject: `Inscripción ${distance} - Pupilo: ${kidName}`
-  });
+  const allowedDistances = getAllowedDistances();
 
-  if (result.success) {
-    // Despacho asíncrono de correo de confirmación al usuario (Resend)
-    try {
-      emailService.sendInscriptionConfirmation({
-        raceName: targetRaceName,
-        name,
-        email,
-        kidName,
-        kidAge: validKidAge,
-        distance,
-        tutorRut
-      }).catch(err => {
-        console.warn('[emailService] No se pudo enviar confirmación a ' + email + ':', err.message);
-      });
-    } catch (mailErr) {
-      console.warn('[emailService] Excepción disparando correo:', mailErr.message);
+  // ── Multi-child: si viene array de children, procesar cada uno ──────────────
+  let childrenArray = [];
+  if (Array.isArray(req.body.children) && req.body.children.length > 0) {
+    childrenArray = req.body.children;
+  } else {
+    // Compatibilidad hacia atrás: un solo hijo con campos legacy
+    childrenArray = [{
+      kidName: req.body.kidName,
+      kidAge: req.body.kidAge,
+      distance: req.body.distance,
+      medicalNotes: req.body.medicalNotes
+    }];
+  }
+
+  if (childrenArray.length === 0) {
+    return res.status(400).json({ success: false, error: 'Debes ingresar al menos un hijo/a.' });
+  }
+
+  const results = [];
+  for (const child of childrenArray) {
+    const kidName      = sanitizeField(child.kidName, 100);
+    const medicalNotes = sanitizeField(child.medicalNotes, 500);
+    const rawDistance  = sanitizeField(child.distance, 100);
+    const distance     = allowedDistances.includes(rawDistance) ? rawDistance : null;
+    const kidAge       = parseInt(child.kidAge, 10);
+    const validKidAge  = (!isNaN(kidAge) && kidAge >= 2 && kidAge <= 15) ? kidAge : null;
+
+    if (!kidName) {
+      return res.status(400).json({ success: false, error: 'Por favor ingresa el Nombre o Apodo deportivo de tu pupilo.' });
+    }
+    if (!distance) {
+      return res.status(400).json({ success: false, error: `Distancia no válida para el participante "${kidName}". Selecciona un circuito válido.` });
     }
 
+    const result = await db.saveInscription({
+      raceId: targetRaceId,
+      raceName: targetRaceName,
+      name,
+      email,
+      phone,
+      tutorRut,
+      kidName,
+      kidAge: validKidAge,
+      distance,
+      emergencyContact: emergencyContact || phone,
+      medicalNotes,
+      paymentProof: paymentProof || '',
+      consentGiven: Boolean(consentGiven === 'true' || consentGiven === true || consentGiven === 'on'),
+      subject: `Inscripción ${distance} - Pupilo: ${kidName}`
+    });
+
+    results.push({ kidName, distance, success: result.success });
+
+    if (result.success) {
+      // Despacho asíncrono de correo de confirmación al usuario (Resend)
+      try {
+        emailService.sendInscriptionConfirmation({
+          raceName: targetRaceName,
+          name,
+          email,
+          kidName,
+          kidAge: validKidAge,
+          distance,
+          tutorRut
+        }).catch(err => {
+          console.warn('[emailService] No se pudo enviar confirmación a ' + email + ':', err.message);
+        });
+      } catch (mailErr) {
+        console.warn('[emailService] Excepción disparando correo:', mailErr.message);
+      }
+    }
+  }
+
+  const allOk = results.every(r => r.success);
+  if (allOk) {
     return res.json({
       success: true,
-      message: '¡Inscripción confirmada con éxito! Sus datos están debidamente protegidos y se ha reservado el cupo y kit oficial.',
-      source: result.source
+      count: results.length,
+      message: results.length > 1
+        ? `¡${results.length} inscripciones confirmadas con éxito! Sus datos están debidamente protegidos y se han reservado los cupos y kits oficiales.`
+        : '¡Inscripción confirmada con éxito! Sus datos están debidamente protegidos y se ha reservado el cupo y kit oficial.',
+      children: results
     });
   } else {
     return res.status(500).json({
       success: false,
-      error: 'Ocurrió un error al procesar la inscripción. Por favor inténtalo nuevamente.'
+      error: 'Ocurrió un error al procesar una o más inscripciones. Por favor inténtalo nuevamente.'
     });
   }
 });
 
 module.exports = router;
+
