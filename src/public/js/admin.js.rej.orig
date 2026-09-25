@@ -1,0 +1,18 @@
+@@ -1718,13 +1718,13 @@
+     if (matchParam && matchParam[1]) return matchParam[1].toUpperCase();
+ 
+-    // 2. Caso formato directo con o sin puntos (ej: 12.345.678-9 o 12345678-9 o 123456789)
+-    const matchDirect = clean.match(/ ([0-9]{1,2}(?:\.?[0-9]{3}){2}-?[0-9kK]) /);
++    // 2. Caso formato directo con o sin puntos
++    const matchDirect = clean.match(/(?:^|[^0-9])([0-9]{1,2}(?:\.?[0-9]{3}){2}-?[0-9kK])(?:$|[^0-9a-zA-Z])/);
+     if (matchDirect && matchDirect[1]) return matchDirect[1].toUpperCase();
+ 
+-    // 3. Caso números de 8 o 9 dígitos continuos
+-    const matchRaw = clean.match(/ ([0-9]{7,8}[0-9kK]) /);
++    // 3. Caso números continuos
++    const matchRaw = clean.match(/(?:^|[^0-9])([0-9]{7,8}[0-9kK])(?:$|[^0-9a-zA-Z])/);
+     if (matchRaw && matchRaw[1]) {
+       const r = matchRaw[1].toUpperCase();
+       return r.slice(0, -1) + '-' + r.slice(-1);
+     }
+ 

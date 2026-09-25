@@ -1712,22 +1712,22 @@ function initRutScanner() {
     if (!text) return null;
     const clean = text.trim();
 
-    // 1. Caso parámetro RUN o RUT en URL/texto
     const matchParam = clean.match(/(?:RUN|RUT|run|rut)[=:\s]*([0-9]{7,8}-?[0-9kK])/);
     if (matchParam && matchParam[1]) return matchParam[1].toUpperCase();
 
-    // 2. Caso formato directo con o sin puntos (ej: 12.345.678-9 o 12345678-9 o 123456789)
-    const matchDirect = clean.match(/([0-9]{1,2}(?:\.?[0-9]{3}){2}-?[0-9kK])/);
+    const matchDirect = clean.match(/(?:^|[^0-9])([0-9]{1,2}(?:\.?[0-9]{3}){2}-?[0-9kK])(?:$|[^0-9a-zA-Z])/);
     if (matchDirect && matchDirect[1]) return matchDirect[1].toUpperCase();
 
-    // 3. Caso números de 8 o 9 dígitos continuos
-    const matchRaw = clean.match(/([0-9]{7,8}[0-9kK])/);
+    const matchRaw = clean.match(/(?:^|[^0-9])([0-9]{7,8}[0-9kK])(?:$|[^0-9a-zA-Z])/);
     if (matchRaw && matchRaw[1]) {
       const r = matchRaw[1].toUpperCase();
       return r.slice(0, -1) + '-' + r.slice(-1);
     }
 
-    return clean;
+    return null;
+  }
+
+    return null;
   }
 
   // Reproducir un sonido sutil de confirmación (bip) usando Web Audio API
@@ -1892,6 +1892,13 @@ function initRutScanner() {
 
       const config = {
         fps: 15,
+        formatsToSupport: [ 
+            Html5QrcodeSupportedFormats.QR_CODE, 
+            Html5QrcodeSupportedFormats.PDF_417, 
+            Html5QrcodeSupportedFormats.CODE_128, 
+            Html5QrcodeSupportedFormats.CODE_39, 
+            Html5QrcodeSupportedFormats.EAN_13 
+        ],
         qrbox: (viewfinderWidth, viewfinderHeight) => {
           return {
             width: Math.floor(viewfinderWidth * 0.85),
