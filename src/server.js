@@ -28,6 +28,7 @@ app.use(
           "'unsafe-inline'",
           "https://cdn.tailwindcss.com",
           "https://unpkg.com",
+          "https://cdn.jsdelivr.net",
           "https://challenges.cloudflare.com"
         ],
         styleSrc: [

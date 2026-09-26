@@ -26,7 +26,8 @@ function initAllAdminModules() {
     ['Footer y Redes', initFooterManager],
     ['Preguntas Frecuentes', initFaqsManager],
     ['Hero Preview', initHeroLivePreview],
-    ['Pestaña Navegador', initBrowserTabLivePreview]
+    ['Pestaña Navegador', initBrowserTabLivePreview],
+    ['Reportes & BI', initReportsManager]
   ];
 
   modules.forEach(([name, fn]) => {
@@ -84,7 +85,7 @@ function initAdminTabs() {
   const fullscreenText = document.getElementById('text-fullscreen-leads');
 
   // Tabs que deben ocultar el sidebar para maximizar el espacio
-  const FULLWIDTH_TABS = new Set(['leads']);
+  const FULLWIDTH_TABS = new Set(['leads', 'reports']);
   let isLeadsFullscreen = false;
 
   function updateFullscreenUI(active) {
@@ -157,11 +158,14 @@ function initAdminTabs() {
       if (!targetTab) return;
 
       tabButtons.forEach(b => {
-        b.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
-        b.classList.add('text-gray-400', 'hover:text-white', 'hover:bg-gray-900');
+        if (b.getAttribute('data-tab') === targetTab) {
+          b.classList.add('bg-blue-600', 'text-white', 'shadow-md');
+          b.classList.remove('text-gray-400', 'text-slate-300', 'hover:bg-gray-900', 'hover:bg-slate-900');
+        } else {
+          b.classList.remove('bg-blue-600', 'text-white', 'shadow-md');
+          b.classList.add('text-gray-400');
+        }
       });
-      btn.classList.add('bg-blue-600', 'text-white', 'shadow-md');
-      btn.classList.remove('text-gray-400', 'hover:text-white', 'hover:bg-gray-900');
 
       tabPanes.forEach(pane => {
         if (pane.id === `tab-${targetTab}`) {
@@ -176,6 +180,15 @@ function initAdminTabs() {
       // Si se abre la pestaña de usuarios, refrescar la lista de usuarios inmediatamente
       if (targetTab === 'users' && typeof window._loadUsersList === 'function') {
         window._loadUsersList();
+      }
+
+      // Si se abre la pestaña de reportes, redibujar los gráficos con dimensiones calculadas correctamente
+      if (targetTab === 'reports' && typeof window._renderReportsDashboard === 'function') {
+        setTimeout(() => {
+          try {
+            window._renderReportsDashboard();
+          } catch (_) {}
+        }, 50);
       }
 
       // Controlar visibilidad del sidebar según el tab activo
@@ -3827,3 +3840,563 @@ function initToggleVisuals() {
     if (Object.keys(TOGGLE_CONFIG).some(cls => inp.classList.contains(cls))) applyToggleState(inp);
   });
 }
+
+// ============================================================
+// MÓDULO: REPORTES & ESTADÍSTICAS (BI DASHBOARD)
+// ============================================================
+function initReportsManager() {
+  const dataEl = document.getElementById('reports-embedded-data');
+  if (!dataEl) return;
+
+  let reportsData = { races: [], activeRaceId: '', leads: [] };
+  try {
+    reportsData = JSON.parse(dataEl.textContent);
+  } catch (err) {
+    console.error('[Reports BI] Error al parsear datos embebidos:', err);
+    return;
+  }
+
+  const raceFilter = document.getElementById('reports-race-filter');
+  const btnExportCsv = document.getElementById('btn-export-sizes-csv');
+  const btnPrintReports = document.getElementById('btn-print-reports');
+
+  // Instancias de Chart.js para destrucción y recreación limpia
+  let chartShirtSizes = null;
+  let chartCircuits = null;
+  let chartAges = null;
+  let chartTimeline = null;
+
+  // Configuración global de tema oscuro para Chart.js
+  if (window.Chart) {
+    Chart.defaults.color = '#94a3b8';
+    Chart.defaults.font.family = 'ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif';
+    if (Chart.defaults.plugins && Chart.defaults.plugins.tooltip) {
+      Chart.defaults.plugins.tooltip.backgroundColor = '#0f172a';
+      Chart.defaults.plugins.tooltip.borderColor = '#334155';
+      Chart.defaults.plugins.tooltip.borderWidth = 1;
+      Chart.defaults.plugins.tooltip.titleColor = '#f8fafc';
+      Chart.defaults.plugins.tooltip.bodyColor = '#cbd5e1';
+      Chart.defaults.plugins.tooltip.padding = 10;
+      Chart.defaults.plugins.tooltip.cornerRadius = 10;
+    }
+  }
+
+  function getFilteredData() {
+    const selectedRaceId = raceFilter ? raceFilter.value : 'all';
+    let filteredLeads = reportsData.leads || [];
+    let selectedRace = null;
+
+    if (selectedRaceId !== 'all') {
+      selectedRace = (reportsData.races || []).find(r => r.id === selectedRaceId);
+      filteredLeads = filteredLeads.filter(l => {
+        if (l.raceId && l.raceId === selectedRaceId) return true;
+        if (selectedRace && l.raceName && l.raceName === selectedRace.name) return true;
+        return false;
+      });
+    }
+
+    return { selectedRaceId, selectedRace, leads: filteredLeads };
+  }
+
+  function renderReportsDashboard() {
+    const { selectedRace, leads } = getFilteredData();
+    const total = leads.length;
+
+    // 1. KPI: Total Inscritos & Capacidad
+    const kpiTotalParticipants = document.getElementById('kpi-total-participants');
+    const kpiCapacityText = document.getElementById('kpi-capacity-text');
+    const kpiCapacitySlots = document.getElementById('kpi-capacity-slots');
+    const kpiCapacityBar = document.getElementById('kpi-capacity-bar');
+
+    if (kpiTotalParticipants) kpiTotalParticipants.textContent = total;
+
+    const maxCapacity = selectedRace ? (parseInt(selectedRace.maxParticipants, 10) || 600) : 600;
+    const capacityPct = maxCapacity > 0 ? Math.min(100, Math.round((total / maxCapacity) * 100)) : 0;
+
+    if (kpiCapacityText) kpiCapacityText.textContent = `${capacityPct}% capacidad`;
+    if (kpiCapacitySlots) kpiCapacitySlots.textContent = `${total} / ${maxCapacity}`;
+    if (kpiCapacityBar) kpiCapacityBar.style.width = `${capacityPct}%`;
+
+    // 2. Conteo de Kits de Poleras por Tallas
+    const STANDARD_SIZES = ['2', '4', '8', '12', '16', 'S', 'M'];
+    const sizeCounts = { '2': 0, '4': 0, '8': 0, '12': 0, '16': 0, 'S': 0, 'M': 0, 'PENDIENTE': 0 };
+    let withDefinedSize = 0;
+
+    leads.forEach(l => {
+      const sz = (l.shirtSize || '').trim().toUpperCase();
+      if (STANDARD_SIZES.includes(sz)) {
+        sizeCounts[sz]++;
+        withDefinedSize++;
+      } else {
+        sizeCounts['PENDIENTE']++;
+      }
+    });
+
+    const pendingSize = sizeCounts['PENDIENTE'];
+
+    const kpiTotalKits = document.getElementById('kpi-total-kits');
+    const kpiKitsWithSize = document.getElementById('kpi-kits-with-size');
+    const kpiKitsPending = document.getElementById('kpi-kits-pending');
+
+    if (kpiTotalKits) kpiTotalKits.textContent = total;
+    if (kpiKitsWithSize) kpiKitsWithSize.textContent = `${withDefinedSize} con talla definida`;
+    if (kpiKitsPending) kpiKitsPending.textContent = `${pendingSize} pendientes`;
+
+    // Renderizar tarjetas de tallas en la grilla superior
+    const gridShirtSizesCards = document.getElementById('grid-shirt-sizes-cards');
+    if (gridShirtSizesCards) {
+      gridShirtSizesCards.innerHTML = '';
+      const allSizesToDisplay = [...STANDARD_SIZES, 'PENDIENTE'];
+      
+      allSizesToDisplay.forEach(sizeKey => {
+        const count = sizeCounts[sizeKey] || 0;
+        const pct = total > 0 ? ((count / total) * 100).toFixed(1) : '0.0';
+        const isPending = sizeKey === 'PENDIENTE';
+
+        const card = document.createElement('div');
+        card.className = `p-3.5 rounded-2xl border text-center transition-all ${
+          isPending 
+            ? 'bg-amber-950/20 border-amber-500/30 text-amber-300' 
+            : 'bg-slate-950/70 border-slate-800 hover:border-slate-700 text-white'
+        }`;
+        card.innerHTML = `
+          <div class="text-[10px] font-black uppercase tracking-wider ${isPending ? 'text-amber-400' : 'text-slate-400'}">
+            ${isPending ? 'Pendiente' : `Talla ${sizeKey}`}
+          </div>
+          <div class="text-2xl font-black mt-1 font-mono ${isPending ? 'text-amber-400' : 'text-white'}">
+            ${count}
+          </div>
+          <div class="text-[10px] font-bold mt-1 ${isPending ? 'text-amber-500' : 'text-slate-500'}">
+            ${pct}%
+          </div>
+        `;
+        gridShirtSizesCards.appendChild(card);
+      });
+    }
+
+    // Renderizar tabla resumen para proveedor
+    const tableSizesBody = document.getElementById('table-shirt-sizes-body');
+    const tableSizesTotalKits = document.getElementById('table-shirt-sizes-total-kits');
+    if (tableSizesBody) {
+      tableSizesBody.innerHTML = '';
+      const sizeKeysForTable = [...STANDARD_SIZES, 'PENDIENTE'];
+      sizeKeysForTable.forEach(sizeKey => {
+        const count = sizeCounts[sizeKey] || 0;
+        const pct = total > 0 ? ((count / total) * 100).toFixed(1) : '0.0';
+        const isPending = sizeKey === 'PENDIENTE';
+
+        const tr = document.createElement('tr');
+        tr.className = 'hover:bg-slate-800/40 transition-colors';
+        tr.innerHTML = `
+          <td class="py-2.5 flex items-center gap-2">
+            <span class="w-6 h-6 rounded-lg ${isPending ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30' : 'bg-blue-500/20 text-blue-400 border border-blue-500/30'} flex items-center justify-center font-bold font-mono text-[10px]">
+              ${isPending ? '?' : sizeKey}
+            </span>
+            <span class="font-bold text-xs ${isPending ? 'text-amber-300' : 'text-slate-200'}">
+              ${isPending ? 'Sin Especificar / Pendiente' : `Talla ${sizeKey}`}
+            </span>
+          </td>
+          <td class="py-2.5 text-center font-mono font-bold ${isPending ? 'text-amber-400' : 'text-white'}">
+            ${count}
+          </td>
+          <td class="py-2.5 text-right">
+            <div class="flex items-center justify-end gap-2 font-mono text-[11px] text-slate-400">
+              <span>${pct}%</span>
+              <div class="w-12 bg-slate-800 h-1.5 rounded-full overflow-hidden hidden sm:block">
+                <div class="${isPending ? 'bg-amber-400' : 'bg-blue-500'} h-full rounded-full" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          </td>
+        `;
+        tableSizesBody.appendChild(tr);
+      });
+    }
+    if (tableSizesTotalKits) tableSizesTotalKits.textContent = total;
+
+    // 3. Edades de Participantes
+    const validAges = leads
+      .map(l => (typeof l.kidAge === 'number' ? l.kidAge : parseInt(l.kidAge, 10)))
+      .filter(a => !isNaN(a) && a >= 1 && a <= 20);
+
+    const kpiAgeRange = document.getElementById('kpi-age-range');
+    const kpiAvgAge = document.getElementById('kpi-avg-age');
+    const kpiTotalKidsWithAge = document.getElementById('kpi-total-kids-with-age');
+
+    if (validAges.length > 0) {
+      const minAge = Math.min(...validAges);
+      const maxAge = Math.max(...validAges);
+      const sum = validAges.reduce((acc, cur) => acc + cur, 0);
+      const avg = (sum / validAges.length).toFixed(1);
+
+      if (kpiAgeRange) kpiAgeRange.textContent = `${minAge} a ${maxAge} años`;
+      if (kpiAvgAge) kpiAvgAge.textContent = `Promedio: ${avg} años`;
+      if (kpiTotalKidsWithAge) kpiTotalKidsWithAge.textContent = `${validAges.length} registrados`;
+
+      // Moda de edad
+      const ageFreq = {};
+      validAges.forEach(a => { ageFreq[a] = (ageFreq[a] || 0) + 1; });
+      let modeAge = validAges[0];
+      let maxCount = 0;
+      Object.entries(ageFreq).forEach(([age, cnt]) => {
+        if (cnt > maxCount) {
+          maxCount = cnt;
+          modeAge = age;
+        }
+      });
+
+      const elYoungest = document.getElementById('ages-summary-youngest');
+      const elMode = document.getElementById('ages-summary-mode');
+      const elOldest = document.getElementById('ages-summary-oldest');
+      if (elYoungest) elYoungest.textContent = `Más pequeño: ${minAge} años`;
+      if (elMode) elMode.textContent = `Edad más repetida: ${modeAge} años (${maxCount} niños)`;
+      if (elOldest) elOldest.textContent = `Mayor: ${maxAge} años`;
+    } else {
+      if (kpiAgeRange) kpiAgeRange.textContent = 'Sin datos';
+      if (kpiAvgAge) kpiAvgAge.textContent = 'Promedio: -';
+      if (kpiTotalKidsWithAge) kpiTotalKidsWithAge.textContent = '0 registrados';
+    }
+
+    // 4. Circuitos
+    const circuitMap = {};
+    leads.forEach(l => {
+      const dist = (l.distance || 'Sin Circuito Asignado').trim();
+      circuitMap[dist] = (circuitMap[dist] || 0) + 1;
+    });
+
+    const circuitEntries = Object.entries(circuitMap).sort((a, b) => b[1] - a[1]);
+    const kpiCircuitsCount = document.getElementById('kpi-circuits-count');
+    const kpiTopCircuit = document.getElementById('kpi-top-circuit');
+
+    if (kpiCircuitsCount) kpiCircuitsCount.textContent = circuitEntries.length;
+    if (kpiTopCircuit) {
+      if (circuitEntries.length > 0) {
+        kpiTopCircuit.textContent = `Líder: ${circuitEntries[0][0]} (${circuitEntries[0][1]})`;
+      } else {
+        kpiTopCircuit.textContent = 'Sin circuitos activos';
+      }
+    }
+
+    // Tabla de Circuitos
+    const tableCircuitsBody = document.getElementById('table-circuits-body');
+    if (tableCircuitsBody) {
+      tableCircuitsBody.innerHTML = '';
+      if (circuitEntries.length === 0) {
+        tableCircuitsBody.innerHTML = `<tr><td colspan="3" class="py-4 text-center text-slate-500 italic">No hay participantes registrados para esta carrera</td></tr>`;
+      } else {
+        circuitEntries.forEach(([circuitName, cnt]) => {
+          const pct = total > 0 ? ((cnt / total) * 100).toFixed(1) : '0.0';
+          const tr = document.createElement('tr');
+          tr.className = 'hover:bg-slate-800/40 transition-colors';
+          tr.innerHTML = `
+            <td class="py-2.5 font-bold text-slate-200">${circuitName}</td>
+            <td class="py-2.5 text-center font-mono font-bold text-cyan-400">${cnt}</td>
+            <td class="py-2.5 text-right font-mono text-slate-400 text-xs">${pct}%</td>
+          `;
+          tableCircuitsBody.appendChild(tr);
+        });
+      }
+    }
+
+    // Badges en leyenda de circuitos
+    const circuitsLegendBadges = document.getElementById('circuits-legend-badges');
+    if (circuitsLegendBadges) {
+      circuitsLegendBadges.innerHTML = '';
+      circuitEntries.forEach(([circuitName, cnt]) => {
+        const badge = document.createElement('span');
+        badge.className = 'px-2 py-1 rounded-lg bg-slate-950 border border-slate-800 text-[11px] font-medium text-slate-300 flex items-center gap-1.5';
+        badge.innerHTML = `<span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span> <span>${circuitName}:</span> <strong class="text-white font-mono">${cnt}</strong>`;
+        circuitsLegendBadges.appendChild(badge);
+      });
+    }
+
+    // 5. RENDERIZADO DE GRÁFICOS (CHART.JS)
+    if (!window.Chart) {
+      console.warn('[Reports BI] Chart.js no está disponible en la página.');
+      return;
+    }
+
+    // A. Gráfico de Tallas (Horizontal Bar Chart)
+    const canvasShirtSizes = document.getElementById('chart-shirt-sizes');
+    if (canvasShirtSizes) {
+      if (chartShirtSizes) chartShirtSizes.destroy();
+      const labels = [...STANDARD_SIZES.map(s => `Talla ${s}`), 'Pendiente'];
+      const data = [...STANDARD_SIZES.map(s => sizeCounts[s]), sizeCounts['PENDIENTE']];
+
+      chartShirtSizes = new Chart(canvasShirtSizes, {
+        type: 'bar',
+        data: {
+          labels,
+          datasets: [{
+            label: 'Kits requeridos',
+            data,
+            backgroundColor: [
+              '#38bdf8', '#3b82f6', '#6366f1', '#8b5cf6',
+              '#a855f7', '#ec4899', '#10b981', '#f59e0b'
+            ],
+            borderRadius: 8,
+            borderSkipped: false
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` ${ctx.parsed.y} kits (${total > 0 ? ((ctx.parsed.y / total) * 100).toFixed(1) : 0}%)`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94a3b8', font: { size: 11, weight: '600' } }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                precision: 0,
+                color: '#64748b'
+              },
+              grid: { color: 'rgba(51, 65, 85, 0.3)' }
+            }
+          }
+        }
+      });
+    }
+
+    // B. Gráfico de Circuitos (Doughnut)
+    const canvasCircuits = document.getElementById('chart-circuits');
+    if (canvasCircuits) {
+      if (chartCircuits) chartCircuits.destroy();
+      const circuitLabels = circuitEntries.map(e => e[0]);
+      const circuitCounts = circuitEntries.map(e => e[1]);
+      const palette = [
+        '#06b6d4', '#3b82f6', '#8b5cf6', '#ec4899',
+        '#f59e0b', '#10b981', '#64748b', '#f97316'
+      ];
+
+      chartCircuits = new Chart(canvasCircuits, {
+        type: 'doughnut',
+        data: {
+          labels: circuitLabels.length > 0 ? circuitLabels : ['Sin inscripciones'],
+          datasets: [{
+            data: circuitCounts.length > 0 ? circuitCounts : [1],
+            backgroundColor: circuitCounts.length > 0 ? palette.slice(0, circuitLabels.length) : ['#334155'],
+            borderWidth: 2,
+            borderColor: '#0f172a'
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: '68%',
+          plugins: {
+            legend: {
+              position: 'bottom',
+              labels: {
+                boxWidth: 12,
+                padding: 14,
+                color: '#cbd5e1',
+                font: { size: 11, weight: '600' }
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => {
+                  if (circuitCounts.length === 0) return ' Sin corredores';
+                  const val = ctx.parsed;
+                  const pct = total > 0 ? ((val / total) * 100).toFixed(1) : 0;
+                  return ` ${val} participantes (${pct}%)`;
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+
+    // C. Gráfico de Distribución por Edades (Bar Chart)
+    const canvasAges = document.getElementById('chart-ages');
+    if (canvasAges) {
+      if (chartAges) chartAges.destroy();
+      const ageDistribution = {};
+      validAges.forEach(a => {
+        ageDistribution[a] = (ageDistribution[a] || 0) + 1;
+      });
+      const sortedAges = Object.keys(ageDistribution).map(Number).sort((a, b) => a - b);
+      const ageLabels = sortedAges.map(a => `${a} años`);
+      const ageValues = sortedAges.map(a => ageDistribution[a]);
+
+      chartAges = new Chart(canvasAges, {
+        type: 'bar',
+        data: {
+          labels: ageLabels.length > 0 ? ageLabels : ['Sin datos'],
+          datasets: [{
+            label: 'Niños inscritos',
+            data: ageValues.length > 0 ? ageValues : [0],
+            backgroundColor: '#8b5cf6',
+            hoverBackgroundColor: '#a855f7',
+            borderRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` ${ctx.parsed.y} niños (${validAges.length > 0 ? ((ctx.parsed.y / validAges.length) * 100).toFixed(1) : 0}%)`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94a3b8', font: { size: 11 } }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0, color: '#64748b' },
+              grid: { color: 'rgba(51, 65, 85, 0.3)' }
+            }
+          }
+        }
+      });
+    }
+
+    // D. Gráfico de Inscripciones en el Tiempo (Line Chart)
+    const canvasTimeline = document.getElementById('chart-timeline');
+    if (canvasTimeline) {
+      if (chartTimeline) chartTimeline.destroy();
+      const dateMap = {};
+      leads.forEach(l => {
+        if (l.createdAt) {
+          const d = l.createdAt.substring(0, 10);
+          dateMap[d] = (dateMap[d] || 0) + 1;
+        }
+      });
+      const sortedDates = Object.keys(dateMap).sort();
+      const dateLabels = sortedDates.map(d => {
+        const parts = d.split('-');
+        if (parts.length === 3) return `${parts[2]}/${parts[1]}`;
+        return d;
+      });
+      const dateValues = sortedDates.map(d => dateMap[d]);
+
+      chartTimeline = new Chart(canvasTimeline, {
+        type: 'line',
+        data: {
+          labels: dateLabels.length > 0 ? dateLabels : ['Hoy'],
+          datasets: [{
+            label: 'Inscripciones por día',
+            data: dateValues.length > 0 ? dateValues : [0],
+            borderColor: '#10b981',
+            backgroundColor: 'rgba(16, 185, 129, 0.1)',
+            fill: true,
+            tension: 0.35,
+            pointBackgroundColor: '#10b981',
+            pointRadius: 4,
+            pointHoverRadius: 6
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              callbacks: {
+                label: (ctx) => ` ${ctx.parsed.y} inscritos`
+              }
+            }
+          },
+          scales: {
+            x: {
+              grid: { display: false },
+              ticks: { color: '#94a3b8', font: { size: 11 } }
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { precision: 0, color: '#64748b' },
+              grid: { color: 'rgba(51, 65, 85, 0.3)' }
+            }
+          }
+        }
+      });
+    }
+
+    // Refrescar iconos Lucide generados dinámicamente si aplica
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  // Exponer globalmente para redibujar al cambiar de pestaña
+  window._renderReportsDashboard = renderReportsDashboard;
+
+  // Escuchar cambio en el selector de carreras
+  if (raceFilter) {
+    raceFilter.addEventListener('change', () => {
+      renderReportsDashboard();
+    });
+  }
+
+  // Exportar CSV de Tallas para el proveedor
+  if (btnExportCsv) {
+    btnExportCsv.addEventListener('click', () => {
+      const { selectedRace, leads } = getFilteredData();
+      const raceTitle = selectedRace ? selectedRace.name : 'Todas las Carreras';
+      const STANDARD_SIZES = ['2', '4', '8', '12', '16', 'S', 'M'];
+      const counts = { '2': 0, '4': 0, '8': 0, '12': 0, '16': 0, 'S': 0, 'M': 0, 'PENDIENTE': 0 };
+      const total = leads.length;
+
+      leads.forEach(l => {
+        const sz = (l.shirtSize || '').trim().toUpperCase();
+        if (STANDARD_SIZES.includes(sz)) {
+          counts[sz]++;
+        } else {
+          counts['PENDIENTE']++;
+        }
+      });
+
+      let csv = `REPORTE DE KITS Y POLERAS - ${raceTitle}\n`;
+      csv += `Fecha de Generación: ${new Date().toLocaleString('es-CL')}\n`;
+      csv += `Total Inscritos: ${total}\n\n`;
+      csv += `Talla,Kits Requeridos,Porcentaje\n`;
+
+      STANDARD_SIZES.forEach(s => {
+        const cnt = counts[s];
+        const pct = total > 0 ? ((cnt / total) * 100).toFixed(1) : '0.0';
+        csv += `Talla ${s},${cnt},${pct}%\n`;
+      });
+
+      const pendingCnt = counts['PENDIENTE'];
+      const pendingPct = total > 0 ? ((pendingCnt / total) * 100).toFixed(1) : '0.0';
+      csv += `Sin Especificar / Pendiente,${pendingCnt},${pendingPct}%\n`;
+      csv += `TOTAL KITS,${total},100%\n`;
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      const safeName = raceTitle.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `tallas-poleras-kidsrun-${safeName}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showAdminToast('Planilla de tallas CSV descargada correctamente', 'success');
+    });
+  }
+
+  // Botón Imprimir Informe
+  if (btnPrintReports) {
+    btnPrintReports.addEventListener('click', () => {
+      window.print();
+    });
+  }
+
+  // Render inicial al cargar
+  renderReportsDashboard();
+}
+
