@@ -961,6 +961,29 @@ function initLeadsManager() {
     });
   });
 
+  // Auto-guardado checkbox "Kit Recibido"
+  document.querySelectorAll('.kit-received-checkbox').forEach(cb => {
+    cb.addEventListener('change', async () => {
+      const leadId = cb.getAttribute('data-id');
+      const checked = cb.checked;
+      try {
+        const json = await cmsFetch(`/admin/api/leads/${leadId}/kit-received`, {
+          method: 'PATCH',
+          body: JSON.stringify({ kitReceived: checked })
+        });
+        if (json.success) {
+          showAdminToast(checked ? '✅ Kit marcado como entregado' : '📦 Kit desmarcado', 'success');
+        } else {
+          showAdminToast(json.error || 'Error al guardar', 'error');
+          cb.checked = !checked;
+        }
+      } catch (err) {
+        showAdminToast('Error de conexión', 'error');
+        cb.checked = !checked;
+      }
+    });
+  });
+
   // --- Gestión de Selección Múltiple y Eliminación Masiva con Palabra de Emergencia ---
   const selectAllCb = document.getElementById('checkbox-select-all-leads');
   const bulkBar = document.getElementById('bulk-selection-bar');

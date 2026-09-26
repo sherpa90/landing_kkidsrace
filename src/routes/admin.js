@@ -501,6 +501,21 @@ router.get('/api/proofs/:filename', auth.requireAuth, (req, res) => {
   return res.sendFile(targetPath);
 });
 
+// Actualizar estado Kit Recibido (admin y editor)
+router.patch('/api/leads/:id/kit-received', auth.requireAuth, async (req, res) => {
+  const { id } = req.params;
+  const { kitReceived } = req.body;
+  if (typeof kitReceived !== 'boolean') {
+    return res.status(400).json({ success: false, error: 'kitReceived debe ser boolean' });
+  }
+  const result = await db.updateKitReceived(id, kitReceived);
+  if (result.success) {
+    res.json({ success: true });
+  } else {
+    res.status(500).json({ success: false, error: result.error });
+  }
+});
+
 // Eliminar un Registro de Inscripción (SOLO Administrador por resguardo y trazabilidad)
 router.delete('/api/leads/:id', auth.requireAdmin, validateCsrf, async (req, res) => {
   const { id } = req.params;

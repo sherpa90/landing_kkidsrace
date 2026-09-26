@@ -82,6 +82,7 @@ async function createTableIfNotExists() {
     ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS kid_first_name VARCHAR(100);
     ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS kid_last_name VARCHAR(100);
     ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS shirt_size VARCHAR(20);
+    ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS kit_received BOOLEAN DEFAULT FALSE;
   `;
   try {
     await pool.query(sql);
@@ -248,6 +249,7 @@ async function getInscriptions() {
         tutorRut: row.tutor_rut || '',
         createdAt: row.created_at,
         read: row.read,
+        kitReceived: row.kit_received || false,
         source: 'postgresql'
       }));
 
@@ -328,11 +330,28 @@ function isPostgresConnected() {
   return isConnected;
 }
 
+async function updateKitReceived(id, kitReceived) {
+  if (pool && isConnected) {
+    try {
+      await pool.query(
+        'UPDATE inscriptions SET kit_received = $1 WHERE id = $2',
+        [kitReceived, id]
+      );
+      return { success: true };
+    } catch (err) {
+      console.error('Error actualizando kit_received:', err.message);
+      return { success: false, error: err.message };
+    }
+  }
+  return { success: false, error: 'Sin conexión a PostgreSQL' };
+}
+
 module.exports = {
   saveInscription,
   getInscriptions,
   deleteInscription,
   deleteInscriptionsBulk,
+  updateKitReceived,
   isPostgresConnected,
   initDb
 };
