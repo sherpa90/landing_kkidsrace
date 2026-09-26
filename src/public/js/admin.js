@@ -675,7 +675,8 @@ function collectCmsFormData() {
     schedule: Array.from(document.querySelectorAll('.schedule-admin-item')).map(item => ({
       time: item.querySelector('.schedule-time-input')?.value.trim() || '',
       title: item.querySelector('.schedule-title-input')?.value.trim() || '',
-      desc: item.querySelector('.schedule-desc-input')?.value.trim() || ''
+      desc: item.querySelector('.schedule-desc-input')?.value.trim() || '',
+      day: item.querySelector('.schedule-day-input')?.value || 'race'
     })).filter(it => it.time || it.title || it.desc),
     scheduleSection: {
       badge: getVal('input-scheduleBadge') || 'HORARIOS Y ACTIVIDADES',
