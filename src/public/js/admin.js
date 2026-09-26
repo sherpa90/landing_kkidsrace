@@ -1865,7 +1865,7 @@ function initKitsManager() {
 
         <div>
           <label class="block text-xs text-gray-400 mb-1">Breve Descripción</label>
-          <textarea name="plans[${newIdx}][description]" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" placeholder="Ej: La experiencia completa para correr y disfrutar en familia.">Incluye polera técnica de competición, medalla finisher y seguro de carrera.</textarea>
+          <textarea name="plans[${newIdx}][description]" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" placeholder="Ej: La experiencia completa para correr y disfrutar en familia.">Incluye polera técnica de competición, polera oficial y seguro de carrera.</textarea>
         </div>
 
         <div class="flex items-center gap-2">
