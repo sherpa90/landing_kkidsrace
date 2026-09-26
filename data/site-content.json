@@ -139,10 +139,10 @@
     },
     {
       "id": "gal-2",
-      "title": "Medallas de Metal para Todos",
+      "title": "Medallas para los Primeros Lugares",
       "category": "Medallas",
       "url": "https://images.unsplash.com/photo-1579952363873-27f3bade9f55?auto=format&fit=crop&w=800&q=80",
-      "caption": "Cada niño recibe su hermosa medalla grabada de finisher."
+      "caption": "Los primeros lugares reciben su medalla grabada."
     },
     {
       "id": "gal-3",
@@ -1057,7 +1057,7 @@
     "step4PaymentHint": "¿No realizaste la transferencia aún? Puedes enviar la inscripción ahora y coordinar el pago por WhatsApp antes del cierre de cupos.",
     "badge1Icon": "award",
     "badge1Text": "Polera Oficial",
-    "badge1Sub": "100% garantizada",
+    "badge1Sub": "100% original",
     "badge2Icon": "shield-check",
     "badge2Text": "Circuito Seguro",
     "badge2Sub": "100% cerrado",
