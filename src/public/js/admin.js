@@ -961,11 +961,16 @@ function initLeadsManager() {
     });
   });
 
-  // Auto-guardado checkbox "Kit Recibido"
+  // Auto-guardado checkbox "Kit Recibido" (sincroniza mobile y desktop)
   document.querySelectorAll('.kit-received-checkbox').forEach(cb => {
     cb.addEventListener('change', async () => {
       const leadId = cb.getAttribute('data-id');
       const checked = cb.checked;
+      // Sincronizar visualmente ambas vistas (mobile y desktop) de inmediato
+      document.querySelectorAll(`.kit-received-checkbox[data-id="${leadId}"]`).forEach(otherCb => {
+        otherCb.checked = checked;
+      });
+
       try {
         const json = await cmsFetch(`/admin/api/leads/${leadId}/kit-received`, {
           method: 'PATCH',
@@ -973,13 +978,32 @@ function initLeadsManager() {
         });
         if (json.success) {
           showAdminToast(checked ? '✅ Kit marcado como entregado' : '📦 Kit desmarcado', 'success');
+          // Actualizar estilo visual en la tarjeta móvil si existe
+          const mobileCardBox = cb.closest('.participant-row')?.querySelector('.p-3.rounded-2xl');
+          if (mobileCardBox) {
+            const badge = mobileCardBox.querySelector('span.font-mono');
+            const title = mobileCardBox.querySelector('.text-xs.font-black span');
+            if (checked) {
+              mobileCardBox.className = 'p-3 rounded-2xl bg-emerald-950/40 border border-emerald-500/40 text-emerald-200 flex items-center justify-between gap-3 transition-colors';
+              if (badge) { badge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-300 border border-emerald-500/30'; badge.textContent = 'ACREDITADO'; }
+              if (title) title.textContent = 'Kit Entregado';
+            } else {
+              mobileCardBox.className = 'p-3 rounded-2xl bg-slate-950/80 border border-slate-800 text-slate-300 flex items-center justify-between gap-3 transition-colors';
+              if (badge) { badge.className = 'text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg bg-slate-800 text-slate-400 border border-slate-700'; badge.textContent = 'PENDIENTE'; }
+              if (title) title.textContent = 'Entregar Kit';
+            }
+          }
         } else {
           showAdminToast(json.error || 'Error al guardar', 'error');
-          cb.checked = !checked;
+          document.querySelectorAll(`.kit-received-checkbox[data-id="${leadId}"]`).forEach(otherCb => {
+            otherCb.checked = !checked;
+          });
         }
       } catch (err) {
         showAdminToast('Error de conexión', 'error');
-        cb.checked = !checked;
+        document.querySelectorAll(`.kit-received-checkbox[data-id="${leadId}"]`).forEach(otherCb => {
+          otherCb.checked = !checked;
+        });
       }
     });
   });

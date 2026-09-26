@@ -2824,19 +2824,19 @@
             <!-- Barra de Herramientas: Búsqueda Inteligente y Filtros -->
             <!-- Barra de Herramientas: Búsqueda Inteligente y Filtros Ultrarrápidos -->
             <div class="space-y-2.5">
-              <div class="flex flex-col sm:flex-row gap-3">
+              <div class="flex flex-col sm:flex-row gap-2.5">
                 <div class="relative flex-1">
                   <input type="text" id="filter-search-input" <%= role !== 'admin' ? 'autofocus' : '' %>
-                         placeholder="Buscar por RUT, Nombre de pupilo, Apoderado o N° Dorsal (Presiona / para enfocar)..." 
-                         class="admin-input w-full px-4 pr-10 py-3 text-xs sm:text-sm text-white placeholder-slate-500 bg-slate-950 border-slate-700/80 focus:border-blue-500 rounded-2xl shadow-inner font-medium">
+                         placeholder="Buscar por RUT, Nombre pupilo, Apoderado..." 
+                         class="admin-input w-full px-3.5 pr-9 py-2.5 sm:py-3 text-xs sm:text-sm text-white placeholder-slate-500 bg-slate-950 border-slate-700/80 focus:border-blue-500 rounded-2xl shadow-inner font-medium">
                   <button type="button" id="btn-clear-search" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer" title="Limpiar búsqueda (ESC)">
                     ✕
                   </button>
                 </div>
 
                 <!-- Filtro por Circuito -->
-                <div class="sm:w-56 shrink-0">
-                  <select id="filter-circuit-select" class="admin-input w-full py-3 text-xs sm:text-sm text-white bg-slate-950 border-slate-700/80 rounded-2xl cursor-pointer">
+                <div class="w-full sm:w-64 shrink-0">
+                  <select id="filter-circuit-select" class="admin-input w-full py-2.5 sm:py-3 px-3 text-xs sm:text-sm text-white bg-slate-950 border-slate-700/80 rounded-2xl cursor-pointer">
                     <option value="all">🏁 Todos los Circuitos</option>
                     <% (content.categories || []).forEach(cat => { %>
                     <option value="<%= (cat.distance || '').toLowerCase() %>"><%= cat.distance %> - <%= cat.title %> (<%= cat.badge %>)</option>
@@ -2872,7 +2872,7 @@
                      data-distance="<%= (lead.distance || '').toLowerCase() %>">
                   
                   <!-- Cabecera de la tarjeta: Dorsal + Circuito -->
-                  <div class="flex items-center justify-between gap-2">
+                  <div class="flex flex-wrap items-center justify-between gap-2">
                     <div class="flex items-center gap-2">
                       <% if (role === 'admin') { %>
                       <input type="checkbox" class="lead-select-checkbox w-4 h-4 rounded text-blue-600 bg-slate-950 border-slate-700 focus:ring-blue-500 cursor-pointer shrink-0" data-id="<%= lead.id %>" data-name="<%= lead.kidName || lead.name %>">
@@ -2881,12 +2881,31 @@
                         <i data-lucide="hash" class="w-3.5 h-3.5 text-amber-400"></i>
                         <span><%= lead.bibNumber || '----' %></span>
                       </span>
-                      <span class="text-[11px] font-semibold text-slate-400">N° Inscripción</span>
                     </div>
 
-                    <span class="px-3 py-1 rounded-full text-xs font-black bg-blue-950/80 text-blue-300 border border-blue-500/40 flex items-center gap-1.5 shadow-sm">
-                      <i data-lucide="map-pin" class="w-3 h-3 text-blue-400"></i>
-                      <span><%= lead.distance || 'General' %></span>
+                    <span class="px-2.5 py-1 rounded-full text-[11px] font-black bg-blue-950/80 text-blue-300 border border-blue-500/40 flex items-center gap-1 shadow-sm max-w-[200px] truncate">
+                      <i data-lucide="map-pin" class="w-3 h-3 text-blue-400 shrink-0"></i>
+                      <span class="truncate"><%= lead.distance || 'General' %></span>
+                    </span>
+                  </div>
+
+                  <!-- BOTÓN / CHECKBOX RÁPIDO DE ENTREGA DE KIT PARA ACREDITADORES (MOBILE FIRST) -->
+                  <div class="p-3 rounded-2xl <%= lead.kitReceived ? 'bg-emerald-950/40 border border-emerald-500/40 text-emerald-200' : 'bg-slate-950/80 border border-slate-800 text-slate-300' %> flex items-center justify-between gap-3 transition-colors">
+                    <label class="flex items-center gap-2.5 cursor-pointer select-none flex-1">
+                      <input type="checkbox" class="kit-received-checkbox w-5 h-5 rounded-lg text-emerald-500 bg-slate-900 border-slate-600 focus:ring-emerald-500 cursor-pointer shrink-0 accent-emerald-500"
+                             data-id="<%= lead.id %>" <%= lead.kitReceived ? 'checked' : '' %>>
+                      <div>
+                        <div class="text-xs font-black tracking-wide <%= lead.kitReceived ? 'text-emerald-300' : 'text-white' %> flex items-center gap-1.5">
+                          <i data-lucide="package-check" class="w-3.5 h-3.5 <%= lead.kitReceived ? 'text-emerald-400' : 'text-slate-400' %>"></i>
+                          <span><%= lead.kitReceived ? 'Kit Entregado' : 'Entregar Kit' %></span>
+                        </div>
+                        <div class="text-[10px] text-slate-400">
+                          Talla Polera: <span class="font-bold text-purple-300"><%= lead.shirtSize ? 'Talla ' + lead.shirtSize : 'Sin talla' %></span>
+                        </div>
+                      </div>
+                    </label>
+                    <span class="text-[10px] font-mono font-bold px-2 py-0.5 rounded-lg <%= lead.kitReceived ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/30' : 'bg-slate-800 text-slate-400 border border-slate-700' %>">
+                      <%= lead.kitReceived ? 'ACREDITADO' : 'PENDIENTE' %>
                     </span>
                   </div>
 
