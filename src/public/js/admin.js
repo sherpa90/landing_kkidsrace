@@ -502,6 +502,19 @@ function collectCmsFormData() {
 
   // 7. Kits / Precios
   const plans = [];
+  // Parsea precios en formato CLP: "15.000", "15,000" o "15000" → 15000
+  const parseClpPrice = (raw) => {
+    if (!raw) return 0;
+    // Quitar símbolo $, espacios y la palabra CLP
+    const clean = String(raw).replace(/[$\sCLP]/gi, '');
+    // Si tiene coma decimal tipo "15,50" (improbable en CLP pero seguro)
+    // Detectar si el separador de miles es punto: "15.000" → quitar puntos
+    // Detectar si el separador de miles es coma: "15,000" → quitar comas
+    const normalized = clean.replace(/\./g, '').replace(/,/g, '');
+    const num = parseInt(normalized, 10);
+    return isNaN(num) ? 0 : num;
+  };
+
   document.querySelectorAll('.pricing-item').forEach(item => {
     const rawFeatures = item.querySelector('textarea[name*="[features]"]')?.value || '';
     const featuresList = rawFeatures.split('\n').map(f => f.trim()).filter(Boolean);
@@ -510,8 +523,8 @@ function collectCmsFormData() {
       id: item.querySelector('input[name*="[id]"]')?.value || 'kit',
       name: item.querySelector('input[name*="[name]"]')?.value || '',
       badge: item.querySelector('input[name*="[badge]"]')?.value || '',
-      priceMonthly: parseFloat(item.querySelector('input[name*="[priceMonthly]"]')?.value || '0'),
-      priceYearly: parseFloat(item.querySelector('input[name*="[priceYearly]"]')?.value || '0'),
+      priceMonthly: parseClpPrice(item.querySelector('input[name*="[priceMonthly]"]')?.value),
+      priceYearly: parseClpPrice(item.querySelector('input[name*="[priceYearly]"]')?.value),
       description: item.querySelector('textarea[name*="[description]"]')?.value || '',
       features: featuresList,
       isPopular: item.querySelector('input[name*="[isPopular]"]')?.checked || false,
@@ -1835,12 +1848,14 @@ function initKitsManager() {
             <input type="text" name="plans[${newIdx}][name]" value="Kit Oficial Carrera" placeholder="Ej: Kit Básico Oficial" class="kit-name-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-emerald-500">
           </div>
           <div>
-            <label class="block text-xs text-gray-400 mb-1">Valor Inscripción ($) *</label>
-            <input type="number" name="plans[${newIdx}][priceMonthly]" value="14990" placeholder="Ej: 14990" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+            <label class="block text-xs text-gray-400 mb-1">Valor Inscripción (CLP) *</label>
+            <input type="text" name="plans[${newIdx}][priceMonthly]" value="15.000" placeholder="Ej: 15.000" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+            <span class="text-[10px] text-gray-500 mt-0.5 block">Ingresa el valor en pesos: 15.000 ó 15000</span>
           </div>
           <div>
-            <label class="block text-xs text-gray-400 mb-1">Valor Referencial ($)</label>
-            <input type="number" name="plans[${newIdx}][priceYearly]" value="19990" placeholder="Ej: 19990" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+            <label class="block text-xs text-gray-400 mb-1">Valor Referencial (CLP)</label>
+            <input type="text" name="plans[${newIdx}][priceYearly]" value="18.000" placeholder="Ej: 18.000" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+            <span class="text-[10px] text-gray-500 mt-0.5 block">Opcional: precio anterior o referencia</span>
           </div>
           <div>
             <label class="block text-xs text-gray-400 mb-1">Badge o Etiqueta</label>

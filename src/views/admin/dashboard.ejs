@@ -2017,12 +2017,14 @@
                     <input type="text" name="plans[<%= idx %>][name]" value="<%= plan.name %>" placeholder="Ej: Kit Básico Oficial" class="kit-name-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-emerald-500">
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-400 mb-1">Valor Inscripción ($) *</label>
-                    <input type="number" name="plans[<%= idx %>][priceMonthly]" value="<%= plan.priceMonthly %>" placeholder="Ej: 14990" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                    <label class="block text-xs text-gray-400 mb-1">Valor Inscripción (CLP) *</label>
+                    <input type="text" name="plans[<%= idx %>][priceMonthly]" value="<%= plan.priceMonthly ? plan.priceMonthly.toLocaleString('es-CL') : '' %>" placeholder="Ej: 15.000" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                    <span class="text-[10px] text-gray-500 mt-0.5 block">Ingresa el valor en pesos: 15.000 ó 15000</span>
                   </div>
                   <div>
-                    <label class="block text-xs text-gray-400 mb-1">Valor Referencial ($)</label>
-                    <input type="number" name="plans[<%= idx %>][priceYearly]" value="<%= plan.priceYearly || plan.priceMonthly %>" placeholder="Ej: 19990" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                    <label class="block text-xs text-gray-400 mb-1">Valor Referencial (CLP)</label>
+                    <input type="text" name="plans[<%= idx %>][priceYearly]" value="<%= (plan.priceYearly || plan.priceMonthly) ? (plan.priceYearly || plan.priceMonthly).toLocaleString('es-CL') : '' %>" placeholder="Ej: 18.000" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                    <span class="text-[10px] text-gray-500 mt-0.5 block">Opcional: precio anterior o referencia</span>
                   </div>
                   <div>
                     <label class="block text-xs text-gray-400 mb-1">Badge o Etiqueta</label>

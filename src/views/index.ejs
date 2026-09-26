@@ -770,8 +770,15 @@
 
             <!-- Precio grande — centrado -->
             <div class="flex flex-col items-center mb-8">
-              <% if (plan.priceMonthly > 0) { %>
-              <span class="text-6xl font-black <%= plan.isPopular ? 'text-blue-600 dark:text-yellow-400' : 'text-yellow-300' %>">$<%= plan.priceMonthly.toLocaleString('es-CL') %></span>
+              <% 
+                // Normalizar precio: soporta número 15000, string "15.000" o "15,000"
+                const rawPrice = plan.priceMonthly;
+                const numPrice = typeof rawPrice === 'number'
+                  ? rawPrice
+                  : parseInt(String(rawPrice || '0').replace(/\./g, '').replace(/,/g, ''), 10) || 0;
+              %>
+              <% if (numPrice > 0) { %>
+              <span class="text-6xl font-black <%= plan.isPopular ? 'text-blue-600 dark:text-yellow-400' : 'text-yellow-300' %>">$<%= numPrice.toLocaleString('es-CL') %></span>
               <span class="text-sm font-medium mt-1 <%= plan.isPopular ? 'text-slate-500' : 'text-blue-200' %>">por inscripción</span>
               <% } else { %>
               <span class="text-6xl font-black <%= plan.isPopular ? 'text-green-600' : 'text-green-300' %>">Gratis</span>
