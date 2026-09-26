@@ -440,9 +440,9 @@
           <p class="text-slate-600 dark:text-gray-400 text-sm sm:text-base mt-3">Diseñados para garantizar la diversión, el esfuerzo sano y la seguridad de cada corredor.</p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div class="flex flex-wrap justify-center gap-6">
           <% (content.categories || []).forEach(cat => { %>
-          <div class="bg-white dark:bg-gray-900/80 p-7 rounded-3xl flex flex-col justify-between border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-300 group">
+          <div class="bg-white dark:bg-gray-900/80 p-7 rounded-3xl flex flex-col justify-between border border-slate-200 dark:border-white/10 shadow-sm hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-500 transition-all duration-300 group w-full sm:w-[calc(50%-12px)] lg:w-[calc(25%-18px)] min-w-[260px] max-w-[320px]">
             <div>
               <div class="flex items-center justify-between mb-5">
                 <span class="text-xs font-black px-3.5 py-1.5 rounded-full bg-amber-50 dark:bg-yellow-400/20 text-amber-700 dark:text-yellow-300 border border-amber-200 dark:border-yellow-400/30">
@@ -474,27 +474,69 @@
 
     <!-- SECCIÓN CRONOGRAMA DEL DÍA -->
     <section id="schedule" style="<%- sStyle('schedule') %>" class="py-20 bg-slate-50/70 dark:bg-gray-900/40 relative z-10 border-t border-slate-100 dark:border-white/5">
-      <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="text-center mb-16">
+      <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="text-center mb-14">
           <span class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-yellow-400 mb-2 inline-block"><%= content.scheduleSection?.badge || 'HORARIOS Y ACTIVIDADES' %></span>
           <h2 class="text-3xl sm:text-4xl font-black text-slate-900 dark:text-white tracking-tight">
-            <%= content.scheduleSection?.title || 'Cronograma de la Gran Jornada' %>
+            <%= content.scheduleSection?.title || 'Cronograma de la Jornada' %>
           </h2>
-          <p class="text-slate-600 dark:text-gray-400 text-sm mt-2"><%= content.scheduleSection?.subtitle || 'Ven temprano para disfrutar de todas las sorpresas preparadas para la familia.' %></p>
+          <p class="text-slate-600 dark:text-gray-400 text-sm mt-2"><%= content.scheduleSection?.subtitle || 'Dos días de actividades para toda la familia.' %></p>
         </div>
 
-        <div class="space-y-4">
-          <% (content.schedule || []).forEach(item => { %>
-          <div class="bg-white dark:bg-gray-900/80 p-5 rounded-3xl border border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm hover:border-blue-400 dark:hover:border-yellow-400/60 transition-all">
-            <div class="px-4 py-2 rounded-2xl bg-blue-600 text-white font-black text-sm tracking-wide shadow-sm flex-shrink-0">
-              <%= item.time %>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+          <!-- Columna KITS (Sábado) -->
+          <div>
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-2xl bg-amber-100 dark:bg-amber-900/40 flex items-center justify-center">
+                <i data-lucide="package" class="w-5 h-5 text-amber-600 dark:text-amber-400"></i>
+              </div>
+              <div>
+                <p class="text-xs font-black uppercase tracking-widest text-amber-600 dark:text-amber-400"><%= content.scheduleSection?.kitsColumnTitle || 'Sábado 28 de Noviembre' %></p>
+                <p class="text-base font-black text-slate-900 dark:text-white"><%= content.scheduleSection?.kitsColumnSubtitle || 'Entrega de Kits' %></p>
+              </div>
             </div>
-            <div class="flex-1">
-              <h4 class="text-base font-bold text-slate-900 dark:text-white"><%= item.title %></h4>
-              <p class="text-xs text-slate-600 dark:text-gray-400 mt-0.5"><%= item.desc %></p>
+            <div class="space-y-3">
+              <% (content.schedule || []).filter(i => i.day === 'kits').forEach(item => { %>
+              <div class="bg-white dark:bg-gray-900/80 p-5 rounded-3xl border border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm hover:border-amber-400 dark:hover:border-amber-400/60 transition-all">
+                <div class="px-4 py-2 rounded-2xl bg-amber-500 text-white font-black text-sm tracking-wide shadow-sm flex-shrink-0">
+                  <%= item.time %>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-base font-bold text-slate-900 dark:text-white"><%= item.title %></h4>
+                  <% if (item.desc) { %><p class="text-xs text-slate-600 dark:text-gray-400 mt-0.5"><%= item.desc %></p><% } %>
+                </div>
+              </div>
+              <% }); %>
             </div>
           </div>
-          <% }); %>
+
+          <!-- Columna CORRIDA (Domingo) -->
+          <div>
+            <div class="flex items-center gap-3 mb-6">
+              <div class="w-10 h-10 rounded-2xl bg-blue-100 dark:bg-blue-900/40 flex items-center justify-center">
+                <i data-lucide="flag" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
+              </div>
+              <div>
+                <p class="text-xs font-black uppercase tracking-widest text-blue-600 dark:text-blue-400"><%= content.scheduleSection?.raceColumnTitle || 'Domingo 29 de Noviembre' %></p>
+                <p class="text-base font-black text-slate-900 dark:text-white"><%= content.scheduleSection?.raceColumnSubtitle || 'Día de la Corrida' %></p>
+              </div>
+            </div>
+            <div class="space-y-3">
+              <% (content.schedule || []).filter(i => i.day === 'race' || !i.day).forEach(item => { %>
+              <div class="bg-white dark:bg-gray-900/80 p-5 rounded-3xl border border-slate-200 dark:border-white/10 flex flex-col sm:flex-row items-start sm:items-center gap-4 shadow-sm hover:border-blue-400 dark:hover:border-yellow-400/60 transition-all">
+                <div class="px-4 py-2 rounded-2xl bg-blue-600 text-white font-black text-sm tracking-wide shadow-sm flex-shrink-0">
+                  <%= item.time %>
+                </div>
+                <div class="flex-1">
+                  <h4 class="text-base font-bold text-slate-900 dark:text-white"><%= item.title %></h4>
+                  <% if (item.desc) { %><p class="text-xs text-slate-600 dark:text-gray-400 mt-0.5"><%= item.desc %></p><% } %>
+                </div>
+              </div>
+              <% }); %>
+            </div>
+          </div>
+
         </div>
       </div>
     </section>

@@ -1481,18 +1481,43 @@
             </div>
 
             <!-- Encabezado de la Sección de Cronograma -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 p-4 rounded-2xl bg-gray-900/50 border border-gray-800">
-              <div>
-                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Etiqueta Superior (Badge)</label>
-                <input type="text" id="input-scheduleBadge" value="<%= content.scheduleSection?.badge || 'HORARIOS Y ACTIVIDADES' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white" placeholder="HORARIOS Y ACTIVIDADES">
+            <div class="space-y-4 p-4 rounded-2xl bg-gray-900/50 border border-gray-800">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Etiqueta Superior (Badge)</label>
+                  <input type="text" id="input-scheduleBadge" value="<%= content.scheduleSection?.badge || 'HORARIOS Y ACTIVIDADES' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white" placeholder="HORARIOS Y ACTIVIDADES">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título Principal</label>
+                  <input type="text" id="input-scheduleTitle" value="<%= content.scheduleSection?.title || 'Cronograma de la Jornada' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white" placeholder="Cronograma de la Jornada">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Bajada / Subtítulo</label>
+                  <input type="text" id="input-scheduleSubtitle" value="<%= content.scheduleSection?.subtitle || 'Dos días de actividades para toda la familia.' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white" placeholder="Dos días de actividades...">
+                </div>
               </div>
-              <div>
-                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título Principal</label>
-                <input type="text" id="input-scheduleTitle" value="<%= content.scheduleSection?.title || 'Cronograma de la Gran Jornada' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white" placeholder="Cronograma de la Gran Jornada">
+              <!-- Encabezados de columnas -->
+              <p class="text-xs font-bold text-amber-400 flex items-center gap-1.5"><i data-lucide="package" class="w-3.5 h-3.5"></i> Columna Izquierda — Entrega de Kits</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Fecha / Título de columna kits</label>
+                  <input type="text" id="input-scheduleKitsTitle" value="<%= content.scheduleSection?.kitsColumnTitle || 'Sábado 28 de Noviembre' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white" placeholder="Sábado 28 de Noviembre">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Subtítulo columna kits</label>
+                  <input type="text" id="input-scheduleKitsSubtitle" value="<%= content.scheduleSection?.kitsColumnSubtitle || 'Entrega de Kits' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white" placeholder="Entrega de Kits">
+                </div>
               </div>
-              <div>
-                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Bajada / Subtítulo</label>
-                <input type="text" id="input-scheduleSubtitle" value="<%= content.scheduleSection?.subtitle || 'Ven temprano para disfrutar de todas las sorpresas preparadas para la familia.' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white" placeholder="Ven temprano para disfrutar...">
+              <p class="text-xs font-bold text-blue-400 flex items-center gap-1.5"><i data-lucide="flag" class="w-3.5 h-3.5"></i> Columna Derecha — Día de la Corrida</p>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Fecha / Título de columna corrida</label>
+                  <input type="text" id="input-scheduleRaceTitle" value="<%= content.scheduleSection?.raceColumnTitle || 'Domingo 29 de Noviembre' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white" placeholder="Domingo 29 de Noviembre">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Subtítulo columna corrida</label>
+                  <input type="text" id="input-scheduleRaceSubtitle" value="<%= content.scheduleSection?.raceColumnSubtitle || 'Día de la Corrida' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white" placeholder="Día de la Corrida">
+                </div>
               </div>
             </div>
 
@@ -1520,9 +1545,16 @@
                   </div>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
                   <div>
-                    <label class="block text-xs text-gray-400 mb-1">Horario / Hora (ej: 08:30 AM)</label>
+                    <label class="block text-xs text-gray-400 mb-1">Columna</label>
+                    <select name="schedule[<%= idx %>][day]" class="schedule-day-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+                      <option value="kits" <%= (item.day === 'kits') ? 'selected' : '' %>>🎁 Kits (Sáb)</option>
+                      <option value="race" <%= (!item.day || item.day === 'race') ? 'selected' : '' %>>🏁 Corrida (Dom)</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Horario / Hora</label>
                     <input type="text" name="schedule[<%= idx %>][time]" value="<%= item.time %>" placeholder="08:30 AM" class="schedule-time-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-mono font-bold focus:outline-none focus:border-blue-500">
                   </div>
                   <div class="sm:col-span-2">

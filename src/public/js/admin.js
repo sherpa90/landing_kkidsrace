@@ -2976,9 +2976,11 @@ function initScheduleManager() {
       const timeInput = item.querySelector('.schedule-time-input');
       const titleInput = item.querySelector('.schedule-title-input');
       const descInput = item.querySelector('.schedule-desc-input');
+      const dayInput = item.querySelector('.schedule-day-input');
       if (timeInput) timeInput.name = `schedule[${idx}][time]`;
       if (titleInput) titleInput.name = `schedule[${idx}][title]`;
       if (descInput) descInput.name = `schedule[${idx}][desc]`;
+      if (dayInput) dayInput.name = `schedule[${idx}][day]`;
     });
 
     if (countBadge) countBadge.textContent = items.length;
@@ -2987,7 +2989,7 @@ function initScheduleManager() {
     }
   }
 
-  function createScheduleItem(idx, defaultTime = '09:00 AM', defaultTitle = '', defaultDesc = '') {
+  function createScheduleItem(idx, defaultTime = '09:00 AM', defaultTitle = '', defaultDesc = '', defaultDay = 'race') {
     const div = document.createElement('div');
     div.className = 'schedule-admin-item p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-3 group hover:border-gray-700 transition-all';
     div.style.animation = 'fadeInUp 0.25s ease forwards';
@@ -3012,9 +3014,16 @@ function initScheduleManager() {
         </div>
       </div>
 
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-3">
         <div>
-          <label class="block text-xs text-gray-400 mb-1">Horario / Hora (ej: 08:30 AM)</label>
+          <label class="block text-xs text-gray-400 mb-1">Columna</label>
+          <select name="schedule[${idx}][day]" class="schedule-day-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-blue-500">
+            <option value="kits" ${defaultDay === 'kits' ? 'selected' : ''}>🎁 Kits (Sáb)</option>
+            <option value="race" ${defaultDay === 'race' ? 'selected' : ''}>🏁 Corrida (Dom)</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Horario / Hora</label>
           <input type="text" name="schedule[${idx}][time]" value="${defaultTime}" placeholder="08:30 AM" class="schedule-time-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-mono font-bold focus:outline-none focus:border-blue-500">
         </div>
         <div class="sm:col-span-2">
@@ -3093,16 +3102,21 @@ function initScheduleManager() {
         const time = item.querySelector('.schedule-time-input')?.value.trim() || '';
         const title = item.querySelector('.schedule-title-input')?.value.trim() || '';
         const desc = item.querySelector('.schedule-desc-input')?.value.trim() || '';
+        const day = item.querySelector('.schedule-day-input')?.value || 'race';
         if (time || title || desc) {
-          schedule.push({ time, title, desc });
+          schedule.push({ time, title, desc, day });
         }
       });
 
       const getVal = id => document.getElementById(id)?.value || '';
       const scheduleSection = {
         badge: getVal('input-scheduleBadge') || 'HORARIOS Y ACTIVIDADES',
-        title: getVal('input-scheduleTitle') || 'Cronograma de la Gran Jornada',
-        subtitle: getVal('input-scheduleSubtitle') || 'Ven temprano para disfrutar de todas las sorpresas preparadas para la familia.'
+        title: getVal('input-scheduleTitle') || 'Cronograma de la Jornada',
+        subtitle: getVal('input-scheduleSubtitle') || 'Dos días de actividades para toda la familia.',
+        kitsColumnTitle: getVal('input-scheduleKitsTitle') || 'Sábado 28 de Noviembre',
+        kitsColumnSubtitle: getVal('input-scheduleKitsSubtitle') || 'Entrega de Kits',
+        raceColumnTitle: getVal('input-scheduleRaceTitle') || 'Domingo 29 de Noviembre',
+        raceColumnSubtitle: getVal('input-scheduleRaceSubtitle') || 'Día de la Corrida'
       };
 
       try {

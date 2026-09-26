@@ -205,47 +205,56 @@
     {
       "time": "Sábado 28 Nov • 15:00 a 19:00 hrs",
       "title": "Entrega Oficial de Kits de Competencia",
-      "desc": "Retiro de poleras técnicas, números y pulseras de color identificatorias según distancia en el sector de acreditaciones."
+      "desc": "Retiro de poleras técnicas, números y pulseras de color identificatorias según distancia en el sector de acreditaciones.",
+      "day": "kits"
     },
     {
       "time": "Domingo 29 Nov • 10:00 a 10:30 hrs",
       "title": "Bienvenida Familiar & Baile Entretenido",
-      "desc": "Calentamiento masivo con música y animación para todas las familias deportistas en el Pedraplén."
+      "desc": "Calentamiento masivo con música y animación para todas las familias deportistas en el Pedraplén.",
+      "day": "race"
     },
     {
       "time": "10:45 hrs",
       "title": "Largada 250m babykidsrace (Pulsera Blanca)",
-      "desc": "Nacidos 2023 a 2026 (0 a 3 años) acompañados por sus familias en circuito protegido."
+      "desc": "Nacidos 2023 a 2026 (0 a 3 años) acompañados por sus familias en circuito protegido.",
+      "day": "race"
     },
     {
       "time": "11:00 hrs",
       "title": "Largada 250m planos (Pulsera Rosada)",
-      "desc": "Nacidos 2021 y 2022 (4 y 5 años) con adulto responsable. Salida calle Walker Martínez retorno Casino."
+      "desc": "Nacidos 2021 y 2022 (4 y 5 años) con adulto responsable. Salida calle Walker Martínez retorno Casino.",
+      "day": "race"
     },
     {
       "time": "11:15 - 11:20 hrs",
       "title": "Largadas 500m (Pulsera Verde)",
-      "desc": "11:15 hrs categoría NEE (4 a 9 años) y 11:20 hrs general (6 y 7 años). Retorno frontis Hotel Bellavista."
+      "desc": "11:15 hrs categoría NEE (4 a 9 años) y 11:20 hrs general (6 y 7 años). Retorno frontis Hotel Bellavista.",
+      "day": "race"
     },
     {
       "time": "11:35 - 11:40 hrs",
       "title": "Largadas 1 Kilómetro (Pulsera Amarilla)",
-      "desc": "11:35 hrs categoría NEE (10 a 14 años) y 11:40 hrs general (8 y 9 años). Retorno Monumento Héroes Patrios."
+      "desc": "11:35 hrs categoría NEE (10 a 14 años) y 11:40 hrs general (8 y 9 años). Retorno Monumento Héroes Patrios.",
+      "day": "race"
     },
     {
       "time": "12:05 hrs",
       "title": "Largada 2 Kilómetros (Pulsera Celeste)",
-      "desc": "Nacidos 2014 a 2016 (10, 11 y 12 años). Salida Pedraplén con retorno en Museo Pablo Fierro."
+      "desc": "Nacidos 2014 a 2016 (10, 11 y 12 años). Salida Pedraplén con retorno en Museo Pablo Fierro.",
+      "day": "race"
     },
     {
       "time": "12:25 - 12:30 hrs",
       "title": "Largadas 4 Kilómetros (Pulsera Roja)",
-      "desc": "12:25 hrs NEE y 12:30 hrs general (13 y 14 años). Dos giros con retorno en Museo Pablo Fierro."
+      "desc": "12:25 hrs NEE y 12:30 hrs general (13 y 14 años). Dos giros con retorno en Museo Pablo Fierro.",
+      "day": "race"
     },
     {
       "time": "13:10 hrs",
       "title": "Ceremonia de Premiación Oficial",
-      "desc": "Reconocimiento a todas las categorías damas y varones, entrega de medallas y cierre familiar."
+      "desc": "Reconocimiento a todas las categorías damas y varones, entrega de medallas y cierre familiar.",
+      "day": "race"
     }
   ],
   "pricing": {
@@ -978,8 +987,12 @@
   },
   "scheduleSection": {
     "badge": "HORARIOS Y ACTIVIDADES",
-    "title": "Cronograma de la Gran Jornada",
-    "subtitle": "Ven temprano para disfrutar de todas las sorpresas preparadas para la familia."
+    "title": "Cronograma de la Jornada",
+    "subtitle": "Dos días de actividades para toda la familia. Retira tu kit el sábado y corre el domingo.",
+    "kitsColumnTitle": "Sábado 28 de Noviembre",
+    "kitsColumnSubtitle": "Entrega de Kits",
+    "raceColumnTitle": "Domingo 29 de Noviembre",
+    "raceColumnSubtitle": "Día de la Corrida"
   },
   "faq": [
     {
