@@ -1103,10 +1103,12 @@
   <%
     const footerCfg = content.footer || {};
     const footerSocial = footerCfg.socialLinks || {};
-    const showBases = footerCfg.showBasesLink !== false;
+    // Robusto: acepta boolean false Y string "false" como "apagado"
+    const _isOn = (v, def = true) => (v === undefined || v === null) ? def : (v !== false && v !== 'false');
+    const showBases = _isOn(footerCfg.showBasesLink, true);
     const basesLabel = footerCfg.basesLinkText || 'Bases & Reglamento';
-    const showAdmin = footerCfg.showAdminLink !== false;
-    const showSocial = footerCfg.showSocialLinks !== false;
+    const showAdmin = _isOn(footerCfg.showAdminLink, true);
+    const showSocial = _isOn(footerCfg.showSocialLinks, true);
   %>
   <footer class="border-t border-slate-800 bg-slate-900 pt-12 pb-28 md:pb-12 relative z-10 text-xs text-slate-400 transition-colors">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
@@ -1195,7 +1197,7 @@
   </footer>
 
   <!-- BOTÓN FLOTANTE MÓVIL TÁCTIL (FLOATING CTA PILL CON MÁRGENES SEGUROS) -->
-  <% if (footerCfg.showFloatingCta !== false) { %>
+  <% if (_isOn(footerCfg.showFloatingCta, true)) { %>
   <div id="mobile-sticky-cta" class="fixed bottom-3 inset-x-3 z-40 md:hidden transition-all duration-300 ease-out translate-y-28 opacity-0 pointer-events-none">
     <div class="bg-white/95 dark:bg-gray-950/95 border border-slate-200/90 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.18)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.6)] rounded-2xl p-2.5 backdrop-blur-lg flex items-center justify-between gap-2.5 max-w-sm mx-auto">
       <div class="flex flex-col min-w-0 pl-1">
@@ -1215,7 +1217,7 @@
   <% } %>
 
   <!-- BOTÓN FLOTANTE WHATSAPP -->
-  <% if (footerCfg.showFloatingWhatsapp !== false) { %>
+  <% if (_isOn(footerCfg.showFloatingWhatsapp, true)) { %>
   <% 
     const rawContactPhone = footerCfg.whatsappNumber || content.contact?.phone || content.registrationForm?.contactWhatsapp || '+56 9 8765 4321';
     const cleanWaNumber = rawContactPhone.replace(/[^0-9]/g, '');

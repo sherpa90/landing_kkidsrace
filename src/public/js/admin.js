@@ -3,6 +3,7 @@
 function initAllAdminModules() {
   const modules = [
     ['Iconos Lucide', () => { if (window.lucide) window.lucide.createIcons(); }],
+    ['Toggles Visuales', initToggleVisuals],
     ['Pestañas', initAdminTabs],
     ['Guardado CMS', initCmsSaveForm],
     ['Tema Color', initColorThemeSelector],
@@ -3723,3 +3724,42 @@ function initFooterManager() {
   });
 }
 
+
+// 22. Gestión visual de todos los toggles del CMS (footer, header, bases, sections)
+// Los selectores CSS :checked + .sibling pueden fallar cuando Tailwind sobreescribe bg-gray-700
+// Este módulo aplica las clases activas directamente por JS al estado inicial y en cada cambio.
+function initToggleVisuals() {
+  const TOGGLE_CONFIG = {
+    'footer-toggle':             '#ec4899',
+    'header-toggle':             '#2563eb',
+    'header-link-toggle':        '#2563eb',
+    'bases-toggle':              '#06b6d4',
+    'section-visibility-toggle': '#2563eb'
+  };
+
+  function applyToggleState(checkbox) {
+    const track = checkbox.nextElementSibling;
+    if (!track || !track.classList.contains('toggle-track')) return;
+    const thumb = track.querySelector('.toggle-thumb');
+    let onColor = '#2563eb';
+    for (const [cls, color] of Object.entries(TOGGLE_CONFIG)) {
+      if (checkbox.classList.contains(cls)) { onColor = color; break; }
+    }
+    if (checkbox.checked) {
+      track.style.backgroundColor = onColor;
+      if (thumb) thumb.style.transform = 'translateX(16px)';
+    } else {
+      track.style.backgroundColor = '#374151';
+      if (thumb) thumb.style.transform = 'translateX(0)';
+    }
+  }
+
+  const sel = Object.keys(TOGGLE_CONFIG).map(c => 'input.' + c).join(', ');
+  document.querySelectorAll(sel).forEach(applyToggleState);
+
+  document.addEventListener('change', (e) => {
+    const inp = e.target;
+    if (!inp || inp.tagName !== 'INPUT' || inp.type !== 'checkbox') return;
+    if (Object.keys(TOGGLE_CONFIG).some(cls => inp.classList.contains(cls))) applyToggleState(inp);
+  });
+}
