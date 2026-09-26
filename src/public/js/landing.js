@@ -524,9 +524,15 @@ function initMobileMenu() {
     link.addEventListener('click', closeMenu);
   });
 
-  // Cerrar al pulsar fuera del menú
+  // Cerrar al pulsar fuera del menú o con Escape
   document.addEventListener('click', (e) => {
     if (isOpen && !menu.contains(e.target) && !btn.contains(e.target)) {
+      closeMenu();
+    }
+  });
+
+  document.addEventListener('keydown', (e) => {
+    if (isOpen && e.key === 'Escape') {
       closeMenu();
     }
   });
@@ -654,18 +660,21 @@ function initContactForm() {
   });
 }
 
-// 9. Navegación suave
+// 9. Navegación suave con compensación de barra fija
 function initSmoothScroll() {
   document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     anchor.addEventListener('click', function(e) {
       const targetId = this.getAttribute('href');
-      if (targetId === '#') return;
+      if (targetId === '#' || targetId === '') return;
       const targetElement = document.querySelector(targetId);
       if (targetElement) {
         e.preventDefault();
-        targetElement.scrollIntoView({
-          behavior: 'smooth',
-          block: 'start'
+        const navbar = document.getElementById('navbar');
+        const navHeight = navbar ? navbar.offsetHeight : 70;
+        const targetPosition = targetElement.getBoundingClientRect().top + window.pageYOffset - navHeight - 12;
+        window.scrollTo({
+          top: Math.max(0, targetPosition),
+          behavior: 'smooth'
         });
       }
     });

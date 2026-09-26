@@ -205,7 +205,7 @@
           <% if (isSecVis('schedule')) { %>
           <a href="#schedule" class="mobile-nav-link group flex items-center gap-3 py-3 px-4 rounded-xl text-slate-700 dark:text-gray-300 font-semibold hover:bg-slate-100 dark:hover:bg-gray-800/70 active:bg-slate-200 transition-colors">
             <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-gray-800 shrink-0"><i data-lucide="calendar-clock" class="w-3.5 h-3.5 text-blue-500"></i></span>
-            Cronograma del Día
+            Cronograma Oficial
           </a>
           <% } %>
           <% if (isSecVis('gallery')) { %>
@@ -354,7 +354,7 @@
           </div>
 
           <!-- Bloques del Contador Dinámico -->
-          <div id="countdown-timer" data-target="<%= content.countdown?.targetDate || '2026-11-15T09:00:00' %>" class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-center max-w-3xl mx-auto">
+          <div id="countdown-timer" data-target="<%= content.countdown?.targetDate || '2026-11-29T10:00:00' %>" class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 text-center max-w-3xl mx-auto">
             
             <div class="p-4 sm:p-6 rounded-3xl bg-blue-50/60 dark:bg-gray-950/90 border border-blue-100 dark:border-gray-800/80 shadow-sm flex flex-col justify-center items-center">
               <span id="cd-days" class="text-4xl sm:text-6xl font-black text-blue-600 dark:text-blue-400">00</span>
@@ -928,14 +928,14 @@
                 </li>
                 <li class="flex items-start gap-2.5">
                   <i data-lucide="car" class="w-4 h-4 text-blue-600 dark:text-yellow-400 mt-0.5 shrink-0"></i>
-                  <span><%= content.venue?.parking || 'Estacionamiento disponible en los alrededores del parque.' %></span>
+                  <span><%= content.venue?.parking || 'Estacionamientos disponibles en calles aledañas a la Costanera y sector Puerto Chico.' %></span>
                 </li>
                 <li class="flex items-start gap-2.5">
                   <i data-lucide="bus" class="w-4 h-4 text-blue-600 dark:text-yellow-400 mt-0.5 shrink-0"></i>
-                  <span><%= content.venue?.transit || 'Acceso en Metro y buses del Transantiago.' %></span>
+                  <span><%= content.venue?.transit || 'Locomoción colectiva y buses por Av. Vicente Pérez Rosales.' %></span>
                 </li>
               </ul>
-              <a href="https://www.google.com/maps/search/<%= encodeURIComponent(content.venue?.address || content.countdown?.locationName || 'Parque Bicentenario Santiago') %>" target="_blank" rel="noopener noreferrer" class="mt-5 flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-2xl text-sm font-bold bg-blue-600 hover:bg-blue-700 dark:bg-yellow-400 dark:hover:bg-yellow-300 text-white dark:text-gray-900 transition-all shadow-md shadow-blue-600/20 dark:shadow-yellow-400/10">
+              <a href="https://www.google.com/maps/search/<%= encodeURIComponent(content.venue?.address || content.countdown?.locationName || 'Costanera Puerto Varas Sector Pedraplen') %>" target="_blank" rel="noopener noreferrer" class="mt-5 flex items-center justify-center gap-2 w-full px-4 py-2.5 rounded-2xl text-sm font-bold bg-blue-600 hover:bg-blue-700 dark:bg-yellow-400 dark:hover:bg-yellow-300 text-white dark:text-gray-900 transition-all shadow-md shadow-blue-600/20 dark:shadow-yellow-400/10">
                 <i data-lucide="navigation" class="w-4 h-4"></i>
                 Abrir en Google Maps
               </a>
@@ -1125,14 +1125,36 @@
     </div>
   </div>
 
+  <!-- BOTÓN FLOTANTE WHATSAPP -->
+  <% 
+    const rawContactPhone = content.contact?.phone || content.registrationForm?.contactWhatsapp || '+56 9 8765 4321';
+    const cleanWaNumber = rawContactPhone.replace(/[^0-9]/g, '');
+  %>
+  <% if (cleanWaNumber) { %>
+  <a href="https://wa.me/<%= cleanWaNumber %>?text=<%= encodeURIComponent('Hola, tengo una consulta sobre la Corrida KKIDSRACE 2026') %>" 
+     target="_blank" 
+     rel="noopener noreferrer"
+     class="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 flex items-center gap-2 px-3.5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 group touch-manipulation"
+     aria-label="Contactar por WhatsApp">
+    <div class="relative flex items-center justify-center">
+      <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
+        <path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.97.581 1.83.89 2.796.89 3.183 0 5.768-2.587 5.769-5.766.001-3.182-2.585-5.777-5.769-5.777zm3.364 8.163c-.144.405-.837.774-1.17.822-.313.044-.72.062-2.312-.6-1.905-.793-3.13-2.735-3.225-2.861-.095-.127-.778-1.036-.778-1.975 0-.939.492-1.401.667-1.591.175-.19.381-.238.508-.238.127 0 .254.001.365.006.118.005.277-.045.433.33.16.386.545 1.332.593 1.428.048.096.08.207.016.334-.064.127-.096.206-.19.317-.095.111-.2.248-.286.334-.095.096-.195.2-.084.391.111.19.493.813 1.058 1.317.728.649 1.341.851 1.532.946.191.096.302.079.413-.048.111-.127.476-.556.603-.746.127-.19.254-.159.429-.095.175.063 1.11.523 1.3.618.19.096.317.143.365.223.048.079.048.461-.096.866z"/>
+        <path d="M12 2C6.477 2 2 6.477 2 12c0 1.891.524 3.661 1.434 5.176L2 22l4.982-1.309A9.957 9.957 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18.182c-1.637 0-3.167-.457-4.479-1.25l-.322-.195-2.962.777.791-2.888-.214-.341C3.937 15.011 3.455 13.551 3.455 12c0-4.711 3.834-8.545 8.545-8.545 4.712 0 8.545 3.834 8.545 8.545 0 4.712-3.833 8.546-8.545 8.546z"/>
+      </svg>
+      <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-yellow-300 rounded-full animate-ping"></span>
+    </div>
+    <span class="text-xs font-bold tracking-tight hidden sm:inline-block">¿Dudas? Escríbenos</span>
+  </a>
+  <% } %>
+
   <!-- Scripts de la Landing Page -->
   <script src="/js/landing.js"></script>
   <!-- Leaflet.js + inicialización del mapa del evento -->
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     (function() {
-      const lat  = <%- JSON.stringify(content.venue?.lat  ?? -33.4489) %>;
-      const lng  = <%- JSON.stringify(content.venue?.lng  ?? -70.6693) %>;
+      const lat  = <%- JSON.stringify(content.venue?.lat  ?? -41.3195) %>;
+      const lng  = <%- JSON.stringify(content.venue?.lng  ?? -72.9854) %>;
       const zoom = <%- JSON.stringify(content.venue?.zoom ?? 15) %>;
       const name = <%- JSON.stringify(content.venue?.name || content.countdown?.locationName || 'Lugar del Evento') %>;
       const addr = <%- JSON.stringify(content.venue?.address || '') %>;

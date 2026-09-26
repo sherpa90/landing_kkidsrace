@@ -160,6 +160,16 @@ html.dark .ambient-red {
   }
 }
 
+/* Smooth scroll padding y márgenes para prevenir solapamiento con navbar fixed */
+html {
+  scroll-behavior: smooth;
+  scroll-padding-top: 5.5rem;
+}
+
+section[id] {
+  scroll-margin-top: 5.5rem;
+}
+
 /* Toasts de Notificación */
 #toast-container {
   position: fixed;
@@ -169,6 +179,15 @@ html.dark .ambient-red {
   display: flex;
   flex-direction: column;
   gap: 12px;
+  max-width: calc(100vw - 32px);
+}
+
+@media (max-width: 768px) {
+  #toast-container {
+    bottom: 84px;
+    right: 16px;
+    left: 16px;
+  }
 }
 
 .toast {
