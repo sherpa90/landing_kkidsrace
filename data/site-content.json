@@ -1074,14 +1074,9 @@
     "title": "Bases, Recorridos y Reglamento",
     "subtitle": "Toda la información oficial del evento KKidsrace 2025: distancias, horarios, categorías y normas. Lee con atención antes de inscribirte.",
     "pdfUrl": "https://kkidsrace.cl/wp-content/uploads/2025/10/BASES-K_KIDS_RACE-2025.pdf",
-    "ticketeraUrl": "https://ticketera.kkidsrace.cl/",
     "supportEmail": "soporte@kkidsrace.cl",
     "showPdfButton": true,
     "pdfButtonText": "Descargar Bases (PDF)",
-    "showTicketeraButton": true,
-    "ticketeraButtonText": "Comprar Entrada (Ticketera)",
-    "showNavTicketeraButton": true,
-    "navTicketeraButtonText": "Comprar Entrada",
     "showPrintButton": true,
     "showSummaryCards": true,
     "showSchedules": true,
@@ -1170,9 +1165,9 @@
     ],
     "neeNotice": "Categorías NEE (Necesidades Educativas Especiales) largan 5 minutos antes de su prueba. Consulte las bases completas (PDF) para detalles de adaptación.",
     "registrationProcess": {
-      "exclusiveNotice": "Las inscripciones se realizan exclusivamente a través de Ticketera (ticketera.kkidsrace.cl). No se aceptan inscripciones por transferencia ni formularios fuera de la plataforma.",
-      "instructions": "Las inscripciones se realizan exclusivamente a través de la plataforma de venta de entradas Ticketera. Accede a https://ticketera.kkidsrace.cl y compra la entrada correspondiente a la categoría de tu participante. Todos los pagos se procesan de forma segura por Ticketera.",
-      "commissionNote": "El valor final (incluye comisión de Ticketera) se muestra al completar la compra en la plataforma."
+      "exclusiveNotice": "Las inscripciones se realizan de forma oficial a través del formulario de esta página. El pago se realiza vía transferencia electrónica directa a la organización.",
+      "instructions": "Para inscribirte, dirígete a la sección de 'Inscribir' en nuestro sitio oficial. Completa el formulario con los datos del corredor y apoderado. Luego adjunta el comprobante de transferencia.",
+      "commissionNote": "La inscripción no tiene costo adicional ni comisiones de plataformas externas."
     },
     "kitPickup": {
       "dateTime": "Sábado 9 de noviembre • 15:00 - 19:00",

@@ -80,14 +80,11 @@
         </button>
         <% } %>
 
-        <!-- Botón Comprar Ticketera (navbar) -->
-        <% const ticketeraLink = content.bases?.ticketeraUrl || 'https://ticketera.kkidsrace.cl/'; %>
-        <% if (content.bases?.showNavTicketeraButton !== false && ticketeraLink) { %>
-        <a href="<%= ticketeraLink %>" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap">
-          <i data-lucide="ticket" class="w-4 h-4"></i>
-          <span><%= content.bases?.navTicketeraButtonText || 'Comprar Entrada' %></span>
+        <!-- Botón Inscribir (navbar) -->
+        <a href="/inscribir" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+          <span>Inscribirse Aquí</span>
         </a>
-        <% } %>
       </div>
 
 
@@ -127,12 +124,10 @@
           </a>
           <% } %>
 
-          <% if (content.bases?.showTicketeraButton !== false && ticketeraLink) { %>
-          <a href="<%= ticketeraLink %>" target="_blank" rel="noopener noreferrer" class="px-5 py-3 rounded-2xl bg-yellow-400 hover:bg-yellow-300 text-gray-950 text-xs sm:text-sm font-black shadow-lg shadow-yellow-400/20 transition-transform active:scale-95 flex items-center gap-2">
-            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
-            <span><%= content.bases?.ticketeraButtonText || 'Comprar Entrada (Ticketera)' %></span>
+          <a href="/inscribir" class="px-5 py-3 rounded-2xl bg-yellow-400 hover:bg-yellow-300 text-gray-950 text-xs sm:text-sm font-black shadow-lg shadow-yellow-400/20 transition-transform active:scale-95 flex items-center gap-2">
+            <i data-lucide="user-plus" class="w-4 h-4"></i>
+            <span>Inscribirse Oficial</span>
           </a>
-          <% } %>
         </div>
 
       </div>
@@ -279,25 +274,25 @@
       </div>
     </section>
 
-    <!-- SECCIÓN 3: PROCESO DE INSCRIPCIÓN EXCLUSIVO POR TICKETERA -->
+    <!-- SECCIÓN 3: PROCESO DE INSCRIPCIÓN OFICIAL -->
     <section class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200/90 dark:border-white/10 shadow-sm space-y-6">
       <div class="pb-4 border-b border-slate-100 dark:border-gray-800">
         <div class="flex items-center gap-2 text-xs font-black text-blue-600 dark:text-yellow-400 uppercase tracking-wider">
-          <i data-lucide="ticket" class="w-4 h-4"></i>
+          <i data-lucide="user-plus" class="w-4 h-4"></i>
           <span>Plataforma Oficial de Compra</span>
         </div>
         <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">Proceso de Inscripción</h2>
       </div>
 
-      <!-- Cuadro de Exclusividad Ticketera -->
+      <!-- Cuadro de Proceso Oficial -->
       <div class="p-5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 flex items-start gap-4">
         <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md">
-          <i data-lucide="alert-circle" class="w-5 h-5"></i>
+          <i data-lucide="info" class="w-5 h-5"></i>
         </div>
         <div class="text-xs leading-relaxed space-y-1">
           <strong class="text-sm font-black text-blue-950 dark:text-blue-200 block">Nota Importante:</strong>
           <p class="text-blue-900 dark:text-blue-300">
-            <%= content.bases?.registrationProcess?.exclusiveNotice || 'Las inscripciones se realizan exclusivamente a través de Ticketera (ticketera.kkidsrace.cl). No se aceptan inscripciones por transferencia ni formularios fuera de la plataforma.' %>
+            <%= content.bases?.registrationProcess?.exclusiveNotice || 'Las inscripciones se realizan de forma oficial a través del formulario de esta página. El pago se realiza vía transferencia electrónica directa a la organización.' %>
           </p>
         </div>
       </div>
@@ -305,10 +300,10 @@
       <!-- Detalle paso a paso -->
       <div class="space-y-4 text-xs sm:text-sm text-slate-700 dark:text-gray-300 leading-relaxed">
         <p>
-          <%= content.bases?.registrationProcess?.instructions || 'Las inscripciones se realizan exclusivamente a través de la plataforma de venta de entradas Ticketera. Accede a https://ticketera.kkidsrace.cl y compra la entrada correspondiente a la categoría de tu participante. Todos los pagos se procesan de forma segura por Ticketera.' %>
+          <%= content.bases?.registrationProcess?.instructions || 'Para inscribirte, dirígete a la sección de Inscribir en nuestro sitio oficial. Completa el formulario con los datos del corredor y apoderado. Luego adjunta el comprobante de transferencia.' %>
         </p>
         <p class="text-slate-500 dark:text-gray-400 italic">
-          <%= content.bases?.registrationProcess?.commissionNote || 'El valor final (incluye comisión de Ticketera) se muestra al completar la compra en la plataforma.' %>
+          <%= content.bases?.registrationProcess?.commissionNote || 'La inscripción no tiene costo adicional ni comisiones de plataformas externas.' %>
         </p>
       </div>
 
@@ -316,14 +311,14 @@
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-100 dark:border-gray-800">
         <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400">
           <i data-lucide="headphones" class="w-4 h-4 text-blue-500"></i>
-          <span>¿Necesitas ayuda con la compra? Contacta soporte:</span>
+          <span>¿Necesitas ayuda con la inscripción? Contacta soporte:</span>
           <% const supportEmail = content.bases?.supportEmail || 'soporte@kkidsrace.cl'; %>
           <a href="mailto:<%= supportEmail %>" class="font-bold text-blue-600 dark:text-yellow-400 hover:underline"><%= supportEmail %></a>
         </div>
 
-        <a href="<%= ticketeraLink %>" target="_blank" rel="noopener noreferrer" class="px-6 py-3 rounded-2xl text-xs sm:text-sm font-black text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/30 active:scale-95 transition-all flex items-center justify-center gap-2">
-          <span>Comprar Entrada en Ticketera</span>
-          <i data-lucide="external-link" class="w-4 h-4"></i>
+        <a href="/inscribir" class="px-6 py-3 rounded-2xl text-xs sm:text-sm font-black text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/30 active:scale-95 transition-all flex items-center justify-center gap-2">
+          <span>Ir a Inscribirse</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </a>
       </div>
     </section>
@@ -378,12 +373,10 @@
         <%= content.bases?.closingBannerText || 'Asegura el cupo y polera técnica de tu pequeño/a antes de que se agoten las inscripciones.' %>
       </p>
       <div class="pt-2 flex flex-wrap justify-center gap-3">
-        <% if (content.bases?.showTicketeraButton !== false && ticketeraLink) { %>
-        <a href="<%= ticketeraLink %>" target="_blank" rel="noopener noreferrer" class="px-6 py-3 rounded-2xl text-sm font-black text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/30 transition-transform active:scale-95 flex items-center gap-2">
-          <span><%= content.bases?.ticketeraButtonText || 'Comprar Entrada Oficial' %></span>
+        <a href="/inscribir" class="px-6 py-3 rounded-2xl text-sm font-black text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/30 transition-transform active:scale-95 flex items-center gap-2">
+          <span>Ir al Formulario de Inscripción</span>
           <i data-lucide="arrow-right" class="w-4 h-4"></i>
         </a>
-        <% } %>
         <% if (content.bases?.showPdfButton !== false && pdfLink) { %>
         <a href="<%= pdfLink %>" target="_blank" rel="noopener noreferrer" class="px-6 py-3 rounded-2xl text-sm font-bold text-slate-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-slate-50 border border-slate-300 dark:border-gray-700 transition-colors flex items-center gap-2">
           <i data-lucide="file-text" class="w-4 h-4"></i>
@@ -404,9 +397,7 @@
         <% if (content.bases?.showPdfButton !== false && pdfLink) { %>
         <a href="<%= pdfLink %>" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 dark:hover:text-yellow-400 font-bold transition-colors">Bases PDF</a>
         <% } %>
-        <% if (content.bases?.showTicketeraButton !== false && ticketeraLink) { %>
-        <a href="<%= ticketeraLink %>" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 dark:hover:text-yellow-400 font-bold transition-colors">Ticketera</a>
-        <% } %>
+        <a href="/inscribir" class="hover:text-blue-600 dark:hover:text-yellow-400 font-bold transition-colors">Inscripción</a>
       </div>
     </div>
   </footer>
