@@ -14,6 +14,7 @@ function initAllAdminModules() {
     ['Corridas', initRacesManager],
     ['Auspiciadores', initSponsorsManager],
     ['Secciones', initSectionsManager],
+    ['Kits de Corredor', initKitsManager],
     ['Escáner RUT', initRutScanner],
     ['Usuarios', initUsersManager],
     ['Cronograma', initScheduleManager],
@@ -1682,6 +1683,148 @@ function initSectionsManager() {
   });
 }
 
+// 10.5 Gestor de Kits de Corredor (Agregar y Eliminar)
+function initKitsManager() {
+  const container = document.getElementById('kits-container');
+  const addBtn = document.getElementById('btn-add-kit');
+  const emptyMsg = document.getElementById('no-kits-message');
+  const countBadge = document.getElementById('kits-count-badge');
+
+  if (!container || !addBtn) return;
+
+  function updateKitsCount() {
+    const items = container.querySelectorAll('.pricing-item');
+    if (countBadge) countBadge.textContent = items.length;
+    if (emptyMsg) {
+      if (items.length === 0) {
+        emptyMsg.classList.remove('hidden');
+      } else {
+        emptyMsg.classList.add('hidden');
+      }
+    }
+
+    // Re-indexar badges visuales #1, #2, etc.
+    items.forEach((item, idx) => {
+      const badge = item.querySelector('.kit-badge-num');
+      if (badge) badge.textContent = `#${idx + 1}`;
+      const nameInput = item.querySelector('.kit-name-input');
+      const titlePreview = item.querySelector('.kit-title-preview');
+      if (nameInput && titlePreview) {
+        titlePreview.textContent = nameInput.value || `Kit #${idx + 1}`;
+      }
+    });
+  }
+
+  // Escuchar cambios de nombre para actualizar el preview en el header del kit
+  container.addEventListener('input', (e) => {
+    if (e.target && e.target.classList.contains('kit-name-input')) {
+      const card = e.target.closest('.pricing-item');
+      if (card) {
+        const preview = card.querySelector('.kit-title-preview');
+        if (preview) preview.textContent = e.target.value.trim() || 'Nuevo Kit';
+      }
+    }
+  });
+
+  // Agregar nuevo kit
+  addBtn.addEventListener('click', () => {
+    const count = container.querySelectorAll('.pricing-item').length;
+    const newId = 'kit-' + Date.now();
+    const newIdx = count;
+
+    const kitHtml = `
+      <div class="pricing-item p-5 sm:p-6 rounded-3xl bg-gray-900/80 border border-gray-800 space-y-4 relative transition-all animate-in fade-in duration-200">
+        <input type="hidden" name="plans[${newIdx}][id]" value="${newId}" class="kit-id-input">
+        
+        <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+          <div class="flex items-center gap-2.5">
+            <span class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs border border-emerald-500/30 kit-badge-num">
+              #${newIdx + 1}
+            </span>
+            <span class="text-sm font-bold text-white kit-title-preview">Nuevo Kit de Corredor</span>
+          </div>
+          <button type="button" class="btn-delete-kit text-xs text-red-400 hover:text-white bg-red-950/60 hover:bg-red-900 border border-red-500/30 rounded-xl px-3 py-1.5 font-bold transition-all flex items-center gap-1.5 cursor-pointer" title="Eliminar este kit">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+            <span>Eliminar Kit</span>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Nombre del Kit *</label>
+            <input type="text" name="plans[${newIdx}][name]" value="Kit Oficial Carrera" placeholder="Ej: Kit Básico Oficial" class="kit-name-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Valor Inscripción ($) *</label>
+            <input type="number" name="plans[${newIdx}][priceMonthly]" value="14990" placeholder="Ej: 14990" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Valor Referencial ($)</label>
+            <input type="number" name="plans[${newIdx}][priceYearly]" value="19990" placeholder="Ej: 19990" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Badge o Etiqueta</label>
+            <input type="text" name="plans[${newIdx}][badge]" value="Nuevo" placeholder="Ej: Cupos Limitados" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Breve Descripción</label>
+          <textarea name="plans[${newIdx}][description]" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" placeholder="Ej: La experiencia completa para correr y disfrutar en familia.">Incluye polera técnica de competición, medalla finisher y seguro de carrera.</textarea>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <input type="checkbox" id="popular-${newId}" name="plans[${newIdx}][isPopular]" class="w-4 h-4 rounded text-yellow-500 focus:ring-emerald-400 bg-gray-950 border-gray-800 cursor-pointer">
+          <label for="popular-${newId}" class="text-xs font-semibold text-yellow-300 cursor-pointer">Marcar como Kit "Más Elegido" (con halo dorado en la web)</label>
+        </div>
+
+        <div>
+          <label class="block text-xs text-gray-400 mb-1">Elementos y Beneficios Incluidos (Uno por línea)</label>
+          <textarea name="plans[${newIdx}][features]" rows="4" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono leading-relaxed focus:outline-none focus:border-emerald-500" placeholder="Polera técnica oficial Kids Race&#10;Número de corredor oficial&#10;Medalla finisher al cruzar la meta&#10;Hidratación y fruta fresca">Polera técnica oficial Kids Race
+Número de corredor oficial
+Medalla finisher al cruzar la meta
+Hidratación y fruta fresca</textarea>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Texto del Botón</label>
+            <input type="text" name="plans[${newIdx}][ctaText]" value="Inscribir Ahora" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+          </div>
+          <div>
+            <label class="block text-xs text-gray-400 mb-1">Enlace de Destino</label>
+            <input type="text" name="plans[${newIdx}][ctaLink]" value="/inscribir" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
+          </div>
+        </div>
+      </div>
+    `;
+
+    container.insertAdjacentHTML('beforeend', kitHtml);
+    updateKitsCount();
+    if (window.lucide) window.lucide.createIcons();
+
+    const lastItem = container.lastElementChild;
+    if (lastItem) lastItem.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  // Eliminar kit con confirmación
+  container.addEventListener('click', (e) => {
+    const deleteBtn = e.target.closest('.btn-delete-kit');
+    if (!deleteBtn) return;
+
+    const item = deleteBtn.closest('.pricing-item');
+    if (!item) return;
+
+    const name = item.querySelector('.kit-name-input')?.value || 'este kit';
+    if (confirm(`¿Estás seguro de que deseas eliminar el "${name}"?`)) {
+      item.remove();
+      updateKitsCount();
+    }
+  });
+
+  updateKitsCount();
+}
+
 // 11. Escáner de Cédula de Identidad (HTML5 QR/Barcode Scanner)
 function initRutScanner() {
   const openBtn = document.getElementById('btn-open-scanner');
@@ -1697,6 +1840,7 @@ function initRutScanner() {
   const filterTableBtn = document.getElementById('btn-filter-table-with-rut');
   const manualRutInput = document.getElementById('manual-rut-input');
   const searchManualBtn = document.getElementById('btn-search-manual-rut');
+  const fileInput = document.getElementById('scanner-file-input');
   const searchInput = document.getElementById('filter-search-input');
 
   if (!openBtn || !modal) return;
@@ -1704,24 +1848,77 @@ function initRutScanner() {
   let html5QrCode = null;
   let currentCameraFacing = "environment"; // trasera por defecto en móviles
   let lastScannedRut = '';
+  let isScanning = false;
 
-  // Función para extraer el RUT desde el texto escaneado
-  // Las cédulas chilenas codifican strings como:
-  // "RUN=12345678-9" o URLs como "https://portal.sidiv.registrocivil.cl/...&run=12345678-9" o texto crudo "12345678-9"
+  // Validación matemática oficial del dígito verificador chileno (Módulo 11)
+  function isValidRutChecksum(cleanRut) {
+    if (!cleanRut || typeof cleanRut !== 'string') return false;
+    const clean = cleanRut.replace(/[^0-9kK]/g, '').toUpperCase();
+    if (clean.length < 8 || clean.length > 9) return false;
+    const body = clean.slice(0, -1);
+    const dv = clean.slice(-1);
+    let sum = 0;
+    let mul = 2;
+    for (let i = body.length - 1; i >= 0; i--) {
+      sum += parseInt(body[i], 10) * mul;
+      mul = (mul === 7) ? 2 : mul + 1;
+    }
+    const res = 11 - (sum % 11);
+    const expectedDv = res === 11 ? '0' : res === 10 ? 'K' : String(res);
+    return dv === expectedDv;
+  }
+
+  function formatRutWithHyphen(raw) {
+    if (!raw) return '';
+    const clean = raw.replace(/[^0-9kK]/g, '').toUpperCase();
+    if (clean.length < 8) return raw;
+    const body = clean.slice(0, -1);
+    const dv = clean.slice(-1);
+    return `${body}-${dv}`;
+  }
+
+  // Función robusta para extraer el RUT desde cualquier código de barras o QR
   function extractRutFromBarcode(text) {
     if (!text) return null;
     const clean = text.trim();
+    console.log('[Scanner raw decoded]:', clean);
 
-    const matchParam = clean.match(/(?:RUN|RUT|run|rut)[=:\s]*([0-9]{7,8}-?[0-9kK])/);
-    if (matchParam && matchParam[1]) return matchParam[1].toUpperCase();
+    // 1. Caso parámetro RUN o RUT en URL del Registro Civil (ej: &RUN=12345678-9 o docstatus?run=12.345.678-9)
+    const matchParam = clean.match(/(?:RUN|RUT|run|rut)[=:\s]*([0-9]{1,2}(?:\.?[0-9]{3}){2}-?[0-9kK]|[0-9]{7,8}-?[0-9kK])/i);
+    if (matchParam && matchParam[1]) {
+      return formatRutWithHyphen(matchParam[1]);
+    }
 
-    const matchDirect = clean.match(/(?:^|[^0-9])([0-9]{1,2}(?:\.?[0-9]{3}){2}-?[0-9kK])(?:$|[^0-9a-zA-Z])/);
-    if (matchDirect && matchDirect[1]) return matchDirect[1].toUpperCase();
+    // 2. Formato MRZ del reverso de cédula chilena (IDCHL... / <<12345678<9)
+    const matchMrz = clean.match(/IDCHL([0-9]{7,8})<?([0-9kK])/i);
+    if (matchMrz && matchMrz[1] && matchMrz[2]) {
+      return `${matchMrz[1]}-${matchMrz[2].toUpperCase()}`;
+    }
 
-    const matchRaw = clean.match(/(?:^|[^0-9])([0-9]{7,8}[0-9kK])(?:$|[^0-9a-zA-Z])/);
+    // 3. Formato directo con o sin puntos (ej: 12.345.678-9 o 12345678-9)
+    const matchDots = clean.match(/(?:^|[^0-9])([0-9]{1,2}(?:\.[0-9]{3}){2}-[0-9kK])(?:$|[^0-9a-zA-Z])/i);
+    if (matchDots && matchDots[1]) {
+      return formatRutWithHyphen(matchDots[1]);
+    }
+
+    const matchHyphen = clean.match(/(?:^|[^0-9])([0-9]{7,8}-[0-9kK])(?:$|[^0-9a-zA-Z])/i);
+    if (matchHyphen && matchHyphen[1]) {
+      return matchHyphen[1].toUpperCase();
+    }
+
+    // 4. Buscar secuencias candidatas de 8 o 9 dígitos que cumplan matemáticamente el dígito verificador
+    const candidates = clean.match(/[0-9]{7,8}[0-9kK]/gi) || [];
+    for (const cand of candidates) {
+      const formatted = formatRutWithHyphen(cand);
+      if (isValidRutChecksum(formatted)) {
+        return formatted;
+      }
+    }
+
+    // 5. Fallback números continuos de 8 o 9 caracteres
+    const matchRaw = clean.match(/(?:^|[^0-9])([0-9]{7,8}[0-9kK])(?:$|[^0-9a-zA-Z])/i);
     if (matchRaw && matchRaw[1]) {
-      const r = matchRaw[1].toUpperCase();
-      return r.slice(0, -1) + '-' + r.slice(-1);
+      return formatRutWithHyphen(matchRaw[1]);
     }
 
     return null;
@@ -1734,7 +1931,7 @@ function initRutScanner() {
       const osc = audioCtx.createOscillator();
       const gain = audioCtx.createGain();
       osc.type = 'sine';
-      osc.frequency.setValueAtTime(880, audioCtx.currentTime); // Nota La5 (880Hz)
+      osc.frequency.setValueAtTime(880, audioCtx.currentTime);
       gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
       gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.15);
       osc.connect(gain);
@@ -1747,27 +1944,32 @@ function initRutScanner() {
   // Buscar registros correspondientes en la tabla de participantes
   function searchParticipantByRut(rut) {
     lastScannedRut = rut;
-    const normalizedRut = rut.replace(/[.\-]/g, '').toLowerCase();
+    const cleanTargetRut = rut.replace(/[^0-9kK]/gi, '').toLowerCase();
 
-    // Buscar entre las filas de participantes del DOM
-        // Buscar entre las filas o tarjetas de participantes del DOM
     const allCards = Array.from(document.querySelectorAll('#participants-mobile-list .participant-row'));
     const allRows = Array.from(document.querySelectorAll('#participants-tbody tr.participant-row'));
     const matchedPupils = [];
-    let tutorName = '';
+    let detectedTutor = '';
 
-    // Priorizamos tarjetas móviles si existen (o filas de escritorio)
     const elementsToScan = allCards.length > 0 ? allCards : allRows;
 
     elementsToScan.forEach(el => {
       const searchData = (el.getAttribute('data-search') || '').toLowerCase();
-      const cleanSearchData = searchData.replace(/[.\-]/g, '');
+      const cleanSearchData = searchData.replace(/[^0-9kK\s]/gi, '');
 
-      if (cleanSearchData.includes(normalizedRut)) {
+      let isMatch = false;
+      if (cleanSearchData.includes(cleanTargetRut)) {
+        isMatch = true;
+      } else if (searchData.includes(rut.toLowerCase())) {
+        isMatch = true;
+      }
+
+      if (isMatch) {
         let kidName = 'Pupilo';
         let kidAge = '';
         let distance = 'General';
         let bibNumber = '#---';
+        let tutorName = '';
         const paymentProofBtn = el.querySelector('.btn-view-proof');
 
         if (el.tagName.toLowerCase() === 'tr') {
@@ -1776,33 +1978,34 @@ function initRutScanner() {
           distance = el.querySelector('td:nth-child(4)')?.textContent?.trim() || 'General';
           bibNumber = el.querySelector('td:nth-child(1)')?.textContent?.trim() || '#---';
           const tutorRaw = el.querySelector('td:nth-child(5)')?.textContent?.trim() || '';
-          tutorName = tutorRaw.split('\\n')[0] || tutorName;
+          tutorName = tutorRaw.split('\n')[0]?.trim() || '';
         } else {
-          // Tarjeta móvil
           kidName = el.querySelector('h3')?.textContent?.trim() || 'Pupilo';
-          const ageEl = el.querySelector('.bg-slate-950\\/60 span.text-xs');
+          const ageEl = el.querySelector('.bg-slate-950\/60 span.text-xs');
           kidAge = ageEl ? ageEl.textContent.trim() : '';
-          const distEl = el.querySelector('.bg-blue-950\\/80 span');
+          const distEl = el.querySelector('.bg-blue-950\/80 span');
           distance = distEl ? distEl.textContent.trim() : 'General';
-          const bibEl = el.querySelector('.bg-amber-950\\/80 span:last-child');
+          const bibEl = el.querySelector('.bg-amber-950\/80 span:last-child');
           bibNumber = bibEl ? '#' + bibEl.textContent.trim() : '#---';
           const tutorProof = el.querySelector('.btn-view-proof');
-          if (tutorProof) tutorName = tutorProof.getAttribute('data-tutor') || tutorName;
+          if (tutorProof) tutorName = tutorProof.getAttribute('data-tutor') || '';
         }
+
+        if (tutorName && !detectedTutor) detectedTutor = tutorName;
 
         matchedPupils.push({
           kidName,
           kidAge,
           distance,
           bibNumber,
-          tutorName: tutorName || 'Apoderado',
+          tutorName: tutorName || detectedTutor || 'Apoderado',
           tutorRut: rut,
           hasProof: !!paymentProofBtn
         });
       }
     });
 
-    renderResults(rut, matchedPupils, tutorName);
+    renderResults(rut, matchedPupils, detectedTutor);
   }
 
   function renderResults(rut, pupils, tutorName) {
@@ -1811,55 +2014,57 @@ function initRutScanner() {
 
     if (pupils.length > 0) {
       playSuccessBeep();
-      resultHeader.className = 'p-3.5 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300';
+      resultHeader.className = 'p-4 rounded-2xl bg-emerald-950/80 border border-emerald-500/40 text-emerald-300';
       resultHeader.innerHTML = `
-        <div class="flex items-center gap-2.5">
-          <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400 shrink-0"></i>
+        <div class="flex items-center gap-3">
+          <i data-lucide="check-circle" class="w-6 h-6 text-emerald-400 shrink-0"></i>
           <div>
-            <div class="font-bold text-sm text-white flex items-center gap-2">
-              <span>${tutorName || 'Apoderado Registrado'}</span>
-              <span class="text-xs font-mono bg-emerald-900/60 text-emerald-300 px-2 py-0.5 rounded-lg border border-emerald-500/30">${rut}</span>
+            <div class="font-black text-base text-white flex flex-wrap items-center gap-2">
+              <span>${tutorName || 'Apoderado Acreditado'}</span>
+              <span class="text-xs font-mono bg-emerald-900/60 text-emerald-300 px-2.5 py-0.5 rounded-lg border border-emerald-500/40 font-bold">${rut}</span>
             </div>
-            <div class="text-xs text-emerald-400 mt-0.5">
-              ${pupils.length} pupilo(s) inscrito(s) en la base de datos
+            <div class="text-xs text-emerald-400 mt-1 font-semibold">
+              ✓ ${pupils.length} pupilo(s) registrado(s) y listos para retiro de kit
             </div>
           </div>
         </div>
       `;
 
       pupilsList.innerHTML = pupils.map(p => `
-        <div class="p-3.5 rounded-2xl bg-slate-800/80 border border-slate-700 space-y-2">
-          <div class="flex items-center justify-between">
-            <div class="flex items-center gap-2">
-              <span class="font-mono font-black text-xs text-amber-400 bg-amber-950 px-2 py-0.5 rounded-lg border border-amber-500/30">${p.bibNumber}</span>
-              <span class="font-bold text-sm text-white">${p.kidName}</span>
-              ${p.kidAge ? `<span class="text-xs text-slate-400">(${p.kidAge})</span>` : ''}
+        <div class="p-4 rounded-2xl bg-slate-800/90 border border-slate-700 space-y-2.5 shadow-md">
+          <div class="flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5">
+              <span class="font-mono font-black text-sm text-yellow-300 bg-amber-950/90 px-2.5 py-1 rounded-xl border border-amber-500/40">${p.bibNumber}</span>
+              <div>
+                <span class="font-black text-sm text-white block">${p.kidName}</span>
+                ${p.kidAge ? `<span class="text-xs text-slate-400">${p.kidAge}</span>` : ''}
+              </div>
             </div>
-            <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-full bg-blue-950 text-blue-300 border border-blue-500/40">${p.distance}</span>
+            <span class="text-xs font-black uppercase px-3 py-1 rounded-xl bg-blue-950 text-blue-300 border border-blue-500/40">${p.distance}</span>
           </div>
-          <div class="flex items-center justify-between text-xs pt-1 border-t border-slate-700/60 text-slate-300">
-            <span class="flex items-center gap-1 text-[11px] ${p.hasProof ? 'text-emerald-400' : 'text-amber-400'}">
-              <i data-lucide="${p.hasProof ? 'check' : 'alert-circle'}" class="w-3.5 h-3.5"></i>
-              ${p.hasProof ? 'Comprobante Acreditado' : 'Pago en revisión'}
+          <div class="flex items-center justify-between text-xs pt-2 border-t border-slate-700/60 text-slate-300">
+            <span class="flex items-center gap-1.5 font-bold ${p.hasProof ? 'text-emerald-400' : 'text-amber-400'}">
+              <i data-lucide="${p.hasProof ? 'check-check' : 'alert-circle'}" class="w-4 h-4"></i>
+              ${p.hasProof ? 'Pago Acreditado' : 'Comprobante en Revisión'}
             </span>
-            <span class="text-xs font-bold text-blue-400">Listo para entrega de Kit ✅</span>
+            <span class="text-xs font-black text-emerald-400 bg-emerald-950/60 px-2.5 py-1 rounded-lg border border-emerald-500/30">Kit Listo ✅</span>
           </div>
         </div>
       `).join('');
     } else {
-      resultHeader.className = 'p-3.5 rounded-2xl bg-red-950/80 border border-red-500/40 text-red-300';
+      resultHeader.className = 'p-4 rounded-2xl bg-red-950/80 border border-red-500/40 text-red-300';
       resultHeader.innerHTML = `
-        <div class="flex items-center gap-2.5">
-          <i data-lucide="alert-triangle" class="w-5 h-5 text-red-400 shrink-0"></i>
+        <div class="flex items-center gap-3">
+          <i data-lucide="alert-triangle" class="w-6 h-6 text-red-400 shrink-0"></i>
           <div>
-            <div class="font-bold text-sm text-white">No Encontrado en la Base de Datos</div>
-            <div class="text-xs text-red-400 mt-0.5">El RUT <span class="font-mono font-bold">${rut}</span> no registra inscripciones activas.</div>
+            <div class="font-black text-base text-white">RUT no registrado en la carrera</div>
+            <div class="text-xs text-red-300 mt-0.5">El RUT <span class="font-mono font-bold text-white bg-red-900/60 px-2 py-0.5 rounded-lg border border-red-500/40">${rut}</span> no tiene inscripciones activas asociadas.</div>
           </div>
         </div>
       `;
       pupilsList.innerHTML = `
-        <div class="p-4 rounded-2xl bg-slate-950/50 border border-slate-800 text-center text-xs text-slate-400 space-y-1">
-          <p>Verifica si el apoderado se inscribió con otro RUT o si el participante fue ingresado con un número de carnet distinto.</p>
+        <div class="p-5 rounded-2xl bg-slate-950/60 border border-slate-800 text-center text-xs text-slate-400 space-y-2">
+          <p class="font-medium">Comprueba si la inscripción se realizó con el RUT de otro tutor/familiar, o utiliza el buscador manual escribiendo el nombre del niño.</p>
         </div>
       `;
     }
@@ -1871,8 +2076,8 @@ function initRutScanner() {
     resultsContainer.classList.add('hidden');
     cameraContainer.classList.remove('hidden');
     statusText.innerHTML = `
-      <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
-      Cámara activa lista para escanear
+      <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping"></span>
+      Cámara activa buscando código...
     `;
 
     if (!window.Html5Qrcode) {
@@ -1881,63 +2086,127 @@ function initRutScanner() {
     }
 
     try {
-      if (html5QrCode) {
+      if (html5QrCode && isScanning) {
         try { await html5QrCode.stop(); } catch (_) {}
+        isScanning = false;
       }
 
-      html5QrCode = new Html5Qrcode("reader-qr-view");
+      const supportedFormats = [
+        Html5QrcodeSupportedFormats.PDF_417,
+        Html5QrcodeSupportedFormats.QR_CODE,
+        Html5QrcodeSupportedFormats.CODE_128,
+        Html5QrcodeSupportedFormats.CODE_39,
+        Html5QrcodeSupportedFormats.EAN_13,
+        Html5QrcodeSupportedFormats.DATA_MATRIX
+      ];
+
+      // Constructor con formatos explícitos y barcode detector nativo
+      html5QrCode = new Html5Qrcode("reader-qr-view", {
+        formatsToSupport: supportedFormats,
+        verbose: false,
+        experimentalFeatures: {
+          useBarCodeDetectorIfSupported: true
+        }
+      });
 
       const config = {
-        fps: 15,
-        formatsToSupport: [ 
-            Html5QrcodeSupportedFormats.QR_CODE, 
-            Html5QrcodeSupportedFormats.PDF_417, 
-            Html5QrcodeSupportedFormats.CODE_128, 
-            Html5QrcodeSupportedFormats.CODE_39, 
-            Html5QrcodeSupportedFormats.EAN_13 
-        ],
+        fps: 20,
         qrbox: (viewfinderWidth, viewfinderHeight) => {
-          return {
-            width: Math.floor(viewfinderWidth * 0.85),
-            height: Math.floor(viewfinderHeight * 0.6)
-          };
+          const w = Math.min(Math.floor(viewfinderWidth * 0.92), 680);
+          const h = Math.min(Math.floor(viewfinderHeight * 0.74), 440);
+          return { width: Math.max(w, 280), height: Math.max(h, 180) };
         },
-        aspectRatio: 1.333334
+        aspectRatio: 1.333333
       };
 
-      await html5QrCode.start(
-        { facingMode: currentCameraFacing },
-        config,
-        (decodedText) => {
-          console.log('[Scanner] Texto detectado:', decodedText);
-          const rut = extractRutFromBarcode(decodedText);
-          if (rut) {
-            html5QrCode.stop().then(() => {
-              searchParticipantByRut(rut);
-            }).catch(() => {
-              searchParticipantByRut(rut);
-            });
-          }
-        },
-        (errorMessage) => {
-          // Ignorar frames sin código detectado
+      const onScanSuccess = (decodedText) => {
+        const rut = extractRutFromBarcode(decodedText);
+        if (rut) {
+          stopScanner().then(() => {
+            searchParticipantByRut(rut);
+          }).catch(() => {
+            searchParticipantByRut(rut);
+          });
         }
-      );
+      };
+
+      try {
+        await html5QrCode.start(
+          {
+            facingMode: currentCameraFacing,
+            width: { min: 640, ideal: 1920 },
+            height: { min: 480, ideal: 1080 }
+          },
+          config,
+          onScanSuccess,
+          () => {}
+        );
+        isScanning = true;
+      } catch (overconstrainedErr) {
+        await html5QrCode.start(
+          { facingMode: currentCameraFacing },
+          config,
+          onScanSuccess,
+          () => {}
+        );
+        isScanning = true;
+      }
     } catch (err) {
       console.warn('[Scanner] Error iniciando cámara:', err.message);
       statusText.innerHTML = `
-        <span class="text-amber-400">Permiso de cámara no concedido o no disponible. Puedes ingresar el RUT abajo.</span>
+        <span class="text-amber-400">Permiso de cámara no concedido o cámara ocupada. Puedes subir una foto o escribir el RUT.</span>
       `;
     }
   }
 
   async function stopScanner() {
-    if (html5QrCode) {
+    if (html5QrCode && isScanning) {
       try {
         await html5QrCode.stop();
-        html5QrCode = null;
       } catch (_) {}
+      isScanning = false;
     }
+  }
+
+  // Carga de archivo de imagen directa
+  if (fileInput) {
+    fileInput.addEventListener('change', async (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+
+      statusText.innerHTML = '<span class="text-amber-400 animate-pulse">Analizando imagen de cédula...</span>';
+
+      try {
+        await stopScanner();
+        const supportedFormats = [
+          Html5QrcodeSupportedFormats.PDF_417,
+          Html5QrcodeSupportedFormats.QR_CODE,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.DATA_MATRIX
+        ];
+
+        const fileQr = new Html5Qrcode("reader-qr-view", {
+          formatsToSupport: supportedFormats,
+          verbose: false
+        });
+
+        const decodedText = await fileQr.scanFile(file, true);
+        const rut = extractRutFromBarcode(decodedText);
+        if (rut) {
+          searchParticipantByRut(rut);
+        } else {
+          alert('Se detectó código en la imagen pero no contiene un RUT reconocible. Texto: ' + decodedText);
+          startScanner();
+        }
+      } catch (err) {
+        alert('No se pudo detectar código en la foto. Procura que la imagen esté enfocada y con buena iluminación.');
+        startScanner();
+      } finally {
+        fileInput.value = '';
+      }
+    });
   }
 
   // Abrir Modal y arrancar escáner
@@ -1957,9 +2226,6 @@ function initRutScanner() {
   closeBtn.addEventListener('click', closeModal);
   modal.addEventListener('click', (e) => {
     if (e.target === modal) closeModal();
-  });
-  document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape' && !modal.classList.contains('hidden')) closeModal();
   });
 
   // Cambiar cámara frontal / trasera

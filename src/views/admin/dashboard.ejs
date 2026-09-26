@@ -151,146 +151,182 @@
         </div>
       </div>
 
-      <nav class="space-y-1">
-        <!-- Pestaña de Corridas (Administrador) -->
-        <% if (role === 'admin') { %>
-        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold bg-blue-600 text-white shadow-md shadow-blue-600/30 transition-all text-left" data-tab="races">
-          <div class="flex items-center gap-2.5">
-            <i data-lucide="calendar" class="w-4 h-4"></i>
-            <span>🏃‍♂️ Corridas & Fechas</span>
+      <nav class="space-y-4">
+        <!-- SECCIÓN 1: GESTIÓN DE CARRERA -->
+        <div class="space-y-1">
+          <div class="px-3 pt-1 pb-1 text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <span class="w-1 h-3 rounded-full bg-blue-500"></span>
+            <span>Gestión de Carrera</span>
           </div>
-          <span class="text-[10px] bg-blue-800 text-blue-200 px-2 py-0.5 rounded-full font-black"><%= (races || []).length %></span>
-        </button>
-        <% } %>
 
-        <!-- Base de Datos de Participantes (Admin y Editor) -->
-        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold <%= role !== 'admin' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-gray-300 hover:text-white hover:bg-gray-900' %> transition-all text-left" data-tab="leads">
-          <div class="flex items-center gap-2.5">
-            <i data-lucide="users" class="w-4 h-4"></i>
-            <span>📋 Base de Participantes</span>
-          </div>
-          <% if (leads && leads.length > 0) { %>
-          <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full"><%= leads.length %></span>
+          <% if (role === 'admin') { %>
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-bold bg-blue-600 text-white shadow-md shadow-blue-600/30 transition-all text-left" data-tab="races">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="calendar" class="w-4 h-4"></i>
+              <span>🏃‍♂️ Corridas & Fechas</span>
+            </div>
+            <span class="text-[10px] bg-blue-800 text-blue-200 px-2 py-0.5 rounded-full font-black"><%= (races || []).length %></span>
+          </button>
           <% } %>
-        </button>
-        <!-- Gestión de Usuarios (Solo Administrador) -->
-        <% if (role === 'admin') { %>
-        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="users">
-          <div class="flex items-center gap-2.5">
-            <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i>
-            <span>Usuarios</span>
-          </div>
-          <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-bold" id="users-count-badge"><%= (typeof usersList !== 'undefined' ? usersList.length : 2) %></span>
-        </button>
 
-        <!-- Modo Construcción / Lanzamiento (Solo Administrador) -->
-        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="construction">
-          <div class="flex items-center gap-2.5">
-            <i data-lucide="construction" class="w-4 h-4 text-amber-400"></i>
-            <span>🚧 Modo Construcción</span>
+          <!-- Base de Datos de Participantes (Admin y Editor) -->
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold <%= role !== 'admin' ? 'bg-blue-600 text-white shadow-md shadow-blue-600/30' : 'text-gray-300 hover:text-white hover:bg-gray-900' %> transition-all text-left" data-tab="leads">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="users" class="w-4 h-4"></i>
+              <span>📋 Base de Participantes</span>
+            </div>
+            <% if (leads && leads.length > 0) { %>
+            <span class="bg-red-500 text-white text-[10px] font-black px-2 py-0.5 rounded-full"><%= leads.length %></span>
+            <% } %>
+          </button>
+
+          <!-- Modo Construcción / Lanzamiento (Solo Administrador) -->
+          <% if (role === 'admin') { %>
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="construction">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="construction" class="w-4 h-4 text-amber-400"></i>
+              <span>🚧 Modo Construcción</span>
+            </div>
+            <span class="text-[9px] px-1.5 py-0.5 rounded-full font-black <%= content.construction?.enabled ? 'bg-amber-500 text-slate-950 animate-pulse' : 'bg-slate-800 text-slate-400' %>" id="sidebar-construction-badge">
+              <%= content.construction?.enabled ? 'ACTIVO' : 'OFF' %>
+            </span>
+          </button>
+          <% } %>
+        </div>
+
+        <!-- SECCIÓN 2: EVENTO & CORREDORES -->
+        <% if (role === 'admin') { %>
+        <div class="space-y-1">
+          <div class="px-3 pt-2 pb-1 text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <span class="w-1 h-3 rounded-full bg-emerald-500"></span>
+            <span>Evento & Corredores</span>
           </div>
-          <span class="text-[9px] px-1.5 py-0.5 rounded-full font-black <%= content.construction?.enabled ? 'bg-amber-500 text-slate-950 animate-pulse' : 'bg-slate-800 text-slate-400' %>" id="sidebar-construction-badge">
-            <%= content.construction?.enabled ? 'ACTIVO' : 'OFF' %>
-          </span>
-        </button>
+
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="registration-form">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="file-text" class="w-4 h-4 text-emerald-400"></i>
+              <span>📝 Formulario /inscribir</span>
+            </div>
+            <span class="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded-full font-bold">Página</span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="circuits">
+            <i data-lucide="flag" class="w-4 h-4"></i>
+            <span>Circuitos & Edades</span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="kits">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="tag" class="w-4 h-4 text-emerald-400"></i>
+              <span>Kits de Corredor</span>
+            </div>
+            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-bold" id="kits-count-badge"><%= (content.pricing?.plans || []).length %></span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="schedule">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="calendar-clock" class="w-4 h-4 text-blue-400"></i>
+              <span>📅 Cronograma del Día</span>
+            </div>
+            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-bold" id="schedule-count-badge"><%= (content.schedule || []).length %></span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="venue">
+            <i data-lucide="map-pin" class="w-4 h-4"></i>
+            <span>📍 Lugar del Evento</span>
+          </button>
+        </div>
+
+        <!-- SECCIÓN 3: LANDING & CONTENIDO -->
+        <div class="space-y-1">
+          <div class="px-3 pt-2 pb-1 text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <span class="w-1 h-3 rounded-full bg-amber-500"></span>
+            <span>Landing & Contenido</span>
+          </div>
+
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="hero">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
+              <span>⭐ Portada & Métricas (Hero)</span>
+            </div>
+            <span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-full font-bold">Principal</span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="countdown">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+            <span>⏰ Cuenta Regresiva</span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="gallery">
+            <i data-lucide="image" class="w-4 h-4"></i>
+            <span>🖼️ Galería de Fotos</span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="testimonials">
+            <i data-lucide="message-square" class="w-4 h-4"></i>
+            <span>Testimonios Familiares</span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="faqs">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="help-circle" class="w-4 h-4"></i>
+              <span>Preguntas Frecuentes</span>
+            </div>
+            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-bold" id="faqs-count-badge"><%= (content.faqs || []).length %></span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="sponsors">
+            <i data-lucide="building-2" class="w-4 h-4"></i>
+            <span>🤝 Auspiciadores</span>
+          </button>
+        </div>
+
+        <!-- SECCIÓN 4: SISTEMA & CONFIGURACIÓN -->
+        <div class="space-y-1">
+          <div class="px-3 pt-2 pb-1 text-[10px] font-black uppercase tracking-wider text-slate-500 flex items-center gap-1.5">
+            <span class="w-1 h-3 rounded-full bg-purple-500"></span>
+            <span>Sistema & Ajustes</span>
+          </div>
+
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="brand">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="palette" class="w-4 h-4 text-purple-400"></i>
+              <span>Identidad, Logo & Pestaña</span>
+            </div>
+            <span class="text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full font-bold">Web</span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="sections">
+            <i data-lucide="layout-list" class="w-4 h-4"></i>
+            <span>🔧 Secciones Web</span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="contact">
+            <i data-lucide="mail" class="w-4 h-4"></i>
+            <span>✉️ Contacto & Envíos</span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="seo">
+            <i data-lucide="search" class="w-4 h-4"></i>
+            <span>SEO & Google Events</span>
+          </button>
+
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="users">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="users" class="w-4 h-4 text-emerald-400"></i>
+              <span>Usuarios & Accesos</span>
+            </div>
+            <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-bold" id="users-count-badge"><%= (typeof usersList !== 'undefined' ? usersList.length : 2) %></span>
+          </button>
+        </div>
         <% } %>
 
-        <% if (role === 'admin') { %>
-        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="hero">
-          <div class="flex items-center gap-2.5">
-            <i data-lucide="sparkles" class="w-4 h-4 text-amber-400"></i>
-            <span>⭐ Portada & Métricas (Hero)</span>
-          </div>
-          <span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-full font-bold">Principal</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="countdown">
-          <i data-lucide="clock" class="w-4 h-4"></i>
-          <span>⏰ Cuenta Regresiva</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="circuits">
-          <i data-lucide="flag" class="w-4 h-4"></i>
-          <span>Circuitos & Edades</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="registration-form">
-          <div class="flex items-center gap-2.5">
-            <i data-lucide="file-text" class="w-4 h-4 text-emerald-400"></i>
-            <span>📝 Formulario /inscribir</span>
-          </div>
-          <span class="text-[9px] bg-emerald-500/20 text-emerald-300 border border-emerald-500/30 px-1.5 py-0.5 rounded-full font-bold">Página</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="schedule">
-          <div class="flex items-center gap-2.5">
-            <i data-lucide="calendar-clock" class="w-4 h-4 text-blue-400"></i>
-            <span>📅 Cronograma del Día</span>
-          </div>
-          <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-bold" id="schedule-count-badge"><%= (content.schedule || []).length %></span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="gallery">
-          <i data-lucide="image" class="w-4 h-4"></i>
-          <span>🖼️ Galería de Fotos</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="kits">
-          <i data-lucide="tag" class="w-4 h-4"></i>
-          <span>Kits de Corredor</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="brand">
-          <div class="flex items-center gap-2.5">
-            <i data-lucide="palette" class="w-4 h-4 text-purple-400"></i>
-            <span>Identidad, Logo & Pestaña</span>
-          </div>
-          <span class="text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full font-bold">Web</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="sections">
-          <i data-lucide="layout-list" class="w-4 h-4"></i>
-          <span>🔧 Secciones</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="testimonials">
-          <i data-lucide="message-square" class="w-4 h-4"></i>
-          <span>Testimonios Familiares</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="faqs">
-          <div class="flex items-center gap-2.5">
-            <i data-lucide="help-circle" class="w-4 h-4"></i>
-            <span>Preguntas Frecuentes</span>
-          </div>
-          <span class="text-[10px] bg-slate-800 text-slate-300 px-2 py-0.5 rounded-full font-bold" id="faqs-count-badge"><%= (content.faqs || []).length %></span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="sponsors">
-          <i data-lucide="building-2" class="w-4 h-4"></i>
-          <span>🤝 Auspiciadores</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="venue">
-          <i data-lucide="map-pin" class="w-4 h-4"></i>
-          <span>📍 Lugar del Evento</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="contact">
-          <i data-lucide="mail" class="w-4 h-4"></i>
-          <span>✉️ Contacto & Envíos</span>
-        </button>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="seo">
-          <i data-lucide="search" class="w-4 h-4"></i>
-          <span>SEO & Google Events</span>
-        </button>
-        <% } %>
-
-        <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="security">
-          <i data-lucide="shield" class="w-4 h-4"></i>
-          <span>Seguridad & Clave</span>
-        </button>
+        <div class="pt-2">
+          <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="security">
+            <i data-lucide="shield" class="w-4 h-4"></i>
+            <span>Seguridad & Clave</span>
+          </button>
+        </div>
       </nav>
     </aside>
 
@@ -1528,58 +1564,94 @@
 
         <!-- PESTAÑA: KITS Y PRECIOS -->
         <div id="tab-kits" class="tab-pane hidden space-y-6">
-          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
-            <h2 class="text-base font-bold text-white mb-1 flex items-center gap-2">
-              <i data-lucide="tag" class="w-4 h-4 text-emerald-400"></i>
-              Kits de Inscripción y Valores
-            </h2>
-            <p class="text-xs text-gray-400 mb-6">Gestiona los kits con sus poleras oficiales, medallas y beneficios.</p>
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-800">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                  <i data-lucide="tag" class="w-5 h-5 text-emerald-400"></i>
+                  Kits de Corredor & Valores
+                </h2>
+                <p class="text-xs text-gray-400 mt-1">Gestiona los kits con sus poleras oficiales, medallas y beneficios. Puedes agregar o eliminar opciones según la carrera.</p>
+              </div>
+              <button type="button" id="btn-add-kit" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-lg shadow-emerald-600/30 transition-all flex items-center justify-center gap-2 cursor-pointer active:scale-95 shrink-0">
+                <i data-lucide="plus-circle" class="w-4 h-4"></i>
+                <span>Agregar Nuevo Kit</span>
+              </button>
+            </div>
 
-            <div class="space-y-6">
+            <div id="kits-container" class="space-y-6">
               <% (content.pricing?.plans || []).forEach((plan, idx) => { %>
-              <div class="pricing-item p-5 rounded-3xl bg-gray-900/70 border <%= plan.isPopular ? 'border-yellow-400/70' : 'border-gray-800' %> space-y-4">
-                <input type="hidden" name="plans[<%= idx %>][id]" value="<%= plan.id %>">
-                <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-                  <div>
-                    <label class="block text-xs text-gray-400 mb-1">Nombre del Kit</label>
-                    <input type="text" name="plans[<%= idx %>][name]" value="<%= plan.name %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-bold">
+              <div class="pricing-item p-5 sm:p-6 rounded-3xl bg-gray-900/80 border <%= plan.isPopular ? 'border-yellow-400/70 shadow-lg shadow-yellow-500/10' : 'border-gray-800' %> space-y-4 relative transition-all">
+                <input type="hidden" name="plans[<%= idx %>][id]" value="<%= plan.id || ('kit-' + (idx + 1)) %>" class="kit-id-input">
+                
+                <div class="flex items-center justify-between pb-3 border-b border-gray-800">
+                  <div class="flex items-center gap-2.5">
+                    <span class="w-7 h-7 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center font-bold text-xs border border-emerald-500/30 kit-badge-num">
+                      #<%= idx + 1 %>
+                    </span>
+                    <span class="text-sm font-bold text-white kit-title-preview"><%= plan.name || 'Nuevo Kit' %></span>
                   </div>
-                  <div>
-                    <label class="block text-xs text-gray-400 mb-1">Valor Mensual ($)</label>
-                    <input type="number" name="plans[<%= idx %>][priceMonthly]" value="<%= plan.priceMonthly %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
-                  </div>
-                  <div>
-                    <label class="block text-xs text-gray-400 mb-1">Valor Anual ($)</label>
-                    <input type="number" name="plans[<%= idx %>][priceYearly]" value="<%= plan.priceYearly || plan.priceMonthly %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
-                  </div>
-                  <div>
-                    <label class="block text-xs text-gray-400 mb-1">Badge de Tarjeta</label>
-                    <input type="text" name="plans[<%= idx %>][badge]" value="<%= plan.badge || '' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white">
-                  </div>
+                  <button type="button" class="btn-delete-kit text-xs text-red-400 hover:text-white bg-red-950/60 hover:bg-red-900 border border-red-500/30 rounded-xl px-3 py-1.5 font-bold transition-all flex items-center gap-1.5 cursor-pointer" title="Eliminar este kit">
+                    <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+                    <span>Eliminar Kit</span>
+                  </button>
                 </div>
 
-                <div class="flex items-center gap-2">
-                  <input type="checkbox" id="popular-<%= idx %>" name="plans[<%= idx %>][isPopular]" <%= plan.isPopular ? 'checked' : '' %> class="w-4 h-4 rounded text-yellow-500 focus:ring-emerald-400 bg-gray-950 border-gray-800">
-                  <label for="popular-<%= idx %>" class="text-xs font-semibold text-yellow-300">Marcar como Kit "Más Elegido" (con halo dorado)</label>
+                <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Nombre del Kit *</label>
+                    <input type="text" name="plans[<%= idx %>][name]" value="<%= plan.name %>" placeholder="Ej: Kit Básico Oficial" class="kit-name-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white font-bold focus:outline-none focus:border-emerald-500">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Valor Inscripción ($) *</label>
+                    <input type="number" name="plans[<%= idx %>][priceMonthly]" value="<%= plan.priceMonthly %>" placeholder="Ej: 14990" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Valor Referencial ($)</label>
+                    <input type="number" name="plans[<%= idx %>][priceYearly]" value="<%= plan.priceYearly || plan.priceMonthly %>" placeholder="Ej: 19990" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500 font-mono">
+                  </div>
+                  <div>
+                    <label class="block text-xs text-gray-400 mb-1">Badge o Etiqueta</label>
+                    <input type="text" name="plans[<%= idx %>][badge]" value="<%= plan.badge || '' %>" placeholder="Ej: Cupos Limitados" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-sm text-white focus:outline-none focus:border-emerald-500">
+                  </div>
                 </div>
 
                 <div>
-                  <label class="block text-xs text-gray-400 mb-1">Elementos Incluidos en el Kit (Uno por línea)</label>
-                  <textarea name="plans[<%= idx %>][features]" rows="4" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono leading-relaxed"><%= (plan.features || []).join('\n') %></textarea>
+                  <label class="block text-xs text-gray-400 mb-1">Breve Descripción</label>
+                  <textarea name="plans[<%= idx %>][description]" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500" placeholder="Ej: La experiencia completa para correr y disfrutar en familia."><%= plan.description || '' %></textarea>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <input type="checkbox" id="popular-<%= idx %>" name="plans[<%= idx %>][isPopular]" <%= plan.isPopular ? 'checked' : '' %> class="w-4 h-4 rounded text-yellow-500 focus:ring-emerald-400 bg-gray-950 border-gray-800 cursor-pointer">
+                  <label for="popular-<%= idx %>" class="text-xs font-semibold text-yellow-300 cursor-pointer">Marcar como Kit "Más Elegido" (con halo dorado en la web)</label>
+                </div>
+
+                <div>
+                  <label class="block text-xs text-gray-400 mb-1">Elementos y Beneficios Incluidos (Uno por línea)</label>
+                  <textarea name="plans[<%= idx %>][features]" rows="4" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono leading-relaxed focus:outline-none focus:border-emerald-500" placeholder="Polera técnica oficial Kids Race&#10;Número de corredor oficial&#10;Medalla finisher al cruzar la meta&#10;Hidratación y fruta"><%= (plan.features || []).join('\n') %></textarea>
                 </div>
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                   <div>
                     <label class="block text-xs text-gray-400 mb-1">Texto del Botón</label>
-                    <input type="text" name="plans[<%= idx %>][ctaText]" value="<%= plan.ctaText || 'Inscribir Ahora' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white">
+                    <input type="text" name="plans[<%= idx %>][ctaText]" value="<%= plan.ctaText || 'Inscribir Ahora' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
                   </div>
                   <div>
                     <label class="block text-xs text-gray-400 mb-1">Enlace de Destino</label>
-                    <input type="text" name="plans[<%= idx %>][ctaLink]" value="<%= plan.ctaLink || '#contact' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white">
+                    <input type="text" name="plans[<%= idx %>][ctaLink]" value="<%= plan.ctaLink || '/inscribir' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500">
                   </div>
                 </div>
               </div>
               <% }); %>
+            </div>
+
+            <!-- Mensaje cuando no hay kits -->
+            <div id="no-kits-message" class="<%= (content.pricing?.plans || []).length === 0 ? '' : 'hidden' %> text-center py-12 border-2 border-dashed border-gray-800 rounded-3xl bg-gray-950/40 space-y-3">
+              <div class="w-12 h-12 rounded-2xl bg-gray-900 text-gray-500 flex items-center justify-center mx-auto">
+                <i data-lucide="tag" class="w-6 h-6"></i>
+              </div>
+              <p class="text-sm font-bold text-gray-300">No hay kits de corredor configurados</p>
+              <p class="text-xs text-gray-500 max-w-sm mx-auto">Agrega al menos un kit para que las familias conozcan los valores y beneficios de la inscripción.</p>
             </div>
           </div>
         </div>
@@ -2320,54 +2392,86 @@
 
         <!-- MODAL ESCÁNER DE CÉDULA DE IDENTIDAD (ACREDITACIÓN EN TERRENO) -->
         <div id="scanner-modal" class="fixed inset-0 z-50 hidden bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
-          <div class="relative max-w-xl w-full bg-slate-900 border border-slate-700 rounded-3xl overflow-hidden shadow-2xl p-4 sm:p-6 space-y-4 my-auto">
+          <div class="relative max-w-3xl w-full bg-slate-900 border border-slate-700/80 rounded-3xl overflow-hidden shadow-2xl p-5 sm:p-7 space-y-4 my-auto">
             
             <!-- Cabecera del Escáner -->
-            <div class="flex items-center justify-between pb-3 border-b border-slate-800">
-              <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-2xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400">
-                  <i data-lucide="scan-face" class="w-5 h-5"></i>
+            <div class="flex items-center justify-between pb-3.5 border-b border-slate-800">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-2xl bg-blue-600/20 border border-blue-500/40 flex items-center justify-center text-blue-400 shrink-0">
+                  <i data-lucide="scan" class="w-5 h-5"></i>
                 </div>
                 <div>
-                  <h3 class="text-sm font-black text-white">Escáner de Cédula de Identidad</h3>
-                  <p class="text-[11px] text-slate-400">Acreditación y búsqueda de pupilos en terreno</p>
+                  <h3 class="text-base font-black text-white flex items-center gap-2">
+                    <span>Lector de Cédula de Identidad</span>
+                    <span class="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-300 font-bold border border-blue-500/30">PDF417 / QR</span>
+                  </h3>
+                  <p class="text-xs text-slate-400">Escanea el código de barras trasero o QR de la cédula para buscar al participante</p>
                 </div>
               </div>
-              <button type="button" id="btn-close-scanner" class="w-8 h-8 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors">
+              <button type="button" id="btn-close-scanner" class="w-9 h-9 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-300 hover:text-white flex items-center justify-center transition-colors text-sm font-bold cursor-pointer">
                 ✕
               </button>
             </div>
 
-            <!-- Visor de Cámara y Lector -->
-            <div id="scanner-camera-container" class="space-y-3">
-              <div class="relative w-full aspect-video sm:aspect-[4/3] bg-black rounded-2xl overflow-hidden border border-slate-800 flex items-center justify-center">
+            <!-- Visor de Cámara y Lector (GRANDE Y SIN TEXTOS ENCIMA) -->
+            <div id="scanner-camera-container" class="space-y-3.5">
+              <div class="relative w-full h-[52vh] min-h-[380px] sm:min-h-[460px] max-h-[520px] bg-black rounded-3xl overflow-hidden border-2 border-slate-700/90 flex items-center justify-center shadow-inner">
                 <div id="reader-qr-view" class="w-full h-full"></div>
-                <!-- Guía visual superpuesta -->
-                <div class="absolute inset-0 pointer-events-none flex items-center justify-center p-6">
-                  <div class="w-full h-36 border-2 border-dashed border-blue-400/80 rounded-2xl flex flex-col items-center justify-center bg-blue-500/5 text-center px-4">
-                    <span class="text-xs font-bold text-blue-300 drop-shadow">Apunta al código de barras trasero (PDF417) o QR de la cédula</span>
-                    <span class="text-[10px] text-slate-300 mt-1 opacity-80">El RUT se detectará automáticamente</span>
+                
+                <!-- Guía visual limpia: Marco de esquinas sin letras que tapen el código -->
+                <div class="absolute inset-0 pointer-events-none flex items-center justify-center p-4 sm:p-8">
+                  <div class="relative w-[90%] h-[72%] max-w-[580px] rounded-3xl border-2 border-blue-400/40 bg-blue-500/5">
+                    <!-- 4 esquinas luminosas -->
+                    <div class="absolute -top-1 -left-1 w-7 h-7 border-t-4 border-l-4 border-blue-400 rounded-tl-xl shadow-[0_0_8px_#60a5fa]"></div>
+                    <div class="absolute -top-1 -right-1 w-7 h-7 border-t-4 border-r-4 border-blue-400 rounded-tr-xl shadow-[0_0_8px_#60a5fa]"></div>
+                    <div class="absolute -bottom-1 -left-1 w-7 h-7 border-b-4 border-l-4 border-blue-400 rounded-bl-xl shadow-[0_0_8px_#60a5fa]"></div>
+                    <div class="absolute -bottom-1 -right-1 w-7 h-7 border-b-4 border-r-4 border-blue-400 rounded-br-xl shadow-[0_0_8px_#60a5fa]"></div>
+                    
+                    <!-- Línea de escaneo láser suave -->
+                    <div class="absolute inset-x-6 top-1/2 -translate-y-1/2 h-0.5 bg-gradient-to-r from-transparent via-blue-400 to-transparent shadow-[0_0_10px_#60a5fa] animate-pulse"></div>
                   </div>
+                </div>
+
+                <!-- Indicador superior fuera del centro -->
+                <div class="absolute top-3 inset-x-0 flex justify-center pointer-events-none">
+                  <span class="bg-black/75 backdrop-blur-md text-slate-200 text-xs font-semibold px-4 py-1.5 rounded-full border border-white/10 shadow-lg flex items-center gap-2">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span>Ubica el código de barras o QR en el recuadro</span>
+                  </span>
                 </div>
               </div>
 
-              <!-- Selector de cámara (frontal / trasera) & Estado -->
-              <div class="flex items-center justify-between text-xs text-slate-400 px-1">
-                <span id="scanner-status-text" class="flex items-center gap-1.5 text-blue-400 font-semibold">
-                  <span class="w-2 h-2 rounded-full bg-blue-500 animate-ping"></span>
-                  Cámara activa lista para escanear
+              <!-- Selector de cámara, Carga de foto & Estado -->
+              <div class="flex flex-wrap items-center justify-between gap-2.5 text-xs text-slate-400 px-1">
+                <span id="scanner-status-text" class="flex items-center gap-2 text-blue-400 font-semibold">
+                  <span class="w-2.5 h-2.5 rounded-full bg-blue-500 animate-ping"></span>
+                  Cámara activa buscando código...
                 </span>
-                <button type="button" id="btn-switch-camera" class="hover:text-white transition-colors underline flex items-center gap-1">
-                  <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-                  <span>Cambiar Cámara</span>
-                </button>
+                
+                <div class="flex items-center gap-2">
+                  <!-- Cargar foto alternativa -->
+                  <label class="cursor-pointer text-slate-300 hover:text-white transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-semibold" title="Si la cámara tiene problemas para enfocar, sube una foto nítida de la cédula">
+                    <i data-lucide="image" class="w-3.5 h-3.5 text-blue-400"></i>
+                    <span>Subir Foto Cédula</span>
+                    <input type="file" id="scanner-file-input" accept="image/*" class="hidden">
+                  </label>
+
+                  <!-- Cambiar Cámara -->
+                  <button type="button" id="btn-switch-camera" class="text-slate-300 hover:text-white transition-colors flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-slate-800 hover:bg-slate-700 border border-slate-700 font-semibold cursor-pointer">
+                    <i data-lucide="refresh-cw" class="w-3.5 h-3.5 text-amber-400"></i>
+                    <span>Girar Cámara</span>
+                  </button>
+                </div>
               </div>
             </div>
 
-            <!-- Opción alternativa: Entrada manual rápida -->
-            <div class="pt-2 border-t border-slate-800 flex gap-2">
-              <input type="text" id="manual-rut-input" placeholder="O ingresa el RUT manualmente (ej: 12.345.678-9)..." class="admin-input flex-1 px-3 py-2 text-xs text-white placeholder-slate-500 font-mono">
-              <button type="button" id="btn-search-manual-rut" class="px-4 py-2 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-white transition-all flex items-center gap-1.5 shrink-0">
+            <!-- Entrada manual rápida y destacada -->
+            <div class="pt-3 border-t border-slate-800 flex gap-2.5">
+              <div class="relative flex-1">
+                <i data-lucide="hash" class="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+                <input type="text" id="manual-rut-input" placeholder="O escribe el RUT directamente (ej: 12.345.678-9)..." class="w-full bg-slate-950 border border-slate-700 rounded-2xl pl-10 pr-3.5 py-2.5 text-xs text-white placeholder-slate-500 font-mono focus:outline-none focus:border-blue-500">
+              </div>
+              <button type="button" id="btn-search-manual-rut" class="px-5 py-2.5 rounded-2xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center gap-1.5 shrink-0 shadow-md shadow-blue-600/30 active:scale-95 cursor-pointer">
                 <i data-lucide="search" class="w-3.5 h-3.5"></i>
                 <span>Buscar</span>
               </button>
@@ -2375,23 +2479,21 @@
 
             <!-- Panel de Resultados de Acreditación (Aparece tras escanear) -->
             <div id="scanner-results-container" class="hidden space-y-3 pt-2">
-              <!-- Estado / Mensaje de coincidencia -->
-              <div id="scanner-result-header" class="p-3 rounded-2xl flex items-center justify-between">
+              <div id="scanner-result-header" class="p-3.5 rounded-2xl flex items-center justify-between">
                 <!-- Rellenado dinámicamente -->
               </div>
 
-              <!-- Lista de pupilos encontrados -->
-              <div id="scanner-pupils-list" class="space-y-2 max-h-60 overflow-y-auto pr-1">
+              <div id="scanner-pupils-list" class="space-y-2.5 max-h-72 overflow-y-auto pr-1">
                 <!-- Rellenado dinámicamente -->
               </div>
 
-              <div class="flex gap-2 pt-2">
-                <button type="button" id="btn-scan-again" class="flex-1 py-2.5 rounded-xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-1.5">
-                  <i data-lucide="camera" class="w-3.5 h-3.5"></i>
+              <div class="flex gap-2.5 pt-2">
+                <button type="button" id="btn-scan-again" class="flex-1 py-3 rounded-2xl text-xs font-bold bg-blue-600 hover:bg-blue-500 text-white transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-600/30 cursor-pointer active:scale-95">
+                  <i data-lucide="camera" class="w-4 h-4"></i>
                   <span>Escanear Otra Cédula</span>
                 </button>
-                <button type="button" id="btn-filter-table-with-rut" class="py-2.5 px-4 rounded-xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all flex items-center justify-center gap-1.5" title="Ver en la tabla principal">
-                  <i data-lucide="table" class="w-3.5 h-3.5"></i>
+                <button type="button" id="btn-filter-table-with-rut" class="py-3 px-5 rounded-2xl text-xs font-bold bg-slate-800 hover:bg-slate-700 text-slate-200 transition-all flex items-center justify-center gap-2 border border-slate-700 cursor-pointer" title="Ver en la tabla principal">
+                  <i data-lucide="table" class="w-4 h-4"></i>
                   <span>Ver en Tabla</span>
                 </button>
               </div>
