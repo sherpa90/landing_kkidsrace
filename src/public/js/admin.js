@@ -1727,9 +1727,6 @@ function initRutScanner() {
     return null;
   }
 
-    return null;
-  }
-
   // Reproducir un sonido sutil de confirmación (bip) usando Web Audio API
   function playSuccessBeep() {
     try {
