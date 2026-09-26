@@ -340,8 +340,10 @@ html.dark .sponsor-card:hover {
   width: 100%;
 }
 
-/* ─── Toggle switch (sections visibility) ─── */
+/* ─── Toggle switch (sections & header visibility) ─── */
+.header-toggle:checked + .toggle-track,
 .section-visibility-toggle:checked + .toggle-track { background-color: #2563eb; }
+.header-toggle:checked + .toggle-track .toggle-thumb,
 .section-visibility-toggle:checked + .toggle-track .toggle-thumb { transform: translateX(20px); }
 
 /* ─── Drag-and-drop sortable items ─── */

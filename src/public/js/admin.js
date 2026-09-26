@@ -21,6 +21,7 @@ function initAllAdminModules() {
     ['Circuitos', initCircuitsManager],
     ['Formulario Inscripción', initRegistrationFormManager],
     ['Bases y Reglamento', initBasesManager],
+    ['Header y Menú', initHeaderManager],
     ['Preguntas Frecuentes', initFaqsManager],
     ['Hero Preview', initHeroLivePreview],
     ['Pestaña Navegador', initBrowserTabLivePreview]
@@ -706,7 +707,33 @@ function collectCmsFormData() {
         location: getVal('input-basesKitPickupLocation') || 'Casino Dreams Puerto Varas',
         requirement: getVal('input-basesKitPickupRequirement')
       }
-    }
+    },
+    // 17. Barra Superior de Navegación (Header)
+    header: (() => {
+      const links = {};
+      const labels = {};
+      document.querySelectorAll('.header-link-row').forEach(row => {
+        const id = row.getAttribute('data-link-id');
+        const chk = row.querySelector('.header-link-toggle');
+        const lbl = row.querySelector('.header-label-input');
+        if (id) {
+          links[id] = chk ? chk.checked : true;
+          if (lbl && lbl.value.trim()) {
+            labels[id] = lbl.value.trim();
+          }
+        }
+      });
+      return {
+        links,
+        labels,
+        showCtaButton: document.getElementById('input-header-showCta') ? document.getElementById('input-header-showCta').checked : true,
+        ctaButtonText: getVal('input-header-ctaText') || 'Inscribir Niño/a',
+        ctaButtonLink: getVal('input-header-ctaLink') || '/inscribir',
+        showThemeToggle: document.getElementById('input-header-showThemeToggle') ? document.getElementById('input-header-showThemeToggle').checked : true,
+        showTagline: document.getElementById('input-header-showTagline') ? document.getElementById('input-header-showTagline').checked : true,
+        sticky: true
+      };
+    })()
   };
 }
 
@@ -3592,4 +3619,14 @@ function initBasesManager() {
   const saveBtnBottom = document.getElementById('btn-save-bases-bottom');
   if (saveBtn) saveBtn.addEventListener('click', triggerSave);
   if (saveBtnBottom) saveBtnBottom.addEventListener('click', triggerSave);
+}
+
+// 20. Gestor de Barra Superior (Header / Menú)
+function initHeaderManager() {
+  const triggerSave = () => {
+    const cmsSaveBtn = document.getElementById('btn-save-cms');
+    if (cmsSaveBtn) cmsSaveBtn.click();
+  };
+  const saveBtn = document.getElementById('btn-save-header');
+  if (saveBtn) saveBtn.addEventListener('click', triggerSave);
 }

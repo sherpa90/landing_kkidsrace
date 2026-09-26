@@ -304,6 +304,14 @@
             <span class="text-[9px] bg-purple-500/20 text-purple-300 border border-purple-500/30 px-1.5 py-0.5 rounded-full font-bold">Web</span>
           </button>
 
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-300 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="header">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="navigation" class="w-4 h-4 text-cyan-400"></i>
+              <span>Barra Superior (Header)</span>
+            </div>
+            <span class="text-[9px] bg-cyan-500/20 text-cyan-300 border border-cyan-500/30 px-1.5 py-0.5 rounded-full font-bold">Menú</span>
+          </button>
+
           <button type="button" class="tab-btn w-full flex items-center gap-2.5 px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="sections">
             <i data-lucide="layout-list" class="w-4 h-4"></i>
             <span>🔧 Secciones Web</span>
@@ -668,6 +676,178 @@
         </div>
 
         
+        <!-- PESTAÑA: BARRA SUPERIOR (HEADER / MENÚ) -->
+        <div id="tab-header" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-gray-800">
+              <div>
+                <h2 class="text-lg font-black text-white flex items-center gap-2 mb-1">
+                  <i data-lucide="navigation" class="w-5 h-5 text-cyan-400"></i>
+                  Barra Superior de Navegación (Header)
+                </h2>
+                <p class="text-xs text-gray-400">
+                  Controla con precisión qué elementos, enlaces y botones se muestran en la barra superior (tanto en PC como en el menú móvil) y personaliza sus textos.
+                </p>
+              </div>
+              <button type="button" id="btn-save-header" class="inline-flex items-center justify-center gap-2 px-5 py-2.5 rounded-2xl bg-cyan-600 hover:bg-cyan-500 text-white font-bold text-xs shadow-lg shadow-cyan-600/25 transition-all">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>Guardar Cambios</span>
+              </button>
+            </div>
+
+            <!-- ENLACES DE NAVEGACIÓN -->
+            <div class="mt-6 space-y-4">
+              <div class="flex items-center justify-between">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                  <i data-lucide="list" class="w-4 h-4 text-cyan-400"></i>
+                  Enlaces del Menú Principal
+                </h3>
+                <span class="text-[11px] text-gray-400">Activa o desactiva la visibilidad y edita el texto visible</span>
+              </div>
+
+              <%
+                const headerNavLinks = [
+                  { id: 'countdown', name: 'Cuenta Regresiva', icon: 'clock', defaultLabel: 'Cuenta Regresiva', desc: 'Acceso directo al temporizador del evento' },
+                  { id: 'circuits', name: 'Circuitos & Categorías', icon: 'flag', defaultLabel: 'Circuitos', desc: 'Detalle de distancias y edades' },
+                  { id: 'schedule', name: 'Cronograma Oficial', icon: 'calendar', defaultLabel: 'Cronograma', desc: 'Horarios de entrega de kits y corrida' },
+                  { id: 'gallery', name: 'Galería de Fotos', icon: 'image', defaultLabel: 'Galería', desc: 'Fotos y momentos destacados' },
+                  { id: 'kits', name: 'Inscripción Oficial (Kits)', icon: 'award', defaultLabel: 'Inscripción Oficial', desc: 'Tarifas, kit del corredor y beneficios' },
+                  { id: 'bases', name: 'Bases & Reglamento (Pestaña nueva)', icon: 'file-text', defaultLabel: 'Bases & Reglamento', desc: 'Página oficial de bases, categorías y reglamento' },
+                  { id: 'faq', name: 'Preguntas Frecuentes', icon: 'help-circle', defaultLabel: 'Preguntas', desc: 'Respuestas a dudas comunes' },
+                  { id: 'sponsors', name: 'Auspiciadores', icon: 'building-2', defaultLabel: 'Auspiciadores', desc: 'Logos de marcas patrocinadoras' },
+                  { id: 'venue', name: 'Lugar del Evento', icon: 'map-pin', defaultLabel: 'Lugar', desc: 'Mapa y ubicación' },
+                  { id: 'contact', name: 'Contacto', icon: 'mail', defaultLabel: 'Contacto', desc: 'Formulario y datos de contacto' }
+                ];
+                const curHeader = content.header || {};
+                const curLinks = curHeader.links || {};
+                const curLabels = curHeader.labels || {};
+              %>
+
+              <div class="space-y-2">
+                <% headerNavLinks.forEach(item => { 
+                    const isVisible = (typeof curLinks[item.id] !== 'undefined') ? curLinks[item.id] === true : true;
+                    const labelVal = curLabels[item.id] || item.defaultLabel;
+                %>
+                <div class="header-link-row flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-3.5 rounded-2xl bg-gray-900/60 border border-gray-800 hover:border-gray-700 transition-all" data-link-id="<%= item.id %>">
+                  <div class="flex items-center gap-3 min-w-0 sm:w-1/3">
+                    <div class="w-8 h-8 rounded-xl bg-gray-800 flex items-center justify-center shrink-0">
+                      <i data-lucide="<%= item.icon %>" class="w-4 h-4 text-cyan-400"></i>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-xs font-bold text-white truncate"><%= item.name %></div>
+                      <div class="text-[11px] text-gray-500 truncate"><%= item.desc %></div>
+                    </div>
+                  </div>
+
+                  <div class="flex-1 flex items-center gap-2">
+                    <span class="text-[11px] text-gray-400 shrink-0 hidden md:inline">Texto:</span>
+                    <input type="text" class="header-label-input w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-1.5 text-xs text-white placeholder-gray-600 focus:outline-none focus:border-cyan-400 transition-colors" value="<%= labelVal %>" placeholder="<%= item.defaultLabel %>">
+                  </div>
+
+                  <div class="flex items-center justify-between sm:justify-end gap-3 shrink-0 pt-2 sm:pt-0 border-t border-gray-800/60 sm:border-0">
+                    <span class="text-xs text-gray-400 sm:hidden">Visible en menú:</span>
+                    <label class="relative inline-flex items-center cursor-pointer" title="Mostrar u ocultar en el header">
+                      <input type="checkbox" class="header-link-toggle sr-only header-toggle" <%= isVisible ? 'checked' : '' %>>
+                      <div class="toggle-track w-10 h-5 bg-gray-700 rounded-full transition-colors relative">
+                        <div class="toggle-thumb absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform shadow"></div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+                <% }); %>
+              </div>
+            </div>
+
+            <!-- BOTONES Y ACCIONES ADICIONALES DEL HEADER -->
+            <div class="mt-8 pt-6 border-t border-gray-800 space-y-6">
+              <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                <i data-lucide="sliders" class="w-4 h-4 text-cyan-400"></i>
+                Botones y Acciones de la Barra
+              </h3>
+
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <!-- Botón CTA de Inscripción -->
+                <div class="p-4 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-4">
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-xl bg-blue-500/20 text-blue-400 flex items-center justify-center">
+                        <i data-lucide="user-plus" class="w-4 h-4"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-bold text-white">Botón Principal (CTA)</div>
+                        <div class="text-[11px] text-gray-400">Botón destacado de inscripción rápida</div>
+                      </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" id="input-header-showCta" class="sr-only header-toggle" <%= (curHeader.showCtaButton !== false) ? 'checked' : '' %>>
+                      <div class="toggle-track w-10 h-5 bg-gray-700 rounded-full transition-colors relative">
+                        <div class="toggle-thumb absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform shadow"></div>
+                      </div>
+                    </label>
+                  </div>
+
+                  <div class="space-y-3 pt-2 border-t border-gray-800">
+                    <div>
+                      <label class="block text-[11px] font-semibold text-gray-400 mb-1">Texto del Botón</label>
+                      <input type="text" id="input-header-ctaText" value="<%= curHeader.ctaButtonText || 'Inscribir Niño/a' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
+                    </div>
+                    <div>
+                      <label class="block text-[11px] font-semibold text-gray-400 mb-1">Enlace / Destino</label>
+                      <input type="text" id="input-header-ctaLink" value="<%= curHeader.ctaButtonLink || '/inscribir' %>" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white focus:outline-none focus:border-cyan-400">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Opciones de Tema y Lema -->
+                <div class="p-4 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-4">
+                  <!-- Toggle Modo Claro / Oscuro -->
+                  <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-xl bg-yellow-500/20 text-yellow-400 flex items-center justify-center">
+                        <i data-lucide="sun" class="w-4 h-4"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-bold text-white">Botón Modo Claro / Oscuro</div>
+                        <div class="text-[11px] text-gray-400">Permite a los visitantes cambiar el tema</div>
+                      </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" id="input-header-showThemeToggle" class="sr-only header-toggle" <%= (curHeader.showThemeToggle !== false) ? 'checked' : '' %>>
+                      <div class="toggle-track w-10 h-5 bg-gray-700 rounded-full transition-colors relative">
+                        <div class="toggle-thumb absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform shadow"></div>
+                      </div>
+                    </label>
+                  </div>
+
+                  <!-- Toggle Tagline -->
+                  <div class="flex items-center justify-between pt-4 border-t border-gray-800">
+                    <div class="flex items-center gap-2.5">
+                      <div class="w-8 h-8 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center">
+                        <i data-lucide="type" class="w-4 h-4"></i>
+                      </div>
+                      <div>
+                        <div class="text-xs font-bold text-white">Subtítulo / Lema junto al Logo</div>
+                        <div class="text-[11px] text-gray-400">Muestra el lema oficial bajo el nombre en desktop</div>
+                      </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                      <input type="checkbox" id="input-header-showTagline" class="sr-only header-toggle" <%= (curHeader.showTagline !== false) ? 'checked' : '' %>>
+                      <div class="toggle-track w-10 h-5 bg-gray-700 rounded-full transition-colors relative">
+                        <div class="toggle-thumb absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full transition-transform shadow"></div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="mt-6 p-3 rounded-2xl bg-cyan-950/40 border border-cyan-800/40 text-xs text-cyan-300 flex items-start gap-2">
+              <i data-lucide="info" class="w-4 h-4 shrink-0 mt-0.5"></i>
+              <span>Cualquier cambio aquí se aplica instantáneamente al navbar del sitio principal tanto en computadoras como en teléfonos móviles.</span>
+            </div>
+          </div>
+        </div>
+
         <!-- PESTAÑA: SECCIONES DE LA PÁGINA -->
         <div id="tab-sections" class="tab-pane hidden space-y-6">
           <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">

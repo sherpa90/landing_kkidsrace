@@ -1156,5 +1156,37 @@
       "location": "Casino Dreams Puerto Varas",
       "requirement": "Recuerda llevar tu comprobante de pago. Un representante puede retirar con autorización escrita."
     }
+  },
+  "header": {
+    "links": {
+      "countdown": true,
+      "circuits": true,
+      "schedule": true,
+      "gallery": true,
+      "kits": true,
+      "bases": true,
+      "faq": true,
+      "sponsors": false,
+      "venue": false,
+      "contact": false
+    },
+    "labels": {
+      "countdown": "Cuenta Regresiva",
+      "circuits": "Circuitos",
+      "schedule": "Cronograma",
+      "gallery": "Galería",
+      "kits": "Inscripción Oficial",
+      "bases": "Bases & Reglamento",
+      "faq": "Preguntas",
+      "sponsors": "Auspiciadores",
+      "venue": "Lugar",
+      "contact": "Contacto"
+    },
+    "showThemeToggle": true,
+    "showCtaButton": true,
+    "ctaButtonText": "Inscribir Niño/a",
+    "ctaButtonLink": "/inscribir",
+    "showTagline": true,
+    "sticky": true
   }
 }
