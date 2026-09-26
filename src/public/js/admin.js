@@ -20,6 +20,7 @@ function initAllAdminModules() {
     ['Cronograma', initScheduleManager],
     ['Circuitos', initCircuitsManager],
     ['Formulario Inscripción', initRegistrationFormManager],
+    ['Bases y Reglamento', initBasesManager],
     ['Preguntas Frecuentes', initFaqsManager],
     ['Hero Preview', initHeroLivePreview],
     ['Pestaña Navegador', initBrowserTabLivePreview]
@@ -680,6 +681,31 @@ function collectCmsFormData() {
       submitButtonText: getVal('input-reg-submitButtonText'),
       successTitle: getVal('input-reg-successTitle'),
       successText: getVal('input-reg-successText')
+    },
+    // 16. Bases, Recorridos y Reglamento (/bases)
+    bases: {
+      title: getVal('input-basesTitle') || 'Bases, Recorridos y Reglamento',
+      subtitle: getVal('input-basesSubtitle'),
+      pdfUrl: getVal('input-basesPdfUrl'),
+      ticketeraUrl: getVal('input-basesTicketeraUrl'),
+      supportEmail: getVal('input-basesSupportEmail') || 'soporte@kkidsrace.cl',
+      summary: {
+        distances: getVal('input-basesDistances') || '250m • 500m • 1km • 2km • 4km',
+        price: getVal('input-basesPrice') || '$15.000 CLP',
+        kitPickup: getVal('input-basesKitPickup') || 'Sáb. 9 de nov. • 15:00 - 19:00',
+        venue: getVal('input-basesVenue') || 'Casino Dreams Puerto Varas'
+      },
+      neeNotice: getVal('input-basesNeeNotice'),
+      registrationProcess: {
+        exclusiveNotice: getVal('input-basesRegExclusive'),
+        instructions: getVal('input-basesRegInstructions'),
+        commissionNote: getVal('input-basesRegCommission')
+      },
+      kitPickup: {
+        dateTime: getVal('input-basesKitPickupDateTime') || 'Sábado 9 de noviembre • 15:00 - 19:00',
+        location: getVal('input-basesKitPickupLocation') || 'Casino Dreams Puerto Varas',
+        requirement: getVal('input-basesKitPickupRequirement')
+      }
     }
   };
 }
@@ -3554,4 +3580,16 @@ function initRegistrationFormManager() {
   const saveBtnTop = document.getElementById('btn-save-reg-form-top');
   if (saveBtn) saveBtn.addEventListener('click', triggerSave);
   if (saveBtnTop) saveBtnTop.addEventListener('click', triggerSave);
+}
+
+// 19. Gestor de Bases, Recorridos y Reglamento (/bases)
+function initBasesManager() {
+  const triggerSave = () => {
+    const cmsSaveBtn = document.getElementById('btn-save-cms');
+    if (cmsSaveBtn) cmsSaveBtn.click();
+  };
+  const saveBtn = document.getElementById('btn-save-bases');
+  const saveBtnBottom = document.getElementById('btn-save-bases-bottom');
+  if (saveBtn) saveBtn.addEventListener('click', triggerSave);
+  if (saveBtnBottom) saveBtnBottom.addEventListener('click', triggerSave);
 }

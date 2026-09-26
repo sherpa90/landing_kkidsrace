@@ -1061,5 +1061,100 @@
     "addChildButtonText": "Agregar otro hijo/a",
     "successTitle": "¡Inscripción Exitosa!",
     "successText": "Hemos reservado el cupo y kit oficial. Te contactaremos al correo y WhatsApp indicados con las instrucciones de acreditación y número de dorsal."
+  },
+  "bases": {
+    "title": "Bases, Recorridos y Reglamento",
+    "subtitle": "Toda la información oficial del evento KKidsrace 2025: distancias, horarios, categorías y normas. Lee con atención antes de inscribirte.",
+    "pdfUrl": "https://kkidsrace.cl/wp-content/uploads/2025/10/BASES-K_KIDS_RACE-2025.pdf",
+    "ticketeraUrl": "https://ticketera.kkidsrace.cl/",
+    "supportEmail": "soporte@kkidsrace.cl",
+    "summary": {
+      "distances": "250m • 500m • 1km • 2km • 4km",
+      "price": ".000 CLP",
+      "kitPickup": "Sáb. 9 de nov. • 15:00 - 19:00",
+      "venue": "Casino Dreams Puerto Varas"
+    },
+    "schedules": [
+      {
+        "time": "10:45",
+        "category": "250m babykidsrace",
+        "years": "2021-2023",
+        "color": "Blanca",
+        "colorClass": "bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-600"
+      },
+      {
+        "time": "11:00",
+        "category": "250m planos",
+        "years": "2019-2020",
+        "color": "Rosada",
+        "colorClass": "bg-pink-100 text-pink-700 border-pink-300 dark:bg-pink-950/60 dark:text-pink-300 dark:border-pink-800"
+      },
+      {
+        "time": "11:20",
+        "category": "500m planos",
+        "years": "2017-2018",
+        "color": "Verde",
+        "colorClass": "bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300 dark:border-emerald-800"
+      },
+      {
+        "time": "11:40",
+        "category": "1km planos",
+        "years": "2015-2016",
+        "color": "Amarilla",
+        "colorClass": "bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800"
+      },
+      {
+        "time": "12:05",
+        "category": "2km planos",
+        "years": "2012-2014",
+        "color": "Celeste",
+        "colorClass": "bg-sky-100 text-sky-700 border-sky-300 dark:bg-sky-950/60 dark:text-sky-300 dark:border-sky-800"
+      },
+      {
+        "time": "12:30",
+        "category": "4km planos",
+        "years": "2010-2011",
+        "color": "Roja",
+        "colorClass": "bg-rose-100 text-rose-700 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800"
+      }
+    ],
+    "categoriesDetail": [
+      {
+        "distance": "250m",
+        "years": "2019-2023",
+        "desc": "Para los más pequeños en circuito cerrado y protegido acompañados por sus padres o tutores."
+      },
+      {
+        "distance": "500m",
+        "years": "2017-2018",
+        "desc": "Circuito ida y vuelta por costanera con hidratación y resguardo total."
+      },
+      {
+        "distance": "1km",
+        "years": "2015-2016",
+        "desc": "Recorrido costero señalizado para corredores en etapa formativa."
+      },
+      {
+        "distance": "2km",
+        "years": "2012-2014",
+        "desc": "Para jóvenes corredores que desafían mayor distancia con cronometraje y jueces de ruta."
+      },
+      {
+        "distance": "4km",
+        "years": "2010-2011",
+        "desc": "Prueba mayor con dos giros en circuito costanera y resguardo de seguridad."
+      }
+    ],
+    "neeNotice": "Categorías NEE (Necesidades Educativas Especiales) largan 5 minutos antes de su prueba. Consulte las bases completas (PDF) para detalles de adaptación.",
+    "registrationProcess": {
+      "exclusiveNotice": "Las inscripciones se realizan exclusivamente a través de Ticketera (ticketera.kkidsrace.cl). No se aceptan inscripciones por transferencia ni formularios fuera de la plataforma.",
+      "instructions": "Las inscripciones se realizan exclusivamente a través de la plataforma de venta de entradas Ticketera. Accede a https://ticketera.kkidsrace.cl y compra la entrada correspondiente a la categoría de tu participante. Todos los pagos se procesan de forma segura por Ticketera.",
+      "commissionNote": "El valor final (incluye comisión de Ticketera) se muestra al completar la compra en la plataforma."
+    },
+    "kitPickup": {
+      "dateTime": "Sábado 9 de noviembre • 15:00 - 19:00",
+      "location": "Casino Dreams Puerto Varas",
+      "requirement": "Recuerda llevar tu comprobante de pago. Un representante puede retirar con autorización escrita."
+    }
   }
 }

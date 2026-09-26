@@ -150,6 +150,10 @@
         <% if (isSecVis('schedule')) { %><a href="#schedule" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap">Cronograma</a><% } %>
         <% if (isSecVis('gallery')) { %><a href="#gallery" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap">Galería</a><% } %>
         <% if (isSecVis('kits')) { %><a href="#kits" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap">Inscripción Oficial</a><% } %>
+        <a href="/bases" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 dark:hover:text-yellow-400 transition-colors flex items-center gap-1 whitespace-nowrap text-amber-600 dark:text-yellow-400 font-extrabold" title="Abrir Bases y Reglamento en una pestaña nueva">
+          <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+          <span>Bases & Reglamento</span>
+        </a>
         <% if (isSecVis('faq')) { %><a href="#faq" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap">Preguntas</a><% } %>
         <% if (isSecVis('sponsors')) { %><a href="#sponsors" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap hidden xl:block">Auspiciadores</a><% } %>
         <% if (isSecVis('venue')) { %><a href="#venue" class="hover:text-blue-600 dark:hover:text-white transition-colors whitespace-nowrap hidden xl:block">Lugar</a><% } %>
@@ -220,6 +224,13 @@
             Inscripción Oficial
           </a>
           <% } %>
+          <a href="/bases" target="_blank" rel="noopener noreferrer" class="mobile-nav-link group flex items-center justify-between py-3 px-4 rounded-xl text-amber-600 dark:text-yellow-400 font-bold hover:bg-amber-50 dark:hover:bg-amber-950/40 active:bg-amber-100 transition-colors">
+            <div class="flex items-center gap-3">
+              <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-amber-100 dark:bg-amber-900/50 shrink-0"><i data-lucide="file-text" class="w-3.5 h-3.5 text-amber-600 dark:text-yellow-400"></i></span>
+              Bases & Reglamento
+            </div>
+            <i data-lucide="external-link" class="w-3.5 h-3.5 text-slate-400"></i>
+          </a>
           <% if (isSecVis('faq')) { %>
           <a href="#faq" class="mobile-nav-link group flex items-center gap-3 py-3 px-4 rounded-xl text-slate-700 dark:text-gray-300 font-semibold hover:bg-slate-100 dark:hover:bg-gray-800/70 active:bg-slate-200 transition-colors">
             <span class="flex items-center justify-center w-7 h-7 rounded-lg bg-slate-100 dark:bg-gray-800 shrink-0"><i data-lucide="help-circle" class="w-3.5 h-3.5 text-blue-500"></i></span>
@@ -1098,7 +1109,11 @@
           <i data-lucide="facebook" class="w-4 h-4"></i>
         </a>
         <% } %>
-        <a href="/admin" class="ml-4 text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 font-bold">
+        <a href="/bases" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors font-bold flex items-center gap-1.5 text-xs mr-2" title="Ver Bases y Reglamento">
+          <i data-lucide="file-text" class="w-3.5 h-3.5 text-yellow-400"></i>
+          <span>Bases & Reglamento</span>
+        </a>
+        <a href="/admin" class="ml-2 text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 font-bold">
           <i data-lucide="shield" class="w-3.5 h-3.5"></i>
           CMS Admin
         </a>

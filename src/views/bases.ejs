@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="es" class="<%= themeMode === 'dark' ? 'dark' : '' %>">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0">
+  <title><%= content.bases?.title || 'Bases, Recorridos y Reglamento' %> — <%= content.brand?.name || 'KKIDSRACE' %></title>
+  <meta name="description" content="<%= content.bases?.subtitle || 'Toda la información oficial del evento KKidsrace: distancias, horarios, categorías y normas.' %>">
+  
+  <link rel="icon" type="image/x-icon" href="/favicon.ico">
+  <link rel="canonical" href="<%= siteUrl %>/bases">
+
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              blue: '#1d4ed8',
+              yellow: '#facc15',
+              green: '#22c55e',
+              red: '#ef4444',
+            }
+          }
+        }
+      }
+    };
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&display=swap');
+    body {
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+    }
+    @media print {
+      header, footer, .no-print { display: none !important; }
+      body { background: white !important; color: black !important; }
+      .print-shadow-none { box-shadow: none !important; border: 1px solid #e2e8f0 !important; }
+    }
+  </style>
+</head>
+<body class="bg-slate-50 text-slate-800 dark:bg-gray-950 dark:text-gray-100 transition-colors duration-300 min-h-screen flex flex-col selection:bg-blue-600 selection:text-white">
+
+  <!-- NAVBAR SUPERIOR -->
+  <header class="sticky top-0 z-40 bg-white/90 dark:bg-gray-950/90 backdrop-blur-md border-b border-slate-200/80 dark:border-white/10 transition-colors">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 h-16 sm:h-20 flex items-center justify-between gap-4">
+      
+      <!-- Logo y Volver -->
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2 group text-slate-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-yellow-400 text-xs font-bold transition-colors">
+          <div class="w-8 h-8 rounded-xl bg-slate-100 dark:bg-gray-900 border border-slate-200 dark:border-gray-800 flex items-center justify-center group-hover:bg-blue-50 dark:group-hover:bg-gray-800 transition-all">
+            <i data-lucide="arrow-left" class="w-4 h-4"></i>
+          </div>
+          <span class="hidden sm:inline">Volver a la portada</span>
+        </a>
+        <div class="h-4 w-px bg-slate-200 dark:border-gray-800 hidden sm:block"></div>
+        <a href="/" class="text-sm sm:text-base font-black tracking-tight text-slate-900 dark:text-white truncate">
+          <%= content.brand?.name || 'KKIDSRACE 2026' %>
+        </a>
+      </div>
+
+      <!-- Acciones de Cabecera -->
+      <div class="flex items-center gap-2.5">
+        <!-- Modo Oscuro -->
+        <button type="button" id="theme-btn" class="p-2.5 rounded-xl border border-slate-200 dark:border-gray-800 text-slate-700 dark:text-yellow-400 hover:bg-slate-100 dark:hover:bg-gray-900 transition-colors" title="Cambiar tema">
+          <i data-lucide="sun" class="w-4 h-4 hidden dark:block"></i>
+          <i data-lucide="moon" class="w-4 h-4 block dark:hidden"></i>
+        </button>
+
+        <!-- Botón Imprimir -->
+        <button type="button" onclick="window.print()" class="hidden md:inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold text-slate-600 dark:text-gray-300 hover:bg-slate-100 dark:hover:bg-gray-900 border border-slate-200 dark:border-gray-800 transition-colors" title="Imprimir reglamento">
+          <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+          <span>Imprimir</span>
+        </button>
+
+        <!-- Botón Comprar Ticketera -->
+        <% const ticketeraLink = content.bases?.ticketeraUrl || 'https://ticketera.kkidsrace.cl/'; %>
+        <a href="<%= ticketeraLink %>" target="_blank" rel="noopener noreferrer" class="px-4 py-2 rounded-xl text-xs sm:text-sm font-black text-white bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 shadow-md shadow-blue-600/20 active:scale-95 transition-all flex items-center gap-1.5 whitespace-nowrap">
+          <i data-lucide="ticket" class="w-4 h-4"></i>
+          <span>Comprar Entrada</span>
+        </a>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- CONTENIDO PRINCIPAL -->
+  <main class="flex-1 max-w-5xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-10 sm:py-14 space-y-10">
+
+    <!-- HERO PRINCIPAL DE BASES -->
+    <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-blue-600 via-indigo-600 to-blue-800 text-white p-8 sm:p-12 shadow-xl shadow-blue-900/10">
+      <!-- Decoración de fondo -->
+      <div class="absolute -right-10 -bottom-10 w-72 h-72 bg-white/10 rounded-full blur-3xl pointer-events-none"></div>
+      <div class="absolute top-0 right-1/3 w-60 h-60 bg-yellow-400/10 rounded-full blur-2xl pointer-events-none"></div>
+
+      <div class="relative z-10 max-w-3xl">
+        <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/15 backdrop-blur-md text-yellow-300 text-xs font-black uppercase tracking-wider mb-4 border border-white/20">
+          <i data-lucide="shield-check" class="w-3.5 h-3.5"></i>
+          Documento Oficial
+        </div>
+        
+        <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight mb-4 leading-tight">
+          <%= content.bases?.title || 'Bases, Recorridos y Reglamento' %>
+        </h1>
+        
+        <p class="text-blue-100 text-sm sm:text-base leading-relaxed mb-8">
+          <%= content.bases?.subtitle || 'Toda la información oficial del evento KKidsrace 2025: distancias, horarios, categorías y normas. Lee con atención antes de inscribirte.' %>
+        </p>
+
+        <!-- Botones de Acción Primarios -->
+        <div class="flex flex-wrap items-center gap-3.5 no-print">
+          <% const pdfLink = content.bases?.pdfUrl || 'https://kkidsrace.cl/wp-content/uploads/2025/10/BASES-K_KIDS_RACE-2025.pdf'; %>
+          <a href="<%= pdfLink %>" target="_blank" rel="noopener noreferrer" class="px-5 py-3 rounded-2xl bg-white text-blue-700 hover:bg-blue-50 text-xs sm:text-sm font-black shadow-lg shadow-black/10 transition-transform active:scale-95 flex items-center gap-2">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Descargar Bases (PDF)</span>
+          </a>
+
+          <a href="<%= ticketeraLink %>" target="_blank" rel="noopener noreferrer" class="px-5 py-3 rounded-2xl bg-yellow-400 hover:bg-yellow-300 text-gray-950 text-xs sm:text-sm font-black shadow-lg shadow-yellow-400/20 transition-transform active:scale-95 flex items-center gap-2">
+            <i data-lucide="shopping-cart" class="w-4 h-4"></i>
+            <span>Comprar Entrada (Ticketera)</span>
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- RESUMEN DEL EVENTO: 3 TARJETAS HIGHLIGHT -->
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+      <div class="p-6 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200/90 dark:border-white/10 shadow-sm flex items-start gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-blue-950/60 border border-blue-100 dark:border-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+          <i data-lucide="route" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider block">Distancias</span>
+          <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-0.5">
+            <%= content.bases?.summary?.distances || '250m • 500m • 1km • 2km • 4km' %>
+          </p>
+        </div>
+      </div>
+
+      <div class="p-6 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200/90 dark:border-white/10 shadow-sm flex items-start gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-amber-50 dark:bg-amber-950/60 border border-amber-100 dark:border-amber-900 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+          <i data-lucide="tag" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider block">Valor Inscripción</span>
+          <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-0.5">
+            <%= content.bases?.summary?.price || '$15.000 CLP' %>
+          </p>
+        </div>
+      </div>
+
+      <div class="p-6 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200/90 dark:border-white/10 shadow-sm flex items-start gap-4">
+        <div class="w-12 h-12 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-100 dark:border-emerald-900 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+          <i data-lucide="package-check" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <span class="text-[11px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider block">Retiro de Kit</span>
+          <p class="text-base sm:text-lg font-black text-slate-900 dark:text-white mt-0.5">
+            <%= content.bases?.summary?.kitPickup || 'Sáb. 9 de nov. • 15:00 - 19:00' %>
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- SECCIÓN 1: HORARIOS DE LARGADA Y COLORES DE PULSERA -->
+    <section class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200/90 dark:border-white/10 shadow-sm space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100 dark:border-gray-800">
+        <div>
+          <div class="flex items-center gap-2 text-xs font-black text-blue-600 dark:text-yellow-400 uppercase tracking-wider">
+            <i data-lucide="clock" class="w-4 h-4"></i>
+            <span>Cronograma Oficial de Largadas</span>
+          </div>
+          <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">Horarios de Largada & Distintivos</h2>
+        </div>
+        <span class="text-xs text-slate-500 dark:text-gray-400">Cada distancia tiene pulsera de color asignada</span>
+      </div>
+
+      <!-- Tabla Responsive y estilizada -->
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm border-collapse">
+          <thead>
+            <tr class="border-b border-slate-200 dark:border-gray-800 text-xs font-black uppercase tracking-wider text-slate-400 dark:text-gray-500">
+              <th class="py-3 px-4">Hora</th>
+              <th class="py-3 px-4">Prueba / Categoría</th>
+              <th class="py-3 px-4">Años de Nacimiento</th>
+              <th class="py-3 px-4 text-right">Color Pulsera</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100 dark:divide-gray-800/60 font-medium">
+            <% const schedules = content.bases?.schedules || [
+              { time: '10:45', category: '250m babykidsrace', years: '2021-2023', color: 'Blanca', colorClass: 'bg-slate-100 text-slate-800 border-slate-300 dark:bg-slate-800 dark:text-slate-100' },
+              { time: '11:00', category: '250m planos', years: '2019-2020', color: 'Rosada', colorClass: 'bg-pink-100 text-pink-700 border-pink-300 dark:bg-pink-950/60 dark:text-pink-300' },
+              { time: '11:20', category: '500m planos', years: '2017-2018', color: 'Verde', colorClass: 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-950/60 dark:text-emerald-300' },
+              { time: '11:40', category: '1km planos', years: '2015-2016', color: 'Amarilla', colorClass: 'bg-amber-100 text-amber-800 border-amber-300 dark:bg-amber-950/60 dark:text-amber-300' },
+              { time: '12:05', category: '2km planos', years: '2012-2014', color: 'Celeste', colorClass: 'bg-sky-100 text-sky-700 border-sky-300 dark:bg-sky-950/60 dark:text-sky-300' },
+              { time: '12:30', category: '4km planos', years: '2010-2011', color: 'Roja', colorClass: 'bg-rose-100 text-rose-700 border-rose-300 dark:bg-rose-950/60 dark:text-rose-300' }
+            ]; %>
+            <% schedules.forEach(s => { %>
+            <tr class="hover:bg-slate-50/80 dark:hover:bg-gray-800/40 transition-colors">
+              <td class="py-3.5 px-4 font-mono font-black text-blue-600 dark:text-blue-400 text-base whitespace-nowrap">
+                <%= s.time %>
+              </td>
+              <td class="py-3.5 px-4 font-bold text-slate-900 dark:text-white">
+                <%= s.category %>
+              </td>
+              <td class="py-3.5 px-4 text-slate-500 dark:text-gray-400 font-mono text-xs">
+                <%= s.years %>
+              </td>
+              <td class="py-3.5 px-4 text-right">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-black uppercase tracking-wider border <%= s.colorClass || 'bg-slate-100 text-slate-800 border-slate-300' %>">
+                  <span class="w-2 h-2 rounded-full bg-current"></span>
+                  <%= s.color %>
+                </span>
+              </td>
+            </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- ALERTA IMPORTANTE NEE -->
+      <div class="p-4 sm:p-5 rounded-2xl bg-amber-50 dark:bg-amber-950/40 border border-amber-200 dark:border-amber-900/50 flex items-start gap-3.5 text-xs text-amber-900 dark:text-amber-200">
+        <i data-lucide="info" class="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5"></i>
+        <div>
+          <strong class="font-bold block text-sm mb-0.5">Categorías Inclusivas NEE (Necesidades Educativas Especiales):</strong>
+          <span><%= content.bases?.neeNotice || 'Categorías NEE largan 5 minutos antes de su prueba. Consulte las bases completas (PDF) para detalles de adaptación.' %></span>
+        </div>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 2: DETALLE DE CATEGORÍAS -->
+    <section class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200/90 dark:border-white/10 shadow-sm space-y-6">
+      <div class="pb-4 border-b border-slate-100 dark:border-gray-800">
+        <div class="flex items-center gap-2 text-xs font-black text-blue-600 dark:text-yellow-400 uppercase tracking-wider">
+          <i data-lucide="users" class="w-4 h-4"></i>
+          <span>Edades y Circuitos</span>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">Detalle de Categorías</h2>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <% const categoriesDetail = content.bases?.categoriesDetail || [
+          { distance: '250m', years: '2019-2023', desc: 'Para los más pequeños en circuito cerrado y protegido acompañados por sus padres o tutores.' },
+          { distance: '500m', years: '2017-2018', desc: 'Circuito ida y vuelta por costanera con hidratación y resguardo total.' },
+          { distance: '1km', years: '2015-2016', desc: 'Recorrido costero señalizado para corredores en etapa formativa.' },
+          { distance: '2km', years: '2012-2014', desc: 'Para jóvenes corredores que desafían mayor distancia con cronometraje y jueces de ruta.' },
+          { distance: '4km', years: '2010-2011', desc: 'Prueba mayor con dos giros en circuito costanera y resguardo de seguridad.' }
+        ]; %>
+        <% categoriesDetail.forEach(cat => { %>
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800 flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <span class="text-lg font-black text-slate-900 dark:text-white"><%= cat.distance %></span>
+              <span class="text-[11px] font-mono font-bold text-blue-600 dark:text-yellow-400 bg-blue-50 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900 px-2 py-0.5 rounded-full"><%= cat.years %></span>
+            </div>
+            <p class="text-xs text-slate-600 dark:text-gray-400 leading-relaxed"><%= cat.desc %></p>
+          </div>
+          <div class="mt-4 pt-3 border-t border-slate-200/60 dark:border-gray-700/60 flex items-center justify-between text-[11px] font-bold text-slate-500 dark:text-gray-400">
+            <span class="flex items-center gap-1"><i data-lucide="award" class="w-3.5 h-3.5 text-amber-500"></i> Medalla oficial</span>
+            <span class="text-emerald-600 dark:text-emerald-400">Protegido</span>
+          </div>
+        </div>
+        <% }); %>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 3: PROCESO DE INSCRIPCIÓN EXCLUSIVO POR TICKETERA -->
+    <section class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200/90 dark:border-white/10 shadow-sm space-y-6">
+      <div class="pb-4 border-b border-slate-100 dark:border-gray-800">
+        <div class="flex items-center gap-2 text-xs font-black text-blue-600 dark:text-yellow-400 uppercase tracking-wider">
+          <i data-lucide="ticket" class="w-4 h-4"></i>
+          <span>Plataforma Oficial de Compra</span>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">Proceso de Inscripción</h2>
+      </div>
+
+      <!-- Cuadro de Exclusividad Ticketera -->
+      <div class="p-5 rounded-2xl bg-blue-50 dark:bg-blue-950/40 border border-blue-200 dark:border-blue-900/60 flex items-start gap-4">
+        <div class="w-10 h-10 rounded-xl bg-blue-600 text-white flex items-center justify-center shrink-0 shadow-md">
+          <i data-lucide="alert-circle" class="w-5 h-5"></i>
+        </div>
+        <div class="text-xs leading-relaxed space-y-1">
+          <strong class="text-sm font-black text-blue-950 dark:text-blue-200 block">Nota Importante:</strong>
+          <p class="text-blue-900 dark:text-blue-300">
+            <%= content.bases?.registrationProcess?.exclusiveNotice || 'Las inscripciones se realizan exclusivamente a través de Ticketera (ticketera.kkidsrace.cl). No se aceptan inscripciones por transferencia ni formularios fuera de la plataforma.' %>
+          </p>
+        </div>
+      </div>
+
+      <!-- Detalle paso a paso -->
+      <div class="space-y-4 text-xs sm:text-sm text-slate-700 dark:text-gray-300 leading-relaxed">
+        <p>
+          <%= content.bases?.registrationProcess?.instructions || 'Las inscripciones se realizan exclusivamente a través de la plataforma de venta de entradas Ticketera. Accede a https://ticketera.kkidsrace.cl y compra la entrada correspondiente a la categoría de tu participante. Todos los pagos se procesan de forma segura por Ticketera.' %>
+        </p>
+        <p class="text-slate-500 dark:text-gray-400 italic">
+          <%= content.bases?.registrationProcess?.commissionNote || 'El valor final (incluye comisión de Ticketera) se muestra al completar la compra en la plataforma.' %>
+        </p>
+      </div>
+
+      <!-- Soporte y CTA -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-4 border-t border-slate-100 dark:border-gray-800">
+        <div class="flex items-center gap-2 text-xs text-slate-500 dark:text-gray-400">
+          <i data-lucide="headphones" class="w-4 h-4 text-blue-500"></i>
+          <span>¿Necesitas ayuda con la compra? Contacta soporte:</span>
+          <% const supportEmail = content.bases?.supportEmail || 'soporte@kkidsrace.cl'; %>
+          <a href="mailto:<%= supportEmail %>" class="font-bold text-blue-600 dark:text-yellow-400 hover:underline"><%= supportEmail %></a>
+        </div>
+
+        <a href="<%= ticketeraLink %>" target="_blank" rel="noopener noreferrer" class="px-6 py-3 rounded-2xl text-xs sm:text-sm font-black text-white bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-600/30 active:scale-95 transition-all flex items-center justify-center gap-2">
+          <span>Comprar Entrada en Ticketera</span>
+          <i data-lucide="external-link" class="w-4 h-4"></i>
+        </a>
+      </div>
+    </section>
+
+    <!-- SECCIÓN 4: ENTREGA DE KITS -->
+    <section class="p-6 sm:p-8 rounded-3xl bg-white dark:bg-gray-900 border border-slate-200/90 dark:border-white/10 shadow-sm space-y-6">
+      <div class="pb-4 border-b border-slate-100 dark:border-gray-800">
+        <div class="flex items-center gap-2 text-xs font-black text-amber-600 dark:text-amber-400 uppercase tracking-wider">
+          <i data-lucide="package" class="w-4 h-4"></i>
+          <span>Acreditación Previa</span>
+        </div>
+        <h2 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white mt-1">Entrega de Kits</h2>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800 flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-amber-100 dark:bg-amber-950 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+            <i data-lucide="calendar" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="text-[11px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider block">Fecha y Hora</span>
+            <p class="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5">
+              <%= content.bases?.kitPickup?.dateTime || 'Sábado 9 de noviembre • 15:00 - 19:00' %>
+            </p>
+          </div>
+        </div>
+
+        <div class="p-5 rounded-2xl bg-slate-50 dark:bg-gray-800/50 border border-slate-100 dark:border-gray-800 flex items-start gap-3.5">
+          <div class="w-10 h-10 rounded-xl bg-blue-100 dark:bg-blue-950 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+            <i data-lucide="map-pin" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <span class="text-[11px] font-bold text-slate-400 dark:text-gray-500 uppercase tracking-wider block">Lugar Oficial</span>
+            <p class="text-sm sm:text-base font-bold text-slate-900 dark:text-white mt-0.5">
+              <%= content.bases?.kitPickup?.location || 'Casino Dreams Puerto Varas' %>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Regla de Retiro -->
+      <div class="p-4 rounded-2xl bg-amber-50/70 dark:bg-gray-800 border border-amber-200/80 dark:border-gray-700 flex items-center gap-3 text-xs text-amber-900 dark:text-gray-300">
+        <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-600 dark:text-yellow-400 shrink-0"></i>
+        <span><%= content.bases?.kitPickup?.requirement || 'Recuerda llevar tu comprobante de pago. Un representante puede retirar con autorización escrita.' %></span>
+      </div>
+    </section>
+
+    <!-- BANNER DE CIERRE: LLAMADO A LA ACCIÓN -->
+    <div class="text-center py-10 px-6 rounded-3xl bg-slate-100 dark:bg-gray-900 border border-slate-200 dark:border-gray-800 space-y-4">
+      <h3 class="text-xl sm:text-2xl font-black text-slate-900 dark:text-white">¿Listo para ser parte de la gran corrida?</h3>
+      <p class="text-xs sm:text-sm text-slate-500 dark:text-gray-400 max-w-lg mx-auto">
+        Asegura el cupo, medalla oficial y polera técnica de tu pequeño/a antes de que se agoten las inscripciones.
+      </p>
+      <div class="pt-2 flex flex-wrap justify-center gap-3">
+        <a href="<%= ticketeraLink %>" target="_blank" rel="noopener noreferrer" class="px-6 py-3 rounded-2xl text-sm font-black text-white bg-blue-600 hover:bg-blue-700 shadow-lg shadow-blue-600/30 transition-transform active:scale-95 flex items-center gap-2">
+          <span>Comprar Entrada Oficial</span>
+          <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        </a>
+        <a href="<%= pdfLink %>" target="_blank" rel="noopener noreferrer" class="px-6 py-3 rounded-2xl text-sm font-bold text-slate-700 dark:text-gray-200 bg-white dark:bg-gray-800 hover:bg-slate-50 border border-slate-300 dark:border-gray-700 transition-colors flex items-center gap-2">
+          <i data-lucide="file-text" class="w-4 h-4"></i>
+          <span>Descargar PDF</span>
+        </a>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- PIE DE PÁGINA SIMPLE -->
+  <footer class="border-t border-slate-200 dark:border-white/10 bg-white dark:bg-gray-950 py-8 text-xs text-slate-500 dark:text-gray-400 text-center transition-colors">
+    <div class="max-w-6xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+      <p><%= content.footer?.copyright || '© 2026 KKidsrace. Todos los derechos reservados.' %></p>
+      <div class="flex items-center gap-4">
+        <a href="/" class="hover:text-blue-600 dark:hover:text-yellow-400 font-bold transition-colors">Inicio</a>
+        <a href="<%= pdfLink %>" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 dark:hover:text-yellow-400 font-bold transition-colors">Bases PDF</a>
+        <a href="<%= ticketeraLink %>" target="_blank" rel="noopener noreferrer" class="hover:text-blue-600 dark:hover:text-yellow-400 font-bold transition-colors">Ticketera</a>
+      </div>
+    </div>
+  </footer>
+
+  <script>
+    // Lucide Icons
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+
+    // Conmutador de tema claro/oscuro sincronizado
+    const themeBtn = document.getElementById('theme-btn');
+    if (themeBtn) {
+      themeBtn.addEventListener('click', () => {
+        const isDark = document.documentElement.classList.contains('dark');
+        if (isDark) {
+          document.documentElement.classList.remove('dark');
+          localStorage.setItem('kidsrun_theme', 'light');
+        } else {
+          document.documentElement.classList.add('dark');
+          localStorage.setItem('kidsrun_theme', 'dark');
+        }
+      });
+    }
+
+    // Cargar preferencia de tema guardada
+    const savedTheme = localStorage.getItem('kidsrun_theme');
+    if (savedTheme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else if (savedTheme === 'light') {
+      document.documentElement.classList.remove('dark');
+    }
+  </script>
+</body>
+</html>

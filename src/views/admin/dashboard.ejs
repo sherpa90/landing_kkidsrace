@@ -235,6 +235,14 @@
             <i data-lucide="map-pin" class="w-4 h-4"></i>
             <span>📍 Lugar del Evento</span>
           </button>
+
+          <button type="button" class="tab-btn w-full flex items-center justify-between px-3.5 py-2.5 rounded-2xl text-xs font-semibold text-gray-400 hover:text-white hover:bg-gray-900 transition-all text-left" data-tab="bases">
+            <div class="flex items-center gap-2.5">
+              <i data-lucide="file-text" class="w-4 h-4 text-amber-400"></i>
+              <span>Bases & Reglamento</span>
+            </div>
+            <span class="text-[9px] bg-amber-500/20 text-amber-300 border border-amber-500/30 px-1.5 py-0.5 rounded-full font-bold">Página</span>
+          </button>
         </div>
 
         <!-- SECCIÓN 3: LANDING & CONTENIDO -->
@@ -1917,7 +1925,7 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
               <div>
                 <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nombre del lugar</label>
-                <input type="text" id="input-venueName" value="<%= content.venue?.name || content.countdown?.locationName || 'Parque Bicentenario' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white">
+                <input type="text" id="input-venueName" value="<%= content.venue?.name || content.countdown?.locationName || 'Sector Costanera • Pedraplén' %>" class="w-full bg-gray-900 border border-gray-800 rounded-3xl px-4 py-2.5 text-sm text-white">
               </div>
               <div>
                 <label class="block text-xs font-semibold text-gray-300 mb-1.5">Dirección completa</label>
@@ -1961,6 +1969,142 @@
             </div>
           </div>
         </div>
+
+        <!-- PESTAÑA: BASES, RECORRIDOS Y REGLAMENTO (/bases) -->
+        <div id="tab-bases" class="tab-pane hidden space-y-6">
+          <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800 space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-gray-800">
+              <div>
+                <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                  <i data-lucide="file-text" class="w-5 h-5 text-amber-400"></i>
+                  <span>Bases, Recorridos y Reglamento Oficial</span>
+                </h2>
+                <p class="text-xs text-gray-400 mt-1">
+                  Administra la información de la página dedicada <a href="/bases" target="_blank" class="text-amber-400 hover:underline font-mono">/bases</a> (enlace a PDF, Ticketera, largadas y retiro de kits).
+                </p>
+              </div>
+              <div class="flex items-center gap-2.5">
+                <a href="/bases" target="_blank" rel="noopener noreferrer" class="px-3.5 py-2 rounded-2xl text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 transition-all flex items-center gap-1.5">
+                  <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+                  <span>Ver Página en Vivo</span>
+                </a>
+                <button type="button" id="btn-save-bases" class="px-5 py-2.5 rounded-2xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-lg shadow-blue-600/30 active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
+                  <i data-lucide="save" class="w-4 h-4"></i>
+                  <span>Guardar Bases</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Cabecera Principal y Enlaces de Acción -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-4">
+              <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="layout" class="w-3.5 h-3.5"></i> Encabezado & Enlaces Primarios
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Título de la Página</label>
+                  <input type="text" id="input-basesTitle" value="<%= content.bases?.title || 'Bases, Recorridos y Reglamento' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Correo de Soporte Compra</label>
+                  <input type="email" id="input-basesSupportEmail" value="<%= content.bases?.supportEmail || 'soporte@kkidsrace.cl' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Subtítulo / Bajada Descriptiva</label>
+                <textarea id="input-basesSubtitle" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-xs text-white leading-relaxed"><%= content.bases?.subtitle || 'Toda la información oficial del evento KKidsrace 2025: distancias, horarios, categorías y normas. Lee con atención antes de inscribirte.' %></textarea>
+              </div>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Enlace Descarga Bases (PDF)</label>
+                  <input type="url" id="input-basesPdfUrl" value="<%= content.bases?.pdfUrl || 'https://kkidsrace.cl/wp-content/uploads/2025/10/BASES-K_KIDS_RACE-2025.pdf' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-xs font-mono text-white">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Enlace Comprar Entrada (Ticketera)</label>
+                  <input type="url" id="input-basesTicketeraUrl" value="<%= content.bases?.ticketeraUrl || 'https://ticketera.kkidsrace.cl/' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-xs font-mono text-white">
+                </div>
+              </div>
+            </div>
+
+            <!-- Resumen del Evento (3 Métricas) -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-4">
+              <h3 class="text-xs font-bold text-blue-400 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="award" class="w-3.5 h-3.5"></i> Resumen Rápido del Evento
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Distancias</label>
+                  <input type="text" id="input-basesDistances" value="<%= content.bases?.summary?.distances || '250m • 500m • 1km • 2km • 4km' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Valor Inscripción</label>
+                  <input type="text" id="input-basesPrice" value="<%= content.bases?.summary?.price || '$15.000 CLP' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Retiro de Kit (Resumen)</label>
+                  <input type="text" id="input-basesKitPickup" value="<%= content.bases?.summary?.kitPickup || 'Sáb. 9 de nov. • 15:00 - 19:00' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white">
+                </div>
+              </div>
+            </div>
+
+            <!-- Proceso de Inscripción & Exclusividad Ticketera -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-4">
+              <h3 class="text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="ticket" class="w-3.5 h-3.5"></i> Proceso de Inscripción & Plataforma
+              </h3>
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Aviso de Exclusividad Ticketera (Caja de Alerta)</label>
+                <textarea id="input-basesRegExclusive" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-xs text-white leading-relaxed"><%= content.bases?.registrationProcess?.exclusiveNotice || 'Las inscripciones se realizan exclusivamente a través de Ticketera (ticketera.kkidsrace.cl). No se aceptan inscripciones por transferencia ni formularios fuera de la plataforma.' %></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Instrucciones de Compra</label>
+                <textarea id="input-basesRegInstructions" rows="2" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-xs text-white leading-relaxed"><%= content.bases?.registrationProcess?.instructions || 'Las inscripciones se realizan exclusivamente a través de la plataforma de venta de entradas Ticketera. Accede a https://ticketera.kkidsrace.cl y compra la entrada correspondiente a la categoría de tu participante. Todos los pagos se procesan de forma segura por Ticketera.' %></textarea>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Nota de Comisión</label>
+                <input type="text" id="input-basesRegCommission" value="<%= content.bases?.registrationProcess?.commissionNote || 'El valor final (incluye comisión de Ticketera) se muestra al completar la compra en la plataforma.' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-xs text-white">
+              </div>
+            </div>
+
+            <!-- Entrega de Kits & Acreditación -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-4">
+              <h3 class="text-xs font-bold text-amber-400 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="package" class="w-3.5 h-3.5"></i> Entrega de Kits y Acreditación
+              </h3>
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Fecha y Horario de Entrega</label>
+                  <input type="text" id="input-basesKitPickupDateTime" value="<%= content.bases?.kitPickup?.dateTime || 'Sábado 9 de noviembre • 15:00 - 19:00' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white">
+                </div>
+                <div>
+                  <label class="block text-xs font-semibold text-gray-300 mb-1.5">Lugar de Entrega</label>
+                  <input type="text" id="input-basesKitPickupLocation" value="<%= content.bases?.kitPickup?.location || 'Casino Dreams Puerto Varas' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-sm text-white">
+                </div>
+              </div>
+              <div>
+                <label class="block text-xs font-semibold text-gray-300 mb-1.5">Requisitos para el Retiro (Regla / Advertencia)</label>
+                <input type="text" id="input-basesKitPickupRequirement" value="<%= content.bases?.kitPickup?.requirement || 'Recuerda llevar tu comprobante de pago. Un representante puede retirar con autorización escrita.' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-xs text-white">
+              </div>
+            </div>
+
+            <!-- Aviso de Categorías Inclusivas NEE -->
+            <div class="p-4 sm:p-5 rounded-2xl bg-gray-900/60 border border-gray-800 space-y-3">
+              <h3 class="text-xs font-bold text-yellow-400 uppercase tracking-wider flex items-center gap-1.5">
+                <i data-lucide="heart-handshake" class="w-3.5 h-3.5"></i> Aviso Categorías Inclusivas NEE
+              </h3>
+              <input type="text" id="input-basesNeeNotice" value="<%= content.bases?.neeNotice || 'Categorías NEE (Necesidades Educativas Especiales) largan 5 minutos antes de su prueba. Consulte las bases completas (PDF) para detalles de adaptación.' %>" class="w-full bg-gray-950 border border-gray-800 rounded-2xl px-4 py-2.5 text-xs text-white">
+            </div>
+
+            <!-- Botón de Guardado al Pie -->
+            <div class="flex items-center justify-end pt-4 border-t border-gray-800">
+              <button type="button" id="btn-save-bases-bottom" class="px-6 py-2.5 rounded-2xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/30 active:scale-95 transition-all flex items-center gap-2 cursor-pointer">
+                <i data-lucide="save" class="w-4 h-4"></i>
+                <span>Guardar Bases y Reglamento</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
 
         <!-- PESTAÑA: CONTACTO & ENVÍO DE CORREOS -->
         <div id="tab-contact" class="tab-pane hidden space-y-6">

@@ -237,6 +237,37 @@ router.get('/inscribir', (req, res) => {
   });
 });
 
+// ─── Página Oficial de Bases, Recorridos y Reglamento ───────────────────────
+
+router.get('/bases', (req, res) => {
+  const content = contentStore.getContent();
+  const isConstruction = content.construction && content.construction.enabled === true;
+  const isStaff = !!(req.session && (req.session.isAdmin || req.session.isEditor));
+
+  if (isConstruction && !isStaff) {
+    return renderConstructionView(req, res, content, false);
+  }
+
+  const theme = contentStore.getTheme(content.brand?.accentColor || 'green_yellow');
+  const themeMode = content.brand?.themeMode || 'light';
+  const siteUrl = content.seo?.canonicalUrl || `${req.protocol}://${req.get('host')}`;
+  const activeRace = contentStore.getActiveRace();
+
+  res.render('bases', {
+    content,
+    theme,
+    themeMode,
+    siteUrl,
+    activeRace,
+    csrfToken: req.session?.csrfToken || '',
+    constructionAdminBypass: isConstruction && isStaff
+  });
+});
+
+router.get('/reglamento', (req, res) => {
+  res.redirect(301, '/bases');
+});
+
 // ─── Upload de Comprobante de Pago ──────────────────────────────────────────
 
 const imageService = require('../services/imageService');
