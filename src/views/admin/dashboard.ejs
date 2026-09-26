@@ -2838,10 +2838,9 @@
                 <div class="sm:w-56 shrink-0">
                   <select id="filter-circuit-select" class="admin-input w-full py-3 text-xs sm:text-sm text-white bg-slate-950 border-slate-700/80 rounded-2xl cursor-pointer">
                     <option value="all">🏁 Todos los Circuitos</option>
-                    <option value="500">500 Metros (Mini Runners)</option>
-                    <option value="1">1 Kilómetro (Rayos)</option>
-                    <option value="2">2 Kilómetros (Campeones)</option>
-                    <option value="3">3 Kilómetros (Titanes)</option>
+                    <% (content.categories || []).forEach(cat => { %>
+                    <option value="<%= (cat.distance || '').toLowerCase() %>"><%= cat.distance %> - <%= cat.title %> (<%= cat.badge %>)</option>
+                    <% }); %>
                   </select>
                 </div>
               </div>
