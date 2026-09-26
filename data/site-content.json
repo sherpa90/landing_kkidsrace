@@ -258,7 +258,7 @@
     }
   ],
   "pricing": {
-    "discountNotice": "Valor único oficial de inscripción • Cupos liberados para alumnos prioritarios",
+    "discountNotice": "Valor único oficial de inscripción",
     "plans": [
       {
         "id": "kit-oficial-kkidsrace",
@@ -279,24 +279,6 @@
         "isPopular": true,
         "ctaText": "Inscribirme por $15.000",
         "ctaLink": "/inscribir"
-      },
-      {
-        "id": "cupo-prioritario",
-        "name": "Beca Alumno Prioritario",
-        "badge": "GRATUITO",
-        "priceMonthly": 0,
-        "priceYearly": 0,
-        "description": "La organización dispone de cupos liberados para alumnos prioritarios de establecimientos educacionales.",
-        "features": [
-          "Cupo 100% liberado de costo",
-          "Solicitud previa a info@kkidsrace.cl o kkidsrace@gmail.com",
-          "Incluye polera técnica oficial",
-          "Incluye pulsera de color y número oficial",
-          "Opción a medalla para primeros lugares"
-        ],
-        "isPopular": false,
-        "ctaText": "Solicitar Cupo Prioritario",
-        "ctaLink": "mailto:info@kkidsrace.cl?subject=Solicitud%20Cupo%20Prioritario%20KKIDSRACE%202026"
       }
     ],
     "title": "¡Inscribe a tu Campeón!",
@@ -332,7 +314,7 @@
     },
     {
       "question": "¿Cuáles son los valores y datos de transferencia para pagar la inscripción?",
-      "answer": "La inscripción tiene un valor oficial de $15.000 pesos. La transferencia se realiza a: Sandra Arriagada Cárdenas, RUT: 11.923.718-1, Banco Santander, Cuenta Corriente N° 67734912, enviando comprobante a sapi.arriagada@gmail.com y kkidsrace@gmail.com."
+      "answer": "La inscripción tiene un valor oficial de $15.000 pesos. La transferencia se realiza a: Sandra Arriagada Cárdenas, RUT: 11.923.718-1, Banco Santander, Cuenta Corriente N° 67734912, enviando comprobante únicamente a kkidsrace@gmail.com."
     },
     {
       "question": "¿Qué distancias y colores de pulsera existen?",
@@ -341,10 +323,6 @@
     {
       "question": "¿Cómo funcionan las categorías para Necesidades Educativas Especiales (NEE)?",
       "answer": "KKIDSRACE cuenta con distancias inclusivas de 500m (para niños de 4 a 9 años nacidos 2017-2022) y 1.000m (para niños de 10 a 14 años nacidos 2012-2016). Ambas categorías largan 5 minutos antes de la prueba respectiva con apoyo y acompañamiento de guías."
-    },
-    {
-      "question": "¿Cómo solicitar los cupos liberados para alumnos prioritarios?",
-      "answer": "Como todos los años, la organización de KKIDSRACE dispone de cupos liberados para alumnos prioritarios. Para solicitar este beneficio debes enviar un correo electrónico a kkidsrace@gmail.com o info@kkidsrace.cl."
     },
     {
       "question": "¿Quiénes reciben medalla?",
@@ -1011,7 +989,7 @@
     },
     {
       "question": "¿Cuáles son los valores y datos de transferencia para pagar la inscripción?",
-      "answer": "La inscripción tiene un valor oficial de $15.000 pesos. La transferencia se realiza a: Sandra Arriagada Cárdenas, RUT: 11.923.718-1, Banco Santander, Cuenta Corriente N° 67734912, enviando comprobante a sapi.arriagada@gmail.com y kkidsrace@gmail.com."
+      "answer": "La inscripción tiene un valor oficial de $15.000 pesos. La transferencia se realiza a: Sandra Arriagada Cárdenas, RUT: 11.923.718-1, Banco Santander, Cuenta Corriente N° 67734912, enviando comprobante únicamente a kkidsrace@gmail.com."
     },
     {
       "question": "¿Qué distancias y colores de pulsera existen?",
@@ -1022,10 +1000,6 @@
       "answer": "KKIDSRACE cuenta con distancias inclusivas de 500m (para niños de 4 a 9 años nacidos 2017-2022) y 1.000m (para niños de 10 a 14 años nacidos 2012-2016). Ambas categorías largan 5 minutos antes de la prueba respectiva con apoyo y acompañamiento de guías."
     },
     {
-      "question": "¿Cómo solicitar los cupos liberados para alumnos prioritarios?",
-      "answer": "Como todos los años, la organización de KKIDSRACE dispone de cupos liberados para alumnos prioritarios. Para solicitar este beneficio debes enviar un correo electrónico a kkidsrace@gmail.com o info@kkidsrace.cl."
-    },
-    {
       "question": "¿Quiénes reciben medalla?",
       "answer": "Los primeros lugares de cada categoría recibirán una medalla de metal oficial durante la premiación general a las 13:10 horas."
     }
@@ -1033,6 +1007,13 @@
   "registrationForm": {
     "heroTitle": "Inscripción Oficial",
     "heroSubtitle": "Asegura el cupo y kit oficial de tu pequeño/a corredor/a",
+    "accountHolder": "Sandra Arriagada Cárdenas",
+    "accountRut": "11.923.718-1",
+    "bankName": "Banco Santander",
+    "accountType": "Cuenta Corriente",
+    "accountNumber": "67734912",
+    "pricePerParticipant": "$15.000",
+    "receiptEmail": "kkidsrace@gmail.com",
     "step1Title": "Selecciona el Circuito",
     "step1Hint": "Por edad sugerida",
     "step2Title": "Datos del Pequeño/a",

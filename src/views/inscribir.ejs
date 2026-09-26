@@ -499,7 +499,7 @@
         </div>
 
         <p class="text-xs text-slate-500 dark:text-gray-400">
-          Realiza la transferencia por <strong>$15.000 por participante</strong> a la cuenta oficial de la organización y adjunta la captura o comprobante bancario abajo.
+          Realiza la transferencia por <strong><%= content.registrationForm?.pricePerParticipant || '$15.000' %> por participante</strong> a la cuenta oficial de la organización y adjunta la captura o comprobante bancario abajo.
         </p>
 
         <!-- CAJA DE DATOS BANCARIOS OFICIALES PARA TRANSFERIR -->
@@ -510,32 +510,31 @@
               Datos Oficiales para Transferencia
             </span>
             <span class="bg-blue-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-sm">
-              $15.000 / niño
+              <%= content.registrationForm?.pricePerParticipant || '$15.000' %> / niño
             </span>
           </div>
 
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
             <div class="bg-white/80 dark:bg-gray-900/80 p-2.5 rounded-xl border border-blue-100 dark:border-gray-800">
               <span class="text-[10px] text-slate-500 dark:text-gray-400 block font-medium">Titular de la Cuenta:</span>
-              <strong class="text-slate-900 dark:text-white font-bold">Sandra Arriagada Cárdenas</strong>
+              <strong class="text-slate-900 dark:text-white font-bold"><%= content.registrationForm?.accountHolder || 'Sandra Arriagada Cárdenas' %></strong>
             </div>
             <div class="bg-white/80 dark:bg-gray-900/80 p-2.5 rounded-xl border border-blue-100 dark:border-gray-800">
               <span class="text-[10px] text-slate-500 dark:text-gray-400 block font-medium">RUT Titular:</span>
-              <strong class="text-slate-900 dark:text-white font-mono font-bold">11.923.718-1</strong>
+              <strong class="text-slate-900 dark:text-white font-mono font-bold"><%= content.registrationForm?.accountRut || '11.923.718-1' %></strong>
             </div>
             <div class="bg-white/80 dark:bg-gray-900/80 p-2.5 rounded-xl border border-blue-100 dark:border-gray-800">
               <span class="text-[10px] text-slate-500 dark:text-gray-400 block font-medium">Banco & Tipo:</span>
-              <strong class="text-slate-900 dark:text-white font-bold">Banco Santander • Cuenta Corriente</strong>
+              <strong class="text-slate-900 dark:text-white font-bold"><%= content.registrationForm?.bankName || 'Banco Santander' %> • <%= content.registrationForm?.accountType || 'Cuenta Corriente' %></strong>
             </div>
             <div class="bg-white/80 dark:bg-gray-900/80 p-2.5 rounded-xl border border-blue-100 dark:border-gray-800">
               <span class="text-[10px] text-slate-500 dark:text-gray-400 block font-medium">Número de Cuenta:</span>
-              <strong class="text-slate-900 dark:text-white font-mono font-black text-blue-600 dark:text-blue-400 text-sm">67734912</strong>
+              <strong class="text-slate-900 dark:text-white font-mono font-black text-blue-600 dark:text-blue-400 text-sm"><%= content.registrationForm?.accountNumber || '67734912' %></strong>
             </div>
           </div>
 
           <div class="text-[11px] text-slate-600 dark:text-slate-300 flex flex-wrap items-center justify-between gap-1 pt-1.5 border-t border-blue-100 dark:border-blue-900/40">
-            <span>Comprobante también a: <strong class="text-blue-600 dark:text-blue-300">sapi.arriagada@gmail.com</strong> / <strong class="text-blue-600 dark:text-blue-300">kkidsrace@gmail.com</strong></span>
-            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">Alumnos prioritarios: cupo liberado vía info@kkidsrace.cl</span>
+            <span>Enviar comprobante únicamente a: <strong class="text-blue-600 dark:text-blue-300 font-mono"><%= content.registrationForm?.receiptEmail || 'kkidsrace@gmail.com' %></strong></span>
           </div>
         </div>
 
