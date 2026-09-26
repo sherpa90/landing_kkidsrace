@@ -403,4 +403,9 @@ html.dark .sponsor-card:hover {
   transform: translateX(24px);
 }
 
+/* ─── WhatsApp float button smooth hide/show ─── */
+#wa-float-btn {
+  transition: opacity 0.25s ease, transform 0.25s ease;
+}
+
 

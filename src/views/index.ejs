@@ -1118,13 +1118,9 @@
     const showSocial = _isOn(footerCfg.showSocialLinks, true);
     const hasStickyCta = _isOn(footerCfg.showFloatingCta, true);
     const hasWhatsapp = _isOn(footerCfg.showFloatingWhatsapp, true);
-    // Calcular padding inferior según los botones flotantes activos
-    let footerPb = 'pb-12'; // default
-    if (hasStickyCta && hasWhatsapp) footerPb = 'pb-40 md:pb-24';
-    else if (hasStickyCta) footerPb = 'pb-28 md:pb-12';
-    else if (hasWhatsapp) footerPb = 'pb-24';
   %>
-  <footer class="border-t border-slate-800 bg-slate-900 pt-12 <%= footerPb %> relative z-10 text-xs text-slate-400 transition-colors">
+  <!-- PIE DE PÁGINA -->
+  <footer id="site-footer" class="border-t border-slate-800 bg-slate-900 pt-12 pb-10 relative z-10 text-xs text-slate-400 transition-colors">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       
       <!-- Fila Superior: Marca, Descripción y Redes Sociales -->
@@ -1238,10 +1234,11 @@
     const waMsg = footerCfg.whatsappMessage || 'Hola, tengo una consulta sobre la Corrida KKIDSRACE 2026';
   %>
   <% if (cleanWaNumber) { %>
-  <a href="https://wa.me/<%= cleanWaNumber %>?text=<%= encodeURIComponent(waMsg) %>" 
+  <a id="wa-float-btn"
+     href="https://wa.me/<%= cleanWaNumber %>?text=<%= encodeURIComponent(waMsg) %>" 
      target="_blank" 
      rel="noopener noreferrer"
-     class="fixed <%= hasStickyCta ? 'bottom-24' : 'bottom-6' %> md:bottom-6 right-4 sm:right-6 z-40 flex items-center gap-2 px-3.5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 group touch-manipulation"
+     class="fixed bottom-6 left-4 sm:left-auto sm:right-6 z-40 flex items-center gap-2 px-3.5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 group touch-manipulation"
      aria-label="Contactar por WhatsApp">
     <div class="relative flex items-center justify-center">
       <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">

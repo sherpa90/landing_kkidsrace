@@ -554,35 +554,55 @@ function initMobileMenu() {
 // 11. Barra flotante táctil inferior para móviles (Sticky Bottom CTA)
 function initMobileStickyCta() {
   const ctaBar = document.getElementById('mobile-sticky-cta');
-  if (!ctaBar) return;
+  const waBtn  = document.getElementById('wa-float-btn');
+  const footer = document.getElementById('site-footer');
 
   const hero = document.getElementById('hero');
-  let threshold = 350;
+  let showThreshold = 350;
 
   function calculateThreshold() {
-    if (hero) {
-      threshold = hero.offsetTop + (hero.offsetHeight * 0.4);
-    }
+    if (hero) showThreshold = hero.offsetTop + (hero.offsetHeight * 0.4);
   }
-
   calculateThreshold();
   window.addEventListener('resize', calculateThreshold, { passive: true });
 
   let ticking = false;
   function onScroll() {
-    if (!ticking) {
-      window.requestAnimationFrame(() => {
-        if (window.scrollY > threshold) {
+    if (ticking) return;
+    ticking = true;
+    window.requestAnimationFrame(() => {
+      const scrollY    = window.scrollY;
+      const winH       = window.innerHeight;
+      // Si el footer está visible en pantalla, ocultar los flotantes
+      const footerTop  = footer ? footer.getBoundingClientRect().top : Infinity;
+      const nearFooter = footerTop < winH + 20; // 20px de margen
+
+      // Sticky CTA: sólo en móvil, aparece después del hero, desaparece al llegar al footer
+      if (ctaBar) {
+        if (!nearFooter && scrollY > showThreshold) {
           ctaBar.classList.remove('translate-y-28', 'opacity-0', 'pointer-events-none');
           ctaBar.classList.add('translate-y-0', 'opacity-100', 'pointer-events-auto');
         } else {
           ctaBar.classList.add('translate-y-28', 'opacity-0', 'pointer-events-none');
           ctaBar.classList.remove('translate-y-0', 'opacity-100', 'pointer-events-auto');
         }
-        ticking = false;
-      });
-      ticking = true;
-    }
+      }
+
+      // Botón WhatsApp: desaparece cuando el footer entra en pantalla
+      if (waBtn) {
+        if (nearFooter) {
+          waBtn.style.opacity = '0';
+          waBtn.style.pointerEvents = 'none';
+          waBtn.style.transform = 'translateY(80px)';
+        } else {
+          waBtn.style.opacity = '1';
+          waBtn.style.pointerEvents = 'auto';
+          waBtn.style.transform = 'translateY(0)';
+        }
+      }
+
+      ticking = false;
+    });
   }
 
   window.addEventListener('scroll', onScroll, { passive: true });
