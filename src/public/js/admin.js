@@ -815,10 +815,61 @@ function initLeadsManager() {
     if (noDesktopRow) {
       noDesktopRow.style.display = (visibleCount === 0 && rows.length > 0) ? '' : 'none';
     }
+
+    // Mostrar/ocultar botón de limpiar búsqueda
+    const clearBtn = document.getElementById('btn-clear-search');
+    if (clearBtn) {
+      if (rawTerm.length > 0) {
+        clearBtn.classList.remove('hidden');
+      } else {
+        clearBtn.classList.add('hidden');
+      }
+    }
   }
 
-  if (searchInput) searchInput.addEventListener('input', applyFilters);
+  if (searchInput) {
+    searchInput.addEventListener('input', applyFilters);
+    // Atajo ESC dentro del input
+    searchInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        searchInput.value = '';
+        applyFilters();
+      }
+    });
+  }
+
+  const clearBtn = document.getElementById('btn-clear-search');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      if (searchInput) {
+        searchInput.value = '';
+        searchInput.focus();
+        applyFilters();
+      }
+    });
+  }
+
+  // Atajo global '/' para enfocar el buscador instantáneamente en la base de participantes
+  document.addEventListener('keydown', (e) => {
+    if (e.key === '/' && document.activeElement !== searchInput && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement?.tagName)) {
+      const leadsPane = document.getElementById('tab-leads');
+      if (leadsPane && !leadsPane.classList.contains('hidden') && searchInput) {
+        e.preventDefault();
+        searchInput.focus();
+        searchInput.select();
+      }
+    }
+  });
+
   if (circuitSelect) circuitSelect.addEventListener('change', applyFilters);
+
+  // Auto-enfocar el buscador si la pestaña de participantes está abierta
+  setTimeout(() => {
+    const leadsPane = document.getElementById('tab-leads');
+    if (leadsPane && !leadsPane.classList.contains('hidden') && searchInput) {
+      searchInput.focus();
+    }
+  }, 100);
 
   // Modal Lightbox para Comprobante de Pago
   const lightboxModal = document.getElementById('proof-lightbox-modal');

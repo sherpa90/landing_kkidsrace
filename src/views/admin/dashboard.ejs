@@ -122,13 +122,13 @@
   </header>
 
   <!-- CONTENIDO PRINCIPAL: SIDEBAR + PANELES -->
-  <div id="main-layout-wrapper" class="flex-1 flex flex-col md:flex-row max-w-7xl w-full mx-auto p-3 sm:p-6 gap-6 relative">
+  <div id="main-layout-wrapper" class="flex-1 flex flex-col md:flex-row <%= role === 'admin' ? 'max-w-7xl' : 'max-w-none w-full' %> w-full mx-auto p-3 sm:p-6 gap-6 relative">
     
     <!-- Backdrop Móvil -->
     <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden md:hidden"></div>
 
     <!-- BARRA LATERAL DE NAVEGACIÓN (TABS) -->
-    <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-72 bg-slate-900 border-r border-slate-800 z-50 p-4 transform -translate-x-full transition-transform duration-200 ease-in-out md:translate-x-0 md:static md:w-64 md:bg-transparent md:border-r-0 md:z-auto md:p-0 md:block flex-shrink-0 space-y-2 overflow-y-auto">
+    <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-72 bg-slate-900 border-r border-slate-800 z-50 p-4 transform -translate-x-full transition-transform duration-200 ease-in-out <%= role === 'admin' ? 'md:translate-x-0 md:static md:w-64 md:bg-transparent md:border-r-0 md:z-auto md:p-0 md:block' : 'hidden' %> flex-shrink-0 space-y-2 overflow-y-auto">
       <div class="flex items-center justify-between md:hidden pb-3 mb-2 border-b border-slate-800">
         <span class="font-black text-sm text-white">Menú del Panel</span>
         <button type="button" id="btn-close-mobile-menu" class="p-1.5 text-slate-400 hover:text-white rounded-lg">✕</button>
@@ -580,6 +580,7 @@
         </div>
         <% } %>
 
+        <% if (role === 'admin') { %>
         <!-- PESTAÑA: CUENTA REGRESIVA & FECHA DEL EVENTO -->
         <div id="tab-countdown" class="tab-pane hidden space-y-6">
           <div class="glass-panel p-6 sm:p-8 rounded-3xl border border-gray-800">
@@ -2612,6 +2613,7 @@
             </div>
           </div>
         </div>
+        <% } %>
 
         <!-- PESTAÑA: BASE DE DATOS DE PARTICIPANTES (ADMINISTRADOR Y EDITOR) -->
         <div id="tab-leads" class="tab-pane <%= role === 'admin' ? 'hidden' : '' %> space-y-5">
@@ -2665,16 +2667,23 @@
             </div>
 
             <!-- Barra de Herramientas: Búsqueda Inteligente y Filtros -->
-            <div class="space-y-3">
+            <!-- Barra de Herramientas: Búsqueda Inteligente y Filtros Ultrarrápidos -->
+            <div class="space-y-2.5">
               <div class="flex flex-col sm:flex-row gap-3">
                 <div class="relative flex-1">
-                  <input type="text" id="filter-search-input" placeholder="Buscar por RUT o Nombre del padre/tutor, pupilo, dorsal o email..." class="admin-input w-full px-4 py-2.5 text-xs text-white placeholder-slate-500">
+                  <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2 pointer-events-none"></i>
+                  <input type="text" id="filter-search-input" <%= role !== 'admin' ? 'autofocus' : '' %>
+                         placeholder="Buscar por RUT, Nombre de pupilo, Apoderado o N° Dorsal (Presiona / para enfocar)..." 
+                         class="admin-input w-full pl-10 pr-10 py-3 text-xs sm:text-sm text-white placeholder-slate-500 bg-slate-950 border-slate-700/80 focus:border-blue-500 rounded-2xl shadow-inner font-medium">
+                  <button type="button" id="btn-clear-search" class="hidden absolute right-3 top-1/2 -translate-y-1/2 w-6 h-6 rounded-full bg-slate-800 hover:bg-slate-700 text-slate-400 hover:text-white flex items-center justify-center text-xs transition-colors cursor-pointer" title="Limpiar búsqueda (ESC)">
+                    ✕
+                  </button>
                 </div>
 
                 <!-- Filtro por Circuito -->
-                <div class="sm:w-56">
-                  <select id="filter-circuit-select" class="admin-input w-full py-2.5 text-xs text-white cursor-pointer">
-                    <option value="all">Todos los Circuitos</option>
+                <div class="sm:w-56 shrink-0">
+                  <select id="filter-circuit-select" class="admin-input w-full py-3 text-xs sm:text-sm text-white bg-slate-950 border-slate-700/80 rounded-2xl cursor-pointer">
+                    <option value="all">🏁 Todos los Circuitos</option>
                     <option value="500">500 Metros (Mini Runners)</option>
                     <option value="1">1 Kilómetro (Rayos)</option>
                     <option value="2">2 Kilómetros (Campeones)</option>
@@ -2682,10 +2691,15 @@
                   </select>
                 </div>
               </div>
-              <p class="text-[11px] text-slate-400 flex items-center gap-1">
-                <i data-lucide="info" class="w-3.5 h-3.5 text-blue-400 flex-shrink-0"></i>
-                <span>Al escribir el <strong>RUT o nombre del apoderado</strong>, el filtro mostrará automáticamente a todos los pupilos asociados a esa familia.</span>
-              </p>
+              <div class="flex flex-wrap items-center justify-between gap-2 text-[11px] text-slate-400 px-1">
+                <span class="flex items-center gap-1.5">
+                  <i data-lucide="zap" class="w-3.5 h-3.5 text-amber-400"></i>
+                  <span>Búsqueda en tiempo real sin recargar. Al escribir el <strong>RUT</strong>, aparecen todos los niños de esa familia.</span>
+                </span>
+                <span class="hidden sm:inline-block font-mono text-[10px] text-slate-500 bg-slate-800/80 px-2 py-0.5 rounded-lg border border-slate-700/60">
+                  Presiona <kbd class="text-slate-300 font-bold">/</kbd> para buscar &bull; <kbd class="text-slate-300 font-bold">ESC</kbd> para limpiar
+                </span>
+              </div>
             </div>
 
             <!-- VISTA MÓVIL (CARDS RESPONSIVE - MOBILE FIRST) -->
