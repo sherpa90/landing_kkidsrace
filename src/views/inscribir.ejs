@@ -29,6 +29,10 @@
   </script>
   <script src="https://unpkg.com/lucide@1.47.0"></script>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.4/dist/confetti.browser.min.js"></script>
+  <% if (typeof turnstileSiteKey !== 'undefined' && turnstileSiteKey) { %>
+  <!-- Cloudflare Turnstile Anti-Bot -->
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+  <% } %>
   <link rel="stylesheet" href="/css/custom.css">
   
   <style>
@@ -249,6 +253,8 @@
       <input type="hidden" name="raceName" value="<%= activeRace ? activeRace.name : 'Kids Race 2026' %>">
       <input type="hidden" id="paymentProofUrl" name="paymentProof" value="">
       <input type="hidden" id="csrfTokenField" name="csrfToken" value="<%= csrfToken %>">
+      <!-- Time-trap anti-bots -->
+      <input type="hidden" id="formStartTime" name="_formStartTime" value="<%= typeof formTimeToken !== 'undefined' ? formTimeToken : '' %>">
       <!-- Honeypot anti-bots -->
       <div style="display:none; visibility:hidden; position:absolute; left:-9999px;" aria-hidden="true">
         <label for="website_url">Sitio web (no completar)</label>
@@ -621,6 +627,11 @@
         <span>Inscripciones No Disponibles</span>
       </button>
       <% } else { %>
+      <% if (typeof turnstileSiteKey !== 'undefined' && turnstileSiteKey) { %>
+      <div class="flex justify-center my-3">
+        <div class="cf-turnstile" data-sitekey="<%= turnstileSiteKey %>" data-theme="auto"></div>
+      </div>
+      <% } %>
       <button type="submit" id="submit-btn" class="btn-theme shimmer-active w-full py-4 px-6 rounded-2xl text-base font-black text-white flex items-center justify-center gap-2 cursor-pointer shadow-xl">
         <i data-lucide="check-circle" class="w-5 h-5"></i>
         <span id="submit-btn-text"><%= content.registrationForm?.submitButtonText || 'Confirmar Inscripción Oficial' %></span>
@@ -1479,6 +1490,10 @@
           `;
 
           const csrfToken = document.getElementById('csrfTokenField')?.value || '';
+          const formStartTimeVal = document.getElementById('formStartTime')?.value || '';
+          const honeypotVal = form.querySelector('input[name="website_url"]')?.value || '';
+          const turnstileTokenVal = form.querySelector('input[name="cf-turnstile-response"]')?.value || '';
+
           const payload = {
             raceId: form.querySelector('input[name="raceId"]')?.value || '',
             raceName: form.querySelector('input[name="raceName"]')?.value || '',
@@ -1490,7 +1505,9 @@
             tutorRut: tutorRutVal,
             paymentProof: proofVal,
             consentGiven: true,
-            website_url: '',
+            website_url: honeypotVal,
+            _formStartTime: formStartTimeVal,
+            'cf-turnstile-response': turnstileTokenVal,
             children
           };
 

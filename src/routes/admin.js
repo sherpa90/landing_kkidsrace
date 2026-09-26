@@ -32,7 +32,7 @@ router.get('/login', (req, res) => {
 });
 
 // Procesar Login con soporte para roles Admin y Editor
-router.post('/login', loginLimiter, validateCsrf, (req, res) => {
+router.post('/login', loginLimiter, validateCsrf, async (req, res) => {
   const { username, password } = req.body;
 
   if (!username || !password) {
@@ -42,7 +42,7 @@ router.post('/login', loginLimiter, validateCsrf, (req, res) => {
     return res.render('admin/login', { error: 'Por favor ingresa usuario y contraseña.', csrfToken: req.session?.csrfToken || '' });
   }
 
-  const user = auth.verifyCredentials(username, password, req.ip);
+  const user = await auth.verifyCredentials(username, password, req.ip);
 
   // Cuenta bloqueada por demasiados intentos fallidos
   if (user && user.locked) {
@@ -54,7 +54,19 @@ router.post('/login', loginLimiter, validateCsrf, (req, res) => {
     return res.render('admin/login', { error: msg, csrfToken: req.session?.csrfToken || '' });
   }
 
-  if (user) {
+  // Intento fallido con intentos restantes
+  if (user && user.failed) {
+    let errorMsg = 'Credenciales incorrectas. Verifica tu usuario y clave.';
+    if (user.remainingAttempts <= 2 && user.remainingAttempts > 0) {
+      errorMsg = `Credenciales incorrectas. Advertencia: te queda${user.remainingAttempts === 1 ? '' : 'n'} ${user.remainingAttempts} intento${user.remainingAttempts === 1 ? '' : 's'} antes de que la cuenta se bloquee por 15 minutos.`;
+    }
+    if (req.xhr || req.headers.accept?.includes('application/json')) {
+      return res.status(401).json({ success: false, error: errorMsg });
+    }
+    return res.render('admin/login', { error: errorMsg, csrfToken: req.session?.csrfToken || '' });
+  }
+
+  if (user && user.id) {
     req.session.userId = user.id;
     req.session.username = user.username;
     req.session.name = user.name;
@@ -129,7 +141,7 @@ router.post('/api/content', auth.requireAuth, validateCsrf, (req, res) => {
     }
 
     // Whitelist de claves top-level permitidas en el CMS
-    const ALLOWED_KEYS = ['brand', 'hero', 'metrics', 'features', 'pricing', 'testimonials', 'faq', 'faqs', 'contact', 'seo', 'countdown', 'gallery', 'sponsors', 'footer', 'venue', 'sections', 'video', 'construction', 'schedule', 'scheduleSection', 'categories', 'registrationForm', 'bases', 'header', 'races'];
+    const ALLOWED_KEYS = ['brand', 'hero', 'metrics', 'features', 'pricing', 'testimonials', 'faq', 'faqs', 'contact', 'seo', 'countdown', 'gallery', 'sponsors', 'footer', 'venue', 'sections', 'video', 'construction', 'schedule', 'scheduleSection', 'categories', 'registrationForm', 'bases', 'header', 'races', 'security'];
     const filtered = {};
     for (const key of ALLOWED_KEYS) {
       if (key in newContent) filtered[key] = newContent[key];

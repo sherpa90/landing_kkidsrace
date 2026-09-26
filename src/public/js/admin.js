@@ -766,7 +766,12 @@ function collectCmsFormData() {
         showTagline: document.getElementById('input-header-showTagline') ? document.getElementById('input-header-showTagline').checked : true,
         sticky: true
       };
-    })()
+    })(),
+    // 18. Configuración de Seguridad & Anti-Bots
+    security: {
+      turnstileSiteKey: getVal('input-security-turnstileSiteKey'),
+      turnstileSecretKey: getVal('input-security-turnstileSecretKey')
+    }
   };
 }
 

@@ -27,7 +27,8 @@ app.use(
           "'self'",
           "'unsafe-inline'",
           "https://cdn.tailwindcss.com",
-          "https://unpkg.com"
+          "https://unpkg.com",
+          "https://challenges.cloudflare.com"
         ],
         styleSrc: [
           "'self'",
@@ -42,7 +43,14 @@ app.use(
           "https://images.unsplash.com",
           "https://fonts.gstatic.com"
         ],
-        connectSrc: ["'self'"]
+        frameSrc: [
+          "'self'",
+          "https://challenges.cloudflare.com"
+        ],
+        connectSrc: [
+          "'self'",
+          "https://challenges.cloudflare.com"
+        ]
       }
     },
     crossOriginEmbedderPolicy: false, // Mantener false para compatibilidad con Tailwind CDN

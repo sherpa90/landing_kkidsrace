@@ -5,6 +5,7 @@ const db = require('../services/db');
 const { validateCsrf } = require('../middleware/csrf');
 const { rateLimit } = require('../middleware/rateLimit');
 const emailService = require('../services/emailService');
+const securityService = require('../services/securityService');
 
 // Rate limiters para endpoints públicos de inscripción y contacto
 const contactLimiter = rateLimit({
@@ -233,6 +234,8 @@ router.get('/inscribir', (req, res) => {
     siteUrl,
     activeRace,
     csrfToken: req.session?.csrfToken || '',
+    formTimeToken: securityService.generateTimeToken(),
+    turnstileSiteKey: process.env.TURNSTILE_SITE_KEY || content.security?.turnstileSiteKey || '',
     constructionAdminBypass: isConstruction && isStaff
   });
 });
@@ -397,6 +400,21 @@ router.post('/api/contact', contactLimiter, validateCsrf, async (req, res) => {
   // Honeypot: si el campo trampa tiene contenido, es un bot — responder 200 falso
   if (req.body.website_url) {
     return res.json({ success: true, message: '¡Inscripción recibida!' });
+  }
+
+  // 1. Time-Trap: Bloquear envíos instantáneos automatizados (< 4 segundos)
+  const timeValidation = securityService.validateTimeToken(req.body._formStartTime);
+  if (!timeValidation.valid) {
+    return res.status(400).json({ success: false, error: timeValidation.error });
+  }
+
+  // 2. Cloudflare Turnstile: Verificación inteligente contra bots (si está configurada)
+  const currentContent = contentStore.getContent();
+  const turnstileSecret = process.env.TURNSTILE_SECRET_KEY || currentContent.security?.turnstileSecretKey || '';
+  const turnstileToken = req.body['cf-turnstile-response'] || req.body.turnstileToken || '';
+  const turnstileRes = await securityService.verifyTurnstileToken(turnstileToken, req.ip, turnstileSecret);
+  if (!turnstileRes.success) {
+    return res.status(400).json({ success: false, error: turnstileRes.error });
   }
 
   const raceId           = sanitizeField(req.body.raceId, 64);

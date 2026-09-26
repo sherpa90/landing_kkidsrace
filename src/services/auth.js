@@ -133,47 +133,73 @@ function isAccountLocked(username) {
 function recordFailedAttempt(username) {
   const entry = loginAttempts.get(username) || { attempts: 0, lockedUntil: null };
   entry.attempts += 1;
-  if (entry.attempts >= MAX_LOGIN_ATTEMPTS) {
+  const isLockedNow = entry.attempts >= MAX_LOGIN_ATTEMPTS;
+  if (isLockedNow) {
     entry.lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
     console.warn(`[security] Cuenta bloqueada por ${MAX_LOGIN_ATTEMPTS} intentos fallidos: "${username}" — hasta ${new Date(entry.lockedUntil).toISOString()}`);
   }
   loginAttempts.set(username, entry);
+  const remaining = Math.max(0, MAX_LOGIN_ATTEMPTS - entry.attempts);
+  return {
+    locked: isLockedNow,
+    attempts: entry.attempts,
+    remainingAttempts: remaining,
+    lockedUntil: entry.lockedUntil
+  };
 }
 
 function resetAttempts(username) {
   loginAttempts.delete(username);
 }
 
-// Verificar credenciales — único flujo: siempre bcrypt sobre users.json
-function verifyCredentials(username, password, clientIp) {
+// Retardo intencional asíncrono para frenar ataques de fuerza bruta masiva
+function sleep(ms) {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+// Verificar credenciales — único flujo: siempre bcrypt sobre users.json con retardo de seguridad
+async function verifyCredentials(username, password, clientIp) {
   const cleanUser = (username || '').trim().toLowerCase();
   const cleanPass = (password || '').trim();
 
   if (!cleanUser || !cleanPass) return null;
 
-  // Comprobar bloqueo de cuenta
+  // Comprobar bloqueo de cuenta previo a cualquier cálculo de bcrypt
   if (isAccountLocked(cleanUser)) {
     const entry = loginAttempts.get(cleanUser);
     const waitSec = Math.ceil((entry.lockedUntil - Date.now()) / 1000);
     console.warn(`[security] Login bloqueado para "${cleanUser}" desde ${clientIp || 'IP desconocida'} — ${waitSec}s restantes`);
+    await sleep(600); // Ralentizar bot que insista sobre cuenta bloqueada
     return { locked: true, waitSeconds: waitSec };
   }
 
-  // Buscar usuario en users.json y verificar con bcrypt
+  // Buscar usuario en users.json
   const users = getUsers();
   const user = users.find(u => u.username.toLowerCase() === cleanUser);
 
   if (!user) {
     console.warn(`[security] Usuario inexistente: "${cleanUser}" desde ${clientIp || 'IP desconocida'}`);
-    recordFailedAttempt(cleanUser);
-    return null;
+    const failInfo = recordFailedAttempt(cleanUser);
+    await sleep(800); // Retardo intencional de mitigación
+    return {
+      failed: true,
+      locked: failInfo.locked,
+      waitSeconds: failInfo.locked ? Math.ceil(LOCKOUT_DURATION_MS / 1000) : 0,
+      remainingAttempts: failInfo.remainingAttempts
+    };
   }
 
   const isValid = bcrypt.compareSync(cleanPass, user.passwordHash);
   if (!isValid) {
     console.warn(`[security] Contraseña incorrecta para "${cleanUser}" desde ${clientIp || 'IP desconocida'}`);
-    recordFailedAttempt(cleanUser);
-    return null;
+    const failInfo = recordFailedAttempt(cleanUser);
+    await sleep(800); // Retardo intencional de mitigación
+    return {
+      failed: true,
+      locked: failInfo.locked,
+      waitSeconds: failInfo.locked ? Math.ceil(LOCKOUT_DURATION_MS / 1000) : 0,
+      remainingAttempts: failInfo.remainingAttempts
+    };
   }
 
   // Login exitoso — resetear contador
