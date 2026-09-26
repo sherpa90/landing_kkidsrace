@@ -1124,8 +1124,8 @@
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       
       <!-- Fila Superior: Marca, Descripción y Redes Sociales -->
-      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-slate-800/80">
-        <div class="max-w-md space-y-2">
+      <div class="flex flex-col items-center justify-center gap-6 pb-8 border-b border-slate-800/80 text-center">
+        <div class="max-w-md space-y-4 flex flex-col items-center">
           <div class="flex items-center gap-3">
             <% if (content.brand?.logoUrl) { %>
             <img src="<%= content.brand.logoUrl %>" alt="" class="h-8 w-auto object-contain">
@@ -1145,7 +1145,7 @@
 
         <!-- Redes Sociales Oficiales -->
         <% if (showSocial) { %>
-        <div class="flex flex-wrap items-center gap-3">
+        <div class="flex flex-wrap items-center justify-center gap-3">
           <% if (footerSocial.instagram) { %>
           <a href="<%= footerSocial.instagram %>" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-pink-600 text-slate-400 hover:text-white flex items-center justify-center transition-all" aria-label="Instagram" title="Instagram">
             <i data-lucide="instagram" class="w-4 h-4"></i>
@@ -1182,12 +1182,12 @@
       </div>
 
       <!-- Fila Inferior: Copyright & Enlaces Legales/Admin -->
-      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500">
+      <div class="flex flex-col items-center justify-center gap-4 text-slate-500 text-center">
         <div>
           <span><%= footerCfg.copyright || '© 2026 KKIDSRACE. Todos los derechos reservados.' %></span>
         </div>
         
-        <div class="flex flex-wrap items-center gap-4 text-xs font-semibold">
+        <div class="flex flex-wrap items-center justify-center gap-4 text-xs font-semibold">
           <% if (showBases) { %>
           <a href="/bases" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors flex items-center gap-1 text-amber-500 hover:text-amber-400 font-bold" title="Abrir Bases en pestaña nueva">
             <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
