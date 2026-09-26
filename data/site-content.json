@@ -19,7 +19,7 @@
   },
   "seo": {
     "metaTitle": "Kids Race 2026 | La Gran Corrida Infantil y Familiar",
-    "metaDescription": "Inscribe a tus hijos en la corrida infantil más alegre, segura y emocionante del año. Circuitos de 500m a 3K, medalla finisher garantizada para todos, polera técnica oficial y actividades familiares.",
+    "metaDescription": "Inscribe a tus hijos en la corrida infantil más alegre, segura y emocionante del año. Circuitos de 500m a 3K y polera técnica oficial y actividades familiares.",
     "keywords": "corrida de niños, corrida infantil, maraton infantil, carrera familiar, kids race, running niños, deporte infantil, medallas niños",
     "canonicalUrl": "http://localhost:3000",
     "ogImage": "https://images.unsplash.com/photo-1517649763962-0c623266ddc0?auto=format&fit=crop&w=1200&h=630&q=80",
@@ -34,12 +34,12 @@
     "badgeLink": "#pricing",
     "headlinePrefix": "XIV Corrida para Niños y Niñas",
     "headlineGradient": "KKIDSRACE 2026 • Puerto Varas",
-    "subheadline": "Domingo 29 de Noviembre en la Costanera de Puerto Varas. 5 distancias, 18 categorías, pulseras por color, categorías inclusivas NEE, polera técnica oficial y medalla finisher garantizada para todos.",
+    "subheadline": "Domingo 29 de Noviembre en la Costanera de Puerto Varas. 5 distancias, 18 categorías, pulseras por color, categorías inclusivas NEE, polera técnica oficial.",
     "primaryCtaText": "Inscribir a mi Pequeño/a",
     "primaryCtaLink": "#contact",
     "secondaryCtaText": "Ver Galería & Circuitos",
     "secondaryCtaLink": "#gallery",
-    "statsNotice": "🏅 Medalla finisher de metal garantizada para todos los niños • Entrega de kits: Sábado 28 de Noviembre de 15:00 a 19:00 hrs"
+    "statsNotice": "🏆 Premiación con medallas para los primeros lugares • Entrega de kits: Sábado 28 de Noviembre de 15:00 a 19:00 hrs"
   },
   "metrics": [
     {
@@ -49,7 +49,7 @@
     },
     {
       "value": "100%",
-      "label": "Medallas Finisher Garantizadas",
+      "label": "Premiación Primeros Lugares",
       "icon": "award"
     },
     {
@@ -271,7 +271,7 @@
           "Polera técnica oficial KKIDSRACE 2026",
           "Número de inscripción oficial de corredor",
           "Pulsera de color asignada según distancia",
-          "Medalla finisher de metal oficial garantizada",
+          "Opción a medalla para primeros lugares",
           "Hidratación y fruta fresca en la meta",
           "Calentamiento masivo Baile Entretenido",
           "Pista cerrada 100% segura con resguardo y primeros auxilios"
@@ -292,7 +292,7 @@
           "Solicitud previa a info@kkidsrace.cl o kkidsrace@gmail.com",
           "Incluye polera técnica oficial",
           "Incluye pulsera de color y número oficial",
-          "Medalla finisher garantizada al cruzar la meta"
+          "Opción a medalla para primeros lugares"
         ],
         "isPopular": false,
         "ctaText": "Solicitar Cupo Prioritario",
@@ -300,7 +300,7 @@
       }
     ],
     "title": "¡Inscribe a tu Campeón!",
-    "subtitle": "Todos los kits incluyen polera técnica oficial, número de corredor, pulsera de color y medalla finisher de metal garantizada."
+    "subtitle": "Todos los kits incluyen polera técnica oficial, número de corredor, pulsera de color."
   },
   "testimonials": [
     {
@@ -308,7 +308,7 @@
       "role": "Mamá de corredor 1K",
       "avatar": "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=150&q=80",
       "stars": 5,
-      "quote": "¡Fue la mejor mañana del año! Tomás estaba tan emocionado con su medalla que durmió con ella puesta. La organización y la seguridad con las pulseras para padres nos dio una tranquilidad total."
+      "quote": "¡Fue la mejor mañana del año! Tomás estaba tan emocionado con su participación que durmió con la polera puesta. La organización y la seguridad con las pulseras para padres nos dio una tranquilidad total."
     },
     {
       "name": "Rodrigo Valenzuela",
@@ -347,8 +347,8 @@
       "answer": "Como todos los años, la organización de KKIDSRACE dispone de cupos liberados para alumnos prioritarios. Para solicitar este beneficio debes enviar un correo electrónico a kkidsrace@gmail.com o info@kkidsrace.cl."
     },
     {
-      "question": "¿Todos los participantes reciben medalla?",
-      "answer": "¡Sí! Todos los niños y niñas que crucen el arco de meta recibirán su medalla de metal finisher oficial de la XIV edición de KKIDSRACE 2026. Además, a las 13:10 horas se realizará la gran premiación general."
+      "question": "¿Quiénes reciben medalla?",
+      "answer": "Los primeros lugares de cada categoría recibirán una medalla de metal oficial durante la premiación general a las 13:10 horas."
     }
   ],
   "sponsors": {
@@ -987,7 +987,7 @@
     "enabled": false,
     "badge": "🚧 PISTA EN PREPARACIÓN • MUY PRONTO",
     "title": "¡Estamos Calentando Motores!",
-    "subtitle": "La Gran Corrida Infantil Kids Race 2026 está preparando una pista llena de aventuras, medallas y diversión para toda la familia.",
+    "subtitle": "La Gran Corrida Infantil Kids Race 2026 está preparando una pista llena de aventuras y mucha diversión para toda la familia.",
     "expectedDate": "Domingo 29 de Noviembre, 2026",
     "targetDate": "2026-11-29T10:00",
     "showCountdown": true,
@@ -1026,8 +1026,8 @@
       "answer": "Como todos los años, la organización de KKIDSRACE dispone de cupos liberados para alumnos prioritarios. Para solicitar este beneficio debes enviar un correo electrónico a kkidsrace@gmail.com o info@kkidsrace.cl."
     },
     {
-      "question": "¿Todos los participantes reciben medalla?",
-      "answer": "¡Sí! Todos los niños y niñas que crucen el arco de meta recibirán su medalla de metal finisher oficial de la XIV edición de KKIDSRACE 2026. Además, a las 13:10 horas se realizará la gran premiación general."
+      "question": "¿Quiénes reciben medalla?",
+      "answer": "Los primeros lugares de cada categoría recibirán una medalla de metal oficial durante la premiación general a las 13:10 horas."
     }
   ],
   "registrationForm": {
@@ -1056,7 +1056,7 @@
     "step4Description": "Adjunta la foto o captura de transferencia del kit de inscripción. Nuestro servidor la optimizará y guardará de forma permanente.",
     "step4PaymentHint": "¿No realizaste la transferencia aún? Puedes enviar la inscripción ahora y coordinar el pago por WhatsApp antes del cierre de cupos.",
     "badge1Icon": "award",
-    "badge1Text": "Medalla Finisher",
+    "badge1Text": "Polera Oficial",
     "badge1Sub": "100% garantizada",
     "badge2Icon": "shield-check",
     "badge2Text": "Circuito Seguro",
@@ -1090,7 +1090,7 @@
     "showKitPickup": true,
     "showClosingBanner": true,
     "closingBannerTitle": "¿Listo para ser parte de la gran corrida?",
-    "closingBannerText": "Asegura el cupo, medalla oficial y polera técnica de tu pequeño/a antes de que se agoten las inscripciones.",
+    "closingBannerText": "Asegura el cupo y polera técnica de tu pequeño/a antes de que se agoten las inscripciones.",
     "summary": {
       "distances": "250m • 500m • 1km • 2km • 4km",
       "price": "$15.000 CLP",

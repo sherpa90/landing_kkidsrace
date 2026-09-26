@@ -1875,9 +1875,9 @@ function initKitsManager() {
 
         <div>
           <label class="block text-xs text-gray-400 mb-1">Elementos y Beneficios Incluidos (Uno por línea)</label>
-          <textarea name="plans[${newIdx}][features]" rows="4" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono leading-relaxed focus:outline-none focus:border-emerald-500" placeholder="Polera técnica oficial Kids Race&#10;Número de corredor oficial&#10;Medalla finisher al cruzar la meta&#10;Hidratación y fruta fresca">Polera técnica oficial Kids Race
+          <textarea name="plans[${newIdx}][features]" rows="4" class="w-full bg-gray-950 border border-gray-800 rounded-xl px-3 py-2 text-xs text-white font-mono leading-relaxed focus:outline-none focus:border-emerald-500" placeholder="Polera técnica oficial Kids Race&#10;Número de corredor oficial&#10;Opción a medalla para primeros lugares&#10;Hidratación y fruta fresca">Polera técnica oficial Kids Race
 Número de corredor oficial
-Medalla finisher al cruzar la meta
+Opción a medalla para primeros lugares
 Hidratación y fruta fresca</textarea>
         </div>
 

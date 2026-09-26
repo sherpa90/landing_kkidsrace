@@ -1311,7 +1311,7 @@
 
               <!-- Aviso -->
               <div class="text-[11px] text-amber-300/90 font-medium">
-                <span id="hero-preview-notice"><%= content.hero?.statsNotice || '🏅 Medalla finisher garantizada para todos los niños' %></span>
+                <span id="hero-preview-notice"><%= content.hero?.statsNotice || '🏆 Premiación con medallas para primeros lugares' %></span>
               </div>
             </div>
           </div>
@@ -1395,7 +1395,7 @@
                   Cifras y Métricas de Impacto (Barra de Estadísticas)
                 </h2>
                 <p class="text-xs text-gray-400">
-                  Cifras destacadas que aparecen horizontalmente en la web justo debajo de la portada (ej: +2,500 Niños y Familias Corriendo, 100% Medallas Aseguradas, etc.).
+                  Cifras destacadas que aparecen horizontalmente en la web justo debajo de la portada (ej: +2,500 Niños y Familias Corriendo, Premiación a Primeros Lugares, etc.).
                 </p>
               </div>
               <button type="button" id="btn-add-metric" class="px-4 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-slate-950 font-bold text-xs rounded-2xl shadow-lg shadow-amber-500/20 flex items-center gap-2 transition-all self-start sm:self-auto cursor-pointer">
@@ -1408,7 +1408,7 @@
             <div id="metrics-container" class="space-y-3">
               <% const metricList = Array.isArray(content.metrics) && content.metrics.length > 0 ? content.metrics : [
                 { value: '+2,500', label: 'Niños y Familias Corriendo', icon: 'users' },
-                { value: '100%', label: 'Medallas Finisher Aseguradas', icon: 'award' },
+                { value: '100%', label: 'Premiación Primeros Lugares', icon: 'award' },
                 { value: '4', label: 'Circuitos por Edades (500m - 3K)', icon: 'flag' },
                 { value: '0', label: 'Incidentes • Seguridad Máxima', icon: 'shield-check' }
               ]; %>
@@ -1624,7 +1624,7 @@
                   </div>
                   <div>
                     <label class="block text-[11px] text-gray-400 mb-1">Título</label>
-                    <input type="text" id="input-reg-badge1Text" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-white" value="<%= rf.badge1Text || 'Medalla Finisher' %>">
+                    <input type="text" id="input-reg-badge1Text" class="w-full bg-gray-900 border border-gray-800 rounded-lg px-2.5 py-1.5 text-xs text-white" value="<%= rf.badge1Text || 'Polera Oficial' %>">
                   </div>
                   <div>
                     <label class="block text-[11px] text-gray-400 mb-1">Subtítulo</label>
@@ -2121,7 +2121,7 @@
                   <i data-lucide="help-circle" class="w-5 h-5 text-emerald-400"></i>
                   Preguntas Frecuentes para Padres (FAQs)
                 </h2>
-                <p class="text-xs text-gray-400">Responde dudas de seguridad, retiro de kits, horarios y medallas.</p>
+                <p class="text-xs text-gray-400">Responde dudas de seguridad, retiro de kits, horarios y premiación.</p>
               </div>
 
               <button type="button" id="btn-add-faq" class="px-4 py-2.5 rounded-2xl text-xs font-bold text-white bg-blue-600 hover:bg-blue-500 shadow-md shadow-blue-600/30 active:scale-95 transition-all flex items-center gap-2 self-start sm:self-auto cursor-pointer">
@@ -3662,7 +3662,7 @@
 
               <div>
                 <label class="block text-xs font-semibold text-gray-300 mb-1.5">Mensaje o Subtítulo para las Familias</label>
-                <textarea id="input-construction-subtitle" rows="3" class="w-full bg-gray-900 border border-gray-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-400"><%= content.construction?.subtitle || 'La Gran Corrida Infantil Kids Race 2026 está preparando una pista llena de aventuras, medallas y diversión para toda la familia.' %></textarea>
+                <textarea id="input-construction-subtitle" rows="3" class="w-full bg-gray-900 border border-gray-800 rounded-2xl p-3 text-xs text-white focus:outline-none focus:border-amber-400"><%= content.construction?.subtitle || 'La Gran Corrida Infantil Kids Race 2026 está preparando una pista llena de aventuras y mucha diversión para toda la familia.' %></textarea>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">

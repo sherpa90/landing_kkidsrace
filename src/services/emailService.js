@@ -168,7 +168,7 @@ class EmailService {
 
             <div class="info-box">
               <strong>📸 IMPORTANTE: Conserva este comprobante</strong><br>
-              Tu <strong>N° de Inscripción #${safeBibNumber}</strong> identifica a tu pequeño corredor en la base de datos oficial del evento y te servirá para retirar tu kit oficial (polera talla ${safeShirtSize}, número y medalla finisher garantizada).
+              Tu <strong>N° de Inscripción #${safeBibNumber}</strong> identifica a tu pequeño corredor en la base de datos oficial del evento y te servirá para retirar tu kit oficial (polera talla ${safeShirtSize}, número y pulsera).
             </div>
 
             <p style="font-size: 13px; color: #64748b; line-height: 1.5;">
