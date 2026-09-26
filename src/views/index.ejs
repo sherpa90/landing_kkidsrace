@@ -349,7 +349,7 @@
               Cuenta Regresiva para la Gran Largada
             </h2>
             <p class="text-sm text-slate-500 dark:text-gray-400 mt-1 font-medium">
-              <%= content.countdown?.eventDateDisplay || 'Domingo 15 de Noviembre, 2026' %> • <%= content.countdown?.eventTime || '09:00 AM' %>
+              <%= content.countdown?.eventDateDisplay || 'Domingo 29 de Noviembre, 2026' %> • <%= content.countdown?.eventTime || '09:00 AM' %>
             </p>
           </div>
 
@@ -391,8 +391,8 @@
                 <i data-lucide="map-pin" class="w-5 h-5 text-blue-600 dark:text-blue-400"></i>
               </div>
               <div>
-                <p class="font-bold text-slate-900 dark:text-white"><%= content.countdown?.locationName || 'Parque Bicentenario' %></p>
-                <p class="text-slate-500 dark:text-gray-400"><%= content.countdown?.locationCity || 'Sector Explanada Central' %></p>
+                <p class="font-bold text-slate-900 dark:text-white"><%= content.countdown?.locationName || 'Sector Costanera • Pedraplén' %></p>
+                <p class="text-slate-500 dark:text-gray-400"><%= content.countdown?.locationCity || 'Puerto Varas' %></p>
               </div>
             </div>
             <div class="flex items-center gap-3 p-3.5 rounded-2xl bg-slate-50 dark:bg-gray-950/50 border border-slate-100 dark:border-gray-800">
@@ -839,12 +839,12 @@
             <div class="bg-slate-50 dark:bg-gray-900 rounded-3xl p-6 border border-slate-100 dark:border-gray-800">
               <h3 class="font-black text-slate-900 dark:text-white text-lg mb-4 flex items-center gap-2">
                 <i data-lucide="flag" class="w-5 h-5 text-blue-600 dark:text-yellow-400"></i>
-                <%= content.venue?.name || content.countdown?.locationName || 'Parque Bicentenario' %>
+                <%= content.venue?.name || content.countdown?.locationName || 'Costanera Puerto Varas' %>
               </h3>
               <ul class="space-y-3 text-sm text-slate-600 dark:text-gray-400">
                 <li class="flex items-start gap-2.5">
                   <i data-lucide="map-pin" class="w-4 h-4 text-blue-600 dark:text-yellow-400 mt-0.5 shrink-0"></i>
-                  <span><%= content.venue?.address || (content.countdown?.locationName + ', ' + content.countdown?.locationCity) || 'Parque Bicentenario, Santiago' %></span>
+                  <span><%= content.venue?.address || (content.countdown?.locationName + ', ' + content.countdown?.locationCity) || 'Av. Vicente Pérez Rosales, Puerto Varas' %></span>
                 </li>
                 <li class="flex items-start gap-2.5">
                   <i data-lucide="clock" class="w-4 h-4 text-blue-600 dark:text-yellow-400 mt-0.5 shrink-0"></i>
@@ -918,7 +918,7 @@
                 </div>
                 <div>
                   <p class="text-xs text-slate-500 dark:text-gray-400">Ubicación del Evento</p>
-                  <p class="font-bold text-slate-900 dark:text-white"><%= content.contact?.location || 'Parque Bicentenario • Explanada Central' %></p>
+                  <p class="font-bold text-slate-900 dark:text-white"><%= content.contact?.location || 'Costanera Puerto Varas • Sector Pedraplén' %></p>
                 </div>
               </div>
             </div>

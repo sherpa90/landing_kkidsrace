@@ -283,7 +283,7 @@ router.post('/api/races', auth.requireAdmin, validateCsrf, (req, res) => {
       date,
       dateDisplay,
       time: time || '09:00 AM',
-      location: location || 'Parque Bicentenario • Circuito Deportivo Cerrado',
+      location: location || 'Sector Costanera • Pedraplén, Puerto Varas',
       city: city || 'Sector Explanada Central',
       status: status || 'planned',
       circuits: Array.isArray(circuits) ? circuits : (typeof circuits === 'string' ? circuits.split(',').map(s => s.trim()).filter(Boolean) : ['500 Metros', '1 Kilómetro', '2 Kilómetros', '3 Kilómetros']),

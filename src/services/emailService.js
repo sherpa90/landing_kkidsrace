@@ -78,7 +78,7 @@ class EmailService {
     const content = contentStore.getContent();
     const brandName = content.brand?.name || 'Kids Race 2026';
     const raceName = inscription.raceName || content.hero?.headlinePrefix || 'Gran Corrida Infantil';
-    const location = content.countdown?.locationName ? `${content.countdown.locationName}, ${content.countdown.locationCity}` : 'Parque Bicentenario';
+    const location = content.countdown?.locationName ? `${content.countdown.locationName}, ${content.countdown.locationCity}` : 'Costanera, Puerto Varas';
     const eventDate = content.countdown?.eventDateDisplay || 'Fecha por confirmar';
     const eventTime = content.countdown?.eventTime || '09:00 AM';
 

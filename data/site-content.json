@@ -1,7 +1,7 @@
 {
   "brand": {
-    "name": "Kids Race 2026",
-    "tagline": "La Gran Corrida Infantil & Familiar",
+    "name": "KKIDSRACE 2026",
+    "tagline": "XIV Corrida Infantil & Familiar Puerto Varas",
     "logoText": "Kids Race 2026",
     "logoIcon": "trophy",
     "logoUrl": "",
@@ -10,12 +10,12 @@
     "faviconUrl": "/images/default-favicon.svg"
   },
   "countdown": {
-    "targetDate": "2026-10-18T09:00:00",
-    "eventDateDisplay": "Domingo 15 de Noviembre, 2026",
-    "eventTime": "09:00 AM",
-    "locationName": "Parque Bicentenario",
-    "locationCity": "Santiago",
-    "badge": "⏰ ¡FALTAN SÓLO!"
+    "targetDate": "2026-11-29T10:00:00",
+    "eventDateDisplay": "Domingo 29 de Noviembre, 2026",
+    "eventTime": "10:00 AM",
+    "locationName": "Sector Costanera • Pedraplén",
+    "locationCity": "Puerto Varas",
+    "badge": "🏃‍♂️ ¡FALTAN SÓLO!"
   },
   "seo": {
     "metaTitle": "Kids Race 2026 | La Gran Corrida Infantil y Familiar",
@@ -30,71 +30,103 @@
     "analyticsCode": ""
   },
   "hero": {
-    "badgeText": "👟 ¡INSCRIPCIONES ABIERTAS EDICIÓN 2026!",
+    "badgeText": "👟 ¡INSCRIPCIONES ABIERTAS XIV EDICIÓN 2026!",
     "badgeLink": "#pricing",
-    "headlinePrefix": "La Carrera Más Alegre del Año para",
-    "headlineGradient": "Pequeños Campeones & Familias",
-    "subheadline": "Un día inolvidable de deporte, risas y diversión en un circuito 100% cerrado y seguro. ¡Medalla de metal oficial y polera de corredor para todos los niños al cruzar la meta!",
+    "headlinePrefix": "XIV Corrida para Niños y Niñas",
+    "headlineGradient": "KKIDSRACE 2026 • Puerto Varas",
+    "subheadline": "Domingo 29 de Noviembre en la Costanera de Puerto Varas. 5 distancias, 18 categorías, pulseras por color, categorías inclusivas NEE, polera técnica oficial y medalla finisher garantizada para todos.",
     "primaryCtaText": "Inscribir a mi Pequeño/a",
     "primaryCtaLink": "#contact",
     "secondaryCtaText": "Ver Galería & Circuitos",
     "secondaryCtaLink": "#gallery",
-    "statsNotice": "🏅 Medalla finisher garantizada para todos los niños • Cupos limitados por seguridad"
+    "statsNotice": "🏅 Medalla finisher de metal garantizada para todos los niños • Entrega de kits: Sábado 28 de Noviembre de 15:00 a 19:00 hrs"
   },
   "metrics": [
     {
-      "value": "+2,500",
-      "label": "Niños y Familias Corriendo",
-      "icon": "users"
+      "value": "14ª",
+      "label": "Edición Aniversario KKIDSRACE",
+      "icon": "trophy"
     },
     {
       "value": "100%",
-      "label": "Medallas Finisher Aseguradas",
+      "label": "Medallas Finisher Garantizadas",
       "icon": "award"
     },
     {
-      "value": "4",
-      "label": "Circuitos por Edades (500m - 3K)",
+      "value": "5",
+      "label": "Distancias (250m a 4K + NEE)",
       "icon": "flag"
     },
     {
-      "value": "0",
-      "label": "Incidentes • Seguridad Máxima",
-      "icon": "shield-check"
+      "value": "18",
+      "label": "Categorías Damas y Varones",
+      "icon": "users"
     }
   ],
   "categories": [
     {
-      "id": "cat-1",
-      "distance": "500 Metros",
-      "badge": "3 a 5 años",
-      "title": "Mini Runners (Con Papás)",
-      "description": "El primer paso en el deporte. Los más pequeñitos corren de la mano con mamá o papá en una pista suave con obstáculos inflables divertidos.",
+      "id": "cat-baby",
+      "distance": "250 Metros babykidsrace",
+      "badge": "0 a 3 años",
+      "title": "Baby Kids Race (Pulsera Blanca)",
+      "description": "Nacidos en 2023, 2024, 2025 y 2026. Largada a las 10:45 hrs en circuito protegido junto al acompañamiento de sus padres o tutores.",
       "icon": "smile"
     },
     {
-      "id": "cat-2",
-      "distance": "1 Kilómetro",
-      "badge": "6 a 8 años",
-      "title": "Pequeños Rayos",
-      "description": "Una vuelta emocionante llena de color y música. Los niños corren de forma autónoma con supervisores y guías en todo el trayecto.",
+      "id": "cat-250m",
+      "distance": "250 Metros planos",
+      "badge": "4 y 5 años",
+      "title": "Mini Runners (Pulsera Rosada)",
+      "description": "Nacidos en 2021 y 2022. Largada a las 11:00 hrs desde calle Walker Martínez, retorno en Casino y meta en calle Walker Martínez. Corren con adulto responsable.",
+      "icon": "heart"
+    },
+    {
+      "id": "cat-500m",
+      "distance": "500 Metros planos",
+      "badge": "6 y 7 años",
+      "title": "Pequeños Rayos (Pulsera Verde)",
+      "description": "Nacidos en 2019 y 2020. Largada 11:20 hrs desde sector Pedraplén por costanera Vicente Pérez Rosales con retorno frente al Hotel Bellavista.",
       "icon": "zap"
     },
     {
-      "id": "cat-3",
-      "distance": "2 Kilómetros",
-      "badge": "9 a 11 años",
-      "title": "Súper Campeones",
-      "description": "Circuito con cronometraje electrónico por chip para los niños que disfrutan el desafío del running y quieren medir su tiempo personal.",
+      "id": "cat-500m-nee",
+      "distance": "500 Metros NEE",
+      "badge": "4 a 9 años NEE",
+      "title": "Categoría Inclusiva NEE (Pulsera Verde)",
+      "description": "Para niños y niñas con Necesidades Educativas Especiales nacidos entre 2017 y 2022. Larga 5 minutos antes de la prueba principal (11:15 hrs).",
+      "icon": "award"
+    },
+    {
+      "id": "cat-1k",
+      "distance": "1 Kilómetro",
+      "badge": "8 y 9 años",
+      "title": "Super Campeones (Pulsera Amarilla)",
+      "description": "Nacidos en 2017 y 2018. Largada a las 11:40 hrs desde sector Pedraplén con retorno en el Monumento a los Héroes Patrios.",
       "icon": "trophy"
     },
     {
-      "id": "cat-4",
-      "distance": "3 Kilómetros",
-      "badge": "12 a 14 años",
-      "title": "Jóvenes Titanes",
-      "description": "Nuestra distancia mayor. Diseñada para preadolescentes que practican deporte escolar y buscan superarse con podio oficial y trofeos.",
+      "id": "cat-1k-nee",
+      "distance": "1 Kilómetro NEE",
+      "badge": "10 a 14 años NEE",
+      "title": "Categoría Inclusiva NEE (Pulsera Amarilla)",
+      "description": "Para niños y niñas con Necesidades Educativas Especiales nacidos entre 2012 y 2016. Larga 5 minutos antes de la prueba principal (11:35 hrs).",
+      "icon": "award"
+    },
+    {
+      "id": "cat-2k",
+      "distance": "2 Kilómetros",
+      "badge": "10 a 12 años",
+      "title": "Jóvenes Titanes (Pulsera Celeste)",
+      "description": "Nacidos en 2014, 2015 y 2016. Largada a las 12:05 hrs desde sector Pedraplén por costanera con retorno en el emblemático Museo Pablo Fierro.",
       "icon": "flame"
+    },
+    {
+      "id": "cat-4k",
+      "distance": "4 Kilómetros",
+      "badge": "13 y 14 años",
+      "title": "Gran Desafío 4K (Pulsera Roja)",
+      "description": "Nacidos en 2012 y 2013 (categoría NEE larga 12:25 hrs). Largada general a las 12:30 hrs desde Pedraplén realizando dos giros con retorno en Museo Pablo Fierro.",
+      "icon": "target"
     }
   ],
   "gallery": [
@@ -171,92 +203,91 @@
   ],
   "schedule": [
     {
-      "time": "08:00 AM",
-      "title": "Apertura del Recinto & Entrega de Kits",
-      "desc": "Acceso de familias, validación de pulseras de seguridad y retiro de poleras y números de corredor."
+      "time": "Sábado 28 Nov • 15:00 a 19:00 hrs",
+      "title": "Entrega Oficial de Kits de Competencia",
+      "desc": "Retiro de poleras técnicas, números y pulseras de color identificatorias según distancia en el sector de acreditaciones."
     },
     {
-      "time": "08:30 AM",
-      "title": "Gran Calentamiento Musical",
-      "desc": "Zumba Kids y monitores disfrazados preparan a todos los participantes con saltos y estiramientos."
+      "time": "Domingo 29 Nov • 10:00 a 10:30 hrs",
+      "title": "Bienvenida Familiar & Baile Entretenido",
+      "desc": "Calentamiento masivo con música y animación para todas las familias deportistas en el Pedraplén."
     },
     {
-      "time": "09:00 AM",
-      "title": "Largada Mini Runners 500m",
-      "desc": "Circuito especial para los pequeños de 3 a 5 años junto a sus padres."
+      "time": "10:45 hrs",
+      "title": "Largada 250m babykidsrace (Pulsera Blanca)",
+      "desc": "Nacidos 2023 a 2026 (0 a 3 años) acompañados por sus familias en circuito protegido."
     },
     {
-      "time": "09:30 AM",
-      "title": "Largada Pequeños Rayos 1K",
-      "desc": "Salida para corredores de 6 a 8 años con banderilleros y puntos de hidratación."
+      "time": "11:00 hrs",
+      "title": "Largada 250m planos (Pulsera Rosada)",
+      "desc": "Nacidos 2021 y 2022 (4 y 5 años) con adulto responsable. Salida calle Walker Martínez retorno Casino."
     },
     {
-      "time": "10:15 AM",
-      "title": "Largada 2K y 3K",
-      "desc": "Competencia con chip de cronometraje para las categorías de 9 a 14 años."
+      "time": "11:15 - 11:20 hrs",
+      "title": "Largadas 500m (Pulsera Verde)",
+      "desc": "11:15 hrs categoría NEE (4 a 9 años) y 11:20 hrs general (6 y 7 años). Retorno frontis Hotel Bellavista."
     },
     {
-      "time": "11:15 AM",
-      "title": "Show Infantil, Fiesta de Espuma & Premiación",
-      "desc": "Reconocimiento a todos los niños, show de magia, sorteos de bicicletas y regalos de auspiciadores."
+      "time": "11:35 - 11:40 hrs",
+      "title": "Largadas 1 Kilómetro (Pulsera Amarilla)",
+      "desc": "11:35 hrs categoría NEE (10 a 14 años) y 11:40 hrs general (8 y 9 años). Retorno Monumento Héroes Patrios."
+    },
+    {
+      "time": "12:05 hrs",
+      "title": "Largada 2 Kilómetros (Pulsera Celeste)",
+      "desc": "Nacidos 2014 a 2016 (10, 11 y 12 años). Salida Pedraplén con retorno en Museo Pablo Fierro."
+    },
+    {
+      "time": "12:25 - 12:30 hrs",
+      "title": "Largadas 4 Kilómetros (Pulsera Roja)",
+      "desc": "12:25 hrs NEE y 12:30 hrs general (13 y 14 años). Dos giros con retorno en Museo Pablo Fierro."
+    },
+    {
+      "time": "13:10 hrs",
+      "title": "Ceremonia de Premiación Oficial",
+      "desc": "Reconocimiento a todas las categorías damas y varones, entrega de medallas y cierre familiar."
     }
   ],
   "pricing": {
-    "discountNotice": "Ahorra inscribiendo a 2 o más hermanitos",
+    "discountNotice": "Valor único oficial de inscripción • Cupos liberados para alumnos prioritarios",
     "plans": [
       {
-        "id": "kit-basico",
-        "name": "Kit Corredor Básico",
-        "badge": "Esencial",
-        "priceMonthly": 12,
-        "priceYearly": 10,
-        "description": "",
+        "id": "kit-oficial-kkidsrace",
+        "name": "Inscripción Oficial KKIDSRACE 2026",
+        "badge": "OFICIAL",
+        "priceMonthly": 15000,
+        "priceYearly": 15000,
+        "description": "Participación oficial en la XIV edición de la corrida más emblemática de Puerto Varas.",
         "features": [
-          "Polera oficial Kids Race Dry-Fit",
-          "Hermosa Medalla Finisher de metal",
-          "Número de corredor personalizado",
-          "Pulsera de seguridad vinculada a los padres",
-          "Puesto de hidratación y fruta fresca en meta"
-        ],
-        "isPopular": false,
-        "ctaText": "Inscribir con Kit Básico",
-        "ctaLink": "#contact"
-      },
-      {
-        "id": "kit-pro",
-        "name": "Kit Campeón Pro",
-        "badge": "MÁS ELEGIDO",
-        "priceMonthly": 22,
-        "priceYearly": 18,
-        "description": "",
-        "features": [
-          "Todo lo del Kit Básico",
-          "Chip de cronometraje electrónico oficial",
-          "Descarga ilimitada de fotos profesionales en pista",
-          "Morral deportivo reflectante Kids Race",
-          "Acceso preferencial a juegos inflables post-carrera"
+          "Polera técnica oficial KKIDSRACE 2026",
+          "Número de inscripción oficial de corredor",
+          "Pulsera de color asignada según distancia",
+          "Medalla finisher de metal oficial garantizada",
+          "Hidratación y fruta fresca en la meta",
+          "Calentamiento masivo Baile Entretenido",
+          "Pista cerrada 100% segura con resguardo y primeros auxilios"
         ],
         "isPopular": true,
-        "ctaText": "Inscribir Kit Campeón Pro",
-        "ctaLink": "#contact"
+        "ctaText": "Inscribirme por $15.000",
+        "ctaLink": "/inscribir"
       },
       {
-        "id": "kit-familiar",
-        "name": "Pack Dúo Hermanos / Familia",
-        "badge": "Promo Hermanitos",
-        "priceMonthly": 35,
-        "priceYearly": 30,
-        "description": "",
+        "id": "cupo-prioritario",
+        "name": "Beca Alumno Prioritario",
+        "badge": "GRATUITO",
+        "priceMonthly": 0,
+        "priceYearly": 0,
+        "description": "La organización dispone de cupos liberados para alumnos prioritarios de establecimientos educacionales.",
         "features": [
-          "2 Kits Completos con poleras y medallas",
-          "2 Chips de cronometraje incluidos",
-          "Fotografías en alta resolución descargables",
-          "Kit de hidratación familiar premium",
-          "Participación doble en sorteo de bicicletas"
+          "Cupo 100% liberado de costo",
+          "Solicitud previa a info@kkidsrace.cl o kkidsrace@gmail.com",
+          "Incluye polera técnica oficial",
+          "Incluye pulsera de color y número oficial",
+          "Medalla finisher garantizada al cruzar la meta"
         ],
         "isPopular": false,
-        "ctaText": "Aprovechar Pack Dúo",
-        "ctaLink": "#contact"
+        "ctaText": "Solicitar Cupo Prioritario",
+        "ctaLink": "mailto:info@kkidsrace.cl?subject=Solicitud%20Cupo%20Prioritario%20KKIDSRACE%202026"
       }
     ]
   },
@@ -285,24 +316,28 @@
   ],
   "faqs": [
     {
-      "question": "¿Los padres o tutores pueden correr junto a los niños?",
-      "answer": "¡Por supuesto! En la categoría de 500 metros (3 a 5 años) es obligatorio que un adulto acompañe al niño. En 1K, 2K y 3K los padres pueden acompañarlos o alentarlos a lo largo del circuito cerrado."
+      "question": "¿Cuándo y dónde se retiran los kits de competencia?",
+      "answer": "La entrega oficial de kits se realizará el SÁBADO 28 DE NOVIEMBRE de 15:00 a 19:00 hrs. Recuerda solicitar tu pulsera de color correspondiente a la distancia que vas a correr."
     },
     {
-      "question": "¿Todos los niños reciben medalla al terminar?",
-      "answer": "¡Sí! En Kids Race premiamos la participación y el amor por el movimiento. Cada niño y niña que cruza el arco de meta recibe su hermosa medalla finisher de metal con cinta conmemorativa."
+      "question": "¿Cuáles son los valores y datos de transferencia para pagar la inscripción?",
+      "answer": "La inscripción tiene un valor oficial de $15.000 pesos. La transferencia se realiza a: Sandra Arriagada Cárdenas, RUT: 11.923.718-1, Banco Santander, Cuenta Corriente N° 67734912, enviando comprobante a sapi.arriagada@gmail.com y kkidsrace@gmail.com."
     },
     {
-      "question": "¿Cómo funciona la seguridad de los niños en el evento?",
-      "answer": "La seguridad es nuestra prioridad #1. El circuito es completamente cerrado sin tráfico vehicular, contamos con ambulancias y paramédicos certificados, y cada niño recibe una pulsera numerada idéntica a la que se le coloca a su tutor para el control de salida."
+      "question": "¿Qué distancias y colores de pulsera existen?",
+      "answer": "Contamos con 5 distancias y 18 categorías: 250m babykidsrace (Pulsera Blanca, nacidos 2023-2026), 250m planos (Pulsera Rosada, 4 y 5 años con adulto), 500m planos y NEE (Pulsera Verde, 6 y 7 años / NEE 4-9 años), 1K planos y NEE (Pulsera Amarilla, 8 y 9 años / NEE 10-14 años), 2K (Pulsera Celeste, 10 a 12 años) y 4K planos y NEE (Pulsera Roja, 13 y 14 años)."
     },
     {
-      "question": "¿Cuándo y dónde se retiran los kits de corredor (polera y número)?",
-      "answer": "Los kits se pueden retirar los días viernes y sábado previos al evento en el mall auspiciador, o el mismo domingo desde las 08:00 AM en la carpa de acreditaciones del parque."
+      "question": "¿Cómo funcionan las categorías para Necesidades Educativas Especiales (NEE)?",
+      "answer": "KKIDSRACE cuenta con distancias inclusivas de 500m (para niños de 4 a 9 años nacidos 2017-2022) y 1.000m (para niños de 10 a 14 años nacidos 2012-2016). Ambas categorías largan 5 minutos antes de la prueba respectiva con apoyo y acompañamiento de guías."
     },
     {
-      "question": "¿Qué incluye el Kit oficial de corredor?",
-      "answer": "Incluye la polera técnica oficial con tejido respirable, número de corredor, chip electrónico (en distancias 2K y 3K), pulseras de seguridad, medalla de metal finisher, morral y snacks saludables de hidratación."
+      "question": "¿Cómo solicitar los cupos liberados para alumnos prioritarios?",
+      "answer": "Como todos los años, la organización de KKIDSRACE dispone de cupos liberados para alumnos prioritarios. Para solicitar este beneficio debes enviar un correo electrónico a kkidsrace@gmail.com o info@kkidsrace.cl."
+    },
+    {
+      "question": "¿Todos los participantes reciben medalla?",
+      "answer": "¡Sí! Todos los niños y niñas que crucen el arco de meta recibirán su medalla de metal finisher oficial de la XIV edición de KKIDSRACE 2026. Además, a las 13:10 horas se realizará la gran premiación general."
     }
   ],
   "sponsors": {
@@ -345,7 +380,7 @@
     "subtitle": "Completa el formulario y te enviaremos la confirmación oficial y guía del evento a tu correo electrónico.",
     "email": "contacto@kkidsrace.cl",
     "phone": "+56 9 8765 4321",
-    "location": "Parque Bicentenario • Explanada Central",
+    "location": "Costanera de Puerto Varas • Sector Pedraplén",
     "formButtonText": "Completar Pre-Inscripción Oficial",
     "forwardEmail": "",
     "resendApiKey": "",
@@ -366,19 +401,23 @@
   "races": [
     {
       "id": "race-1790214610537-bkga",
-      "name": "Kids Race 2026 - Primavera",
+      "name": "XIV Corrida KKIDSRACE 2026 - Puerto Varas",
       "year": 2026,
-      "date": "2026-10-18T09:00:00",
-      "dateDisplay": "",
-      "time": "09:00 AM",
-      "location": "Parque Bicentenario",
-      "city": "Santiago",
+      "date": "2026-11-29T10:00:00",
+      "dateDisplay": "Domingo 29 de Noviembre, 2026",
+      "time": "10:00 AM",
+      "location": "Sector Costanera • Pedraplén",
+      "city": "Puerto Varas",
       "status": "active",
       "circuits": [
-        "500m",
-        "1K",
-        "2K",
-        "3K"
+        "250 Metros babykidsrace (0 a 3 años)",
+        "250 Metros planos (4 y 5 años)",
+        "500 Metros planos (6 y 7 años)",
+        "500 Metros NEE (4 a 9 años NEE)",
+        "1 Kilómetro (8 y 9 años)",
+        "1 Kilómetro NEE (10 a 14 años NEE)",
+        "2 Kilómetros (10 a 12 años)",
+        "4 Kilómetros (13 y 14 años)"
       ],
       "maxParticipants": 600,
       "createdAt": "2026-09-24T01:50:10.537Z"
@@ -878,17 +917,17 @@
     }
   ],
   "venue": {
-    "badge": "Punto de Largada",
-    "title": "¿Dónde es la corrida?",
-    "description": "Encuéntranos en el lugar del evento. ¡Llega con tiempo para disfrutar la previa!",
-    "name": "Costanera",
-    "address": "Costanera, Puerto Varas",
+    "badge": "PUNTO DE LARGADA Y META",
+    "title": "¿Dónde se realiza KKIDSRACE 2026?",
+    "description": "Costanera de Puerto Varas. Todos los circuitos son ida y vuelta iniciando en el Pedraplén por Av. Vicente Pérez Rosales hacia Puerto Chico.",
+    "name": "Sector Costanera • Pedraplén",
+    "address": "Av. Vicente Pérez Rosales (Costanera), Puerto Varas, Región de Los Lagos",
     "lat": -41.3195,
     "lng": -72.9854,
     "zoom": 15,
-    "doorsOpen": "08:00 AM",
-    "parking": "Estacionamientos habilitados en calles aledañas a la Costanera.",
-    "transit": "Acceso por Av. Vicente Pérez Rosales y Costanera."
+    "doorsOpen": "10:00 AM (Calentamiento masivo a las 10:00 hrs)",
+    "parking": "Estacionamientos habilitados en calles aledañas a la Costanera y sector Puerto Chico.",
+    "transit": "Largada y Meta en el Pedraplén. Retiro de kits el Sábado 28 de Noviembre de 15:00 a 19:00 hrs."
   },
   "video": {
     "url": "",
@@ -930,8 +969,8 @@
     "badge": "🚧 PISTA EN PREPARACIÓN • MUY PRONTO",
     "title": "¡Estamos Calentando Motores!",
     "subtitle": "La Gran Corrida Infantil Kids Race 2026 está preparando una pista llena de aventuras, medallas y diversión para toda la familia.",
-    "expectedDate": "Domingo 15 de Noviembre, 2026",
-    "targetDate": "2026-11-15T09:00",
+    "expectedDate": "Domingo 29 de Noviembre, 2026",
+    "targetDate": "2026-11-29T10:00",
     "showCountdown": true,
     "notifyForm": true,
     "contactWhatsapp": "+56 9 8765 4321",
@@ -944,24 +983,28 @@
   },
   "faq": [
     {
-      "question": "¿Los padres o tutores pueden correr junto a los niños?",
-      "answer": "¡Por supuesto! En la categoría de 500 metros (3 a 5 años) es obligatorio que un adulto acompañe al niño. En 1K, 2K y 3K los padres pueden acompañarlos o alentarlos a lo largo del circuito cerrado."
+      "question": "¿Cuándo y dónde se retiran los kits de competencia?",
+      "answer": "La entrega oficial de kits se realizará el SÁBADO 28 DE NOVIEMBRE de 15:00 a 19:00 hrs. Recuerda solicitar tu pulsera de color correspondiente a la distancia que vas a correr."
     },
     {
-      "question": "¿Todos los niños reciben medalla al terminar?",
-      "answer": "¡Sí! En Kids Race premiamos la participación y el amor por el movimiento. Cada niño y niña que cruza el arco de meta recibe su hermosa medalla finisher de metal con cinta conmemorativa."
+      "question": "¿Cuáles son los valores y datos de transferencia para pagar la inscripción?",
+      "answer": "La inscripción tiene un valor oficial de $15.000 pesos. La transferencia se realiza a: Sandra Arriagada Cárdenas, RUT: 11.923.718-1, Banco Santander, Cuenta Corriente N° 67734912, enviando comprobante a sapi.arriagada@gmail.com y kkidsrace@gmail.com."
     },
     {
-      "question": "¿Cómo funciona la seguridad de los niños en el evento?",
-      "answer": "La seguridad es nuestra prioridad #1. El circuito es completamente cerrado sin tráfico vehicular, contamos con ambulancias y paramédicos certificados, y cada niño recibe una pulsera numerada idéntica a la que se le coloca a su tutor para el control de salida."
+      "question": "¿Qué distancias y colores de pulsera existen?",
+      "answer": "Contamos con 5 distancias y 18 categorías: 250m babykidsrace (Pulsera Blanca, nacidos 2023-2026), 250m planos (Pulsera Rosada, 4 y 5 años con adulto), 500m planos y NEE (Pulsera Verde, 6 y 7 años / NEE 4-9 años), 1K planos y NEE (Pulsera Amarilla, 8 y 9 años / NEE 10-14 años), 2K (Pulsera Celeste, 10 a 12 años) y 4K planos y NEE (Pulsera Roja, 13 y 14 años)."
     },
     {
-      "question": "¿Cuándo y dónde se retiran los kits de corredor (polera y número)?",
-      "answer": "Los kits se pueden retirar los días viernes y sábado previos al evento en el mall auspiciador, o el mismo domingo desde las 08:00 AM en la carpa de acreditaciones del parque."
+      "question": "¿Cómo funcionan las categorías para Necesidades Educativas Especiales (NEE)?",
+      "answer": "KKIDSRACE cuenta con distancias inclusivas de 500m (para niños de 4 a 9 años nacidos 2017-2022) y 1.000m (para niños de 10 a 14 años nacidos 2012-2016). Ambas categorías largan 5 minutos antes de la prueba respectiva con apoyo y acompañamiento de guías."
     },
     {
-      "question": "¿Qué incluye el Kit oficial de corredor?",
-      "answer": "Incluye la polera técnica oficial con tejido respirable, número de corredor, chip electrónico (en distancias 2K y 3K), pulseras de seguridad, medalla de metal finisher, morral y snacks saludables de hidratación."
+      "question": "¿Cómo solicitar los cupos liberados para alumnos prioritarios?",
+      "answer": "Como todos los años, la organización de KKIDSRACE dispone de cupos liberados para alumnos prioritarios. Para solicitar este beneficio debes enviar un correo electrónico a kkidsrace@gmail.com o info@kkidsrace.cl."
+    },
+    {
+      "question": "¿Todos los participantes reciben medalla?",
+      "answer": "¡Sí! Todos los niños y niñas que crucen el arco de meta recibirán su medalla de metal finisher oficial de la XIV edición de KKIDSRACE 2026. Además, a las 13:10 horas se realizará la gran premiación general."
     }
   ],
   "registrationForm": {

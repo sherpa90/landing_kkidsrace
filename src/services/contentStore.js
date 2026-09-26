@@ -184,7 +184,7 @@ function saveRace(raceData) {
       date: raceData.date || new Date().toISOString(),
       dateDisplay: raceData.dateDisplay || '',
       time: raceData.time || '09:00 AM',
-      location: raceData.location || 'Parque Bicentenario',
+      location: raceData.location || 'Sector Costanera • Pedraplén',
       city: raceData.city || 'Sector Central',
       status: raceData.status || 'planned',
       circuits: raceData.circuits || ['500 Metros', '1 Kilómetro', '2 Kilómetros', '3 Kilómetros'],

@@ -1097,8 +1097,8 @@ function initRacesManager() {
     if (nameInput) nameInput.value = '';
     if (dateInput) dateInput.value = '';
     if (timeInput) timeInput.value = '09:00 AM';
-    if (locInput) locInput.value = 'Parque Bicentenario • Circuito Cerrado';
-    if (cityInput) cityInput.value = 'Vitacura, Santiago';
+    if (locInput) locInput.value = 'Sector Costanera • Pedraplén, Puerto Varas';
+    if (cityInput) cityInput.value = 'Puerto Varas';
     if (maxInput) maxInput.value = '500';
     if (statusSelect) statusSelect.value = 'active';
     if (formTitle) {

@@ -200,7 +200,7 @@
         <div class="flex flex-wrap items-center gap-y-1.5 gap-x-4 text-xs text-white/90 font-medium pt-1">
           <div class="flex items-center gap-1.5">
             <i data-lucide="calendar" class="w-3.5 h-3.5 text-yellow-300"></i>
-            <span><%= activeRace ? (activeRace.dateDisplay || activeRace.date) : 'Domingo 15 de Noviembre, 2026' %></span>
+            <span><%= activeRace ? (activeRace.dateDisplay || activeRace.date) : 'Domingo 29 de Noviembre, 2026' %></span>
           </div>
           <div class="flex items-center gap-1.5">
             <i data-lucide="map-pin" class="w-3.5 h-3.5 text-yellow-300"></i>
@@ -493,8 +493,45 @@
         </div>
 
         <p class="text-xs text-slate-500 dark:text-gray-400">
-          Adjunta la foto o captura de transferencia del kit de inscripción (<strong>máximo 3 MB</strong>). Se optimizará y comprimirá automáticamente a WebP ultraligero para proteger la base de datos.
+          Realiza la transferencia por <strong>$15.000 por participante</strong> a la cuenta oficial de la organización y adjunta la captura o comprobante bancario abajo.
         </p>
+
+        <!-- CAJA DE DATOS BANCARIOS OFICIALES PARA TRANSFERIR -->
+        <div class="bg-gradient-to-br from-blue-50 to-indigo-50/70 dark:from-slate-950 dark:to-blue-950/40 p-4.5 rounded-2xl border border-blue-200 dark:border-blue-900/60 space-y-3 shadow-sm">
+          <div class="flex items-center justify-between">
+            <span class="text-[11px] font-black uppercase tracking-wider text-blue-700 dark:text-blue-400 flex items-center gap-1.5">
+              <i data-lucide="credit-card" class="w-4 h-4"></i>
+              Datos Oficiales para Transferencia
+            </span>
+            <span class="bg-blue-600 text-white text-[11px] font-black px-2.5 py-0.5 rounded-full shadow-sm">
+              $15.000 / niño
+            </span>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+            <div class="bg-white/80 dark:bg-gray-900/80 p-2.5 rounded-xl border border-blue-100 dark:border-gray-800">
+              <span class="text-[10px] text-slate-500 dark:text-gray-400 block font-medium">Titular de la Cuenta:</span>
+              <strong class="text-slate-900 dark:text-white font-bold">Sandra Arriagada Cárdenas</strong>
+            </div>
+            <div class="bg-white/80 dark:bg-gray-900/80 p-2.5 rounded-xl border border-blue-100 dark:border-gray-800">
+              <span class="text-[10px] text-slate-500 dark:text-gray-400 block font-medium">RUT Titular:</span>
+              <strong class="text-slate-900 dark:text-white font-mono font-bold">11.923.718-1</strong>
+            </div>
+            <div class="bg-white/80 dark:bg-gray-900/80 p-2.5 rounded-xl border border-blue-100 dark:border-gray-800">
+              <span class="text-[10px] text-slate-500 dark:text-gray-400 block font-medium">Banco & Tipo:</span>
+              <strong class="text-slate-900 dark:text-white font-bold">Banco Santander • Cuenta Corriente</strong>
+            </div>
+            <div class="bg-white/80 dark:bg-gray-900/80 p-2.5 rounded-xl border border-blue-100 dark:border-gray-800">
+              <span class="text-[10px] text-slate-500 dark:text-gray-400 block font-medium">Número de Cuenta:</span>
+              <strong class="text-slate-900 dark:text-white font-mono font-black text-blue-600 dark:text-blue-400 text-sm">67734912</strong>
+            </div>
+          </div>
+
+          <div class="text-[11px] text-slate-600 dark:text-slate-300 flex flex-wrap items-center justify-between gap-1 pt-1.5 border-t border-blue-100 dark:border-blue-900/40">
+            <span>Comprobante también a: <strong class="text-blue-600 dark:text-blue-300">sapi.arriagada@gmail.com</strong> / <strong class="text-blue-600 dark:text-blue-300">kkidsrace@gmail.com</strong></span>
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-bold">Alumnos prioritarios: cupo liberado vía info@kkidsrace.cl</span>
+          </div>
+        </div>
 
         <!-- ZONA DE CARGA TÁCTIL -->
         <div id="upload-dropzone" class="border-2 border-dashed border-slate-300 dark:border-gray-700 hover:border-emerald-500 dark:hover:border-emerald-500 rounded-2xl p-4 text-center transition-all bg-slate-50/50 dark:bg-gray-950/50 cursor-pointer relative">

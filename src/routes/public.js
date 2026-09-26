@@ -23,15 +23,32 @@ const uploadLimiter = rateLimit({
 function getAllowedDistances() {
   const content = contentStore.getContent();
   const dynamic = (content.categories || []).map(c => `${c.distance} (${c.badge})`);
-  // Agregar valores de respaldo fijos para robustez
+  const dynamicRaw = (content.categories || []).map(c => c.distance);
+  // Agregar valores oficiales y de respaldo para máxima compatibilidad
   const fallback = [
+    '250 Metros babykidsrace (0 a 3 años)',
+    '250 Metros planos (4 y 5 años)',
+    '500 Metros planos (6 y 7 años)',
+    '500 Metros NEE (4 a 9 años NEE)',
+    '1 Kilómetro (8 y 9 años)',
+    '1 Kilómetro NEE (10 a 14 años NEE)',
+    '2 Kilómetros (10 a 12 años)',
+    '4 Kilómetros (13 y 14 años)',
+    '250 Metros babykidsrace',
+    '250 Metros planos',
+    '500 Metros planos',
+    '500 Metros NEE',
+    '1 Kilómetro',
+    '1 Kilómetro NEE',
+    '2 Kilómetros',
+    '4 Kilómetros',
     '500 Metros (3-5 años)',
     '1 Kilómetro (6-8 años)',
     '2 Kilómetros (9-11 años)',
     '3 Kilómetros (12-14 años)',
     'Contacto General'
   ];
-  const all = new Set([...dynamic, ...fallback]);
+  const all = new Set([...dynamic, ...dynamicRaw, ...fallback]);
   return Array.from(all);
 }
 
