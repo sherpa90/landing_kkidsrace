@@ -1264,40 +1264,74 @@
       const name = <%- JSON.stringify(content.venue?.name || content.countdown?.locationName || 'Lugar del Evento') %>;
       const addr = <%- JSON.stringify(content.venue?.address || '') %>;
 
-      const mapEl = document.getElementById('venue-map');
-      if (!mapEl) return;
+      function initMap() {
+        const mapEl = document.getElementById('venue-map');
+        if (!mapEl) return;
 
-      const isMobile = window.innerWidth < 768;
-      const map = L.map('venue-map', {
-        zoomControl: true,
-        scrollWheelZoom: false,
-        dragging: !isMobile, // Prevenir trampa de scroll táctil en pantallas móviles
-        tap: !isMobile
-      }).setView([lat, lng], zoom);
+        // Evitar doble inicialización
+        if (mapEl._leaflet_id) return;
 
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-        maxZoom: 19
-      }).addTo(map);
+        // Forzar altura en caso de que Tailwind no haya calculado aún
+        if (mapEl.offsetHeight < 10) {
+          mapEl.style.height = '320px';
+        }
 
-      // Ícono personalizado
-      const icon = L.divIcon({
-        className: '',
-        html: '<div style="background:#2563eb;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 4px 12px rgba(37,99,235,0.5)"></div>',
-        iconSize: [36, 36],
-        iconAnchor: [18, 36],
-        popupAnchor: [0, -38]
-      });
+        const isMobile = window.innerWidth < 768;
+        const map = L.map('venue-map', {
+          zoomControl: true,
+          scrollWheelZoom: false,
+          dragging: !isMobile,
+          tap: !isMobile
+        }).setView([lat, lng], zoom);
 
-      L.marker([lat, lng], { icon })
-        .addTo(map)
-        .bindPopup(`<div style="font-family:sans-serif;min-width:160px"><strong style="font-size:14px">📍 ${name}</strong>${addr ? '<br><span style="font-size:12px;color:#64748b">' + addr + '</span>' : ''}</div>`, { maxWidth: 220 })
-        .openPopup();
+        const isDark = document.documentElement.classList.contains('dark');
+        const tileUrl = isDark
+          ? 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'
+          : 'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png';
 
-      // Dark mode tile layer swap
-      const isDark = document.documentElement.classList.contains('dark');
-      if (isDark) {
-        map.eachLayer(l => { if (l.setUrl) l.setUrl('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png'); });
+        L.tileLayer(tileUrl, {
+          attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+          maxZoom: 19
+        }).addTo(map);
+
+        // Ícono personalizado
+        const icon = L.divIcon({
+          className: '',
+          html: '<div style="background:#2563eb;width:36px;height:36px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);border:3px solid white;box-shadow:0 4px 12px rgba(37,99,235,0.5)"></div>',
+          iconSize: [36, 36],
+          iconAnchor: [18, 36],
+          popupAnchor: [0, -38]
+        });
+
+        L.marker([lat, lng], { icon })
+          .addTo(map)
+          .bindPopup(`<div style="font-family:sans-serif;min-width:160px"><strong style="font-size:14px">📍 ${name}</strong>${addr ? '<br><span style="font-size:12px;color:#64748b">' + addr + '</span>' : ''}</div>`, { maxWidth: 220 })
+          .openPopup();
+
+        // invalidateSize al cargar los tiles
+        map.whenReady(() => {
+          setTimeout(() => map.invalidateSize(), 200);
+        });
+
+        // Cuando el usuario hace scroll y el mapa entra en pantalla, re-invalidar
+        if ('IntersectionObserver' in window) {
+          const obs = new IntersectionObserver((entries) => {
+            entries.forEach(e => {
+              if (e.isIntersecting) {
+                map.invalidateSize();
+                obs.disconnect();
+              }
+            });
+          }, { threshold: 0.1 });
+          obs.observe(mapEl);
+        }
+      }
+
+      // Esperar a que el DOM esté listo y luego al siguiente frame de pintura
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', () => requestAnimationFrame(initMap));
+      } else {
+        requestAnimationFrame(initMap);
       }
     })();
   </script>
