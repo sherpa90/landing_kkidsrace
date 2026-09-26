@@ -3623,10 +3623,34 @@ function initBasesManager() {
 
 // 20. Gestor de Barra Superior (Header / Menú)
 function initHeaderManager() {
-  const triggerSave = () => {
-    const cmsSaveBtn = document.getElementById('btn-save-cms');
-    if (cmsSaveBtn) cmsSaveBtn.click();
-  };
   const saveBtn = document.getElementById('btn-save-header');
-  if (saveBtn) saveBtn.addEventListener('click', triggerSave);
+  if (!saveBtn) return;
+
+  saveBtn.addEventListener('click', async () => {
+    const originalHtml = saveBtn.innerHTML;
+    saveBtn.disabled = true;
+    saveBtn.innerHTML = `
+      <span class="inline-block animate-spin mr-2">⟳</span> Guardando...
+    `;
+
+    try {
+      const payload = collectCmsFormData();
+      const json = await cmsFetch('/admin/api/content', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      if (json && json.success) {
+        showAdminToast('¡Navegación del Header guardada con éxito!', 'success');
+      } else {
+        showAdminToast(json?.error || 'Error al guardar el header', 'error');
+      }
+    } catch (err) {
+      showAdminToast(err.message || 'Error de conexión al guardar.', 'error');
+    } finally {
+      saveBtn.disabled = false;
+      saveBtn.innerHTML = originalHtml;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  });
 }
