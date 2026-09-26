@@ -22,6 +22,7 @@ function initAllAdminModules() {
     ['Formulario Inscripción', initRegistrationFormManager],
     ['Bases y Reglamento', initBasesManager],
     ['Header y Menú', initHeaderManager],
+    ['Footer y Redes', initFooterManager],
     ['Preguntas Frecuentes', initFaqsManager],
     ['Hero Preview', initHeroLivePreview],
     ['Pestaña Navegador', initBrowserTabLivePreview]
@@ -540,13 +541,25 @@ function collectCmsFormData() {
     }
   });
 
-  // 10. Footer Social Links (etiquetas corregidas)
+  // 10. Footer y Redes Sociales
   const footer = {
+    description: getVal('input-footer-description') || 'La corrida infantil más alegre, segura e inspiradora. Fomentando hábitos saludables y unión familiar a través del running.',
+    copyright: getVal('input-footer-copyright') || '© 2026 KKIDSRACE. Todos los derechos reservados. Evento deportivo familiar.',
+    showBasesLink: document.getElementById('input-footer-showBasesLink') ? document.getElementById('input-footer-showBasesLink').checked : true,
+    basesLinkText: getVal('input-footer-basesLinkText') || 'Bases & Reglamento',
+    showAdminLink: document.getElementById('input-footer-showAdminLink') ? document.getElementById('input-footer-showAdminLink').checked : true,
+    showSocialLinks: document.getElementById('input-footer-showSocialLinks') ? document.getElementById('input-footer-showSocialLinks').checked : true,
+    showFloatingCta: document.getElementById('input-footer-showFloatingCta') ? document.getElementById('input-footer-showFloatingCta').checked : true,
+    showFloatingWhatsapp: document.getElementById('input-footer-showFloatingWhatsapp') ? document.getElementById('input-footer-showFloatingWhatsapp').checked : true,
+    whatsappNumber: getVal('input-footer-whatsappNumber'),
+    whatsappMessage: getVal('input-footer-whatsappMessage') || 'Hola, tengo una consulta sobre la Corrida KKIDSRACE 2026',
     socialLinks: {
-      instagram: getVal('input-socialInstagram'),
-      facebook: getVal('input-socialFacebook'),
-      twitter: getVal('input-socialTwitter'),
-      youtube: getVal('input-socialYoutube')
+      instagram: getVal('input-footer-instagram') || getVal('input-socialInstagram'),
+      facebook: getVal('input-footer-facebook') || getVal('input-socialFacebook'),
+      tiktok: getVal('input-footer-tiktok'),
+      youtube: getVal('input-footer-youtube') || getVal('input-socialYoutube'),
+      twitter: getVal('input-footer-twitter') || getVal('input-socialTwitter'),
+      whatsapp: getVal('input-footer-socialWhatsapp')
     }
   };
 
@@ -690,6 +703,19 @@ function collectCmsFormData() {
       pdfUrl: getVal('input-basesPdfUrl'),
       ticketeraUrl: getVal('input-basesTicketeraUrl'),
       supportEmail: getVal('input-basesSupportEmail') || 'soporte@kkidsrace.cl',
+      showPdfButton: document.getElementById('input-bases-showPdfButton') ? document.getElementById('input-bases-showPdfButton').checked : true,
+      pdfButtonText: getVal('input-bases-pdfButtonText') || 'Descargar Bases (PDF)',
+      showTicketeraButton: document.getElementById('input-bases-showTicketeraButton') ? document.getElementById('input-bases-showTicketeraButton').checked : true,
+      ticketeraButtonText: getVal('input-bases-ticketeraButtonText') || 'Comprar Entrada (Ticketera)',
+      showNavTicketeraButton: document.getElementById('input-bases-showNavTicketeraButton') ? document.getElementById('input-bases-showNavTicketeraButton').checked : true,
+      navTicketeraButtonText: getVal('input-bases-navTicketeraButtonText') || 'Comprar Entrada',
+      showPrintButton: document.getElementById('input-bases-showPrintButton') ? document.getElementById('input-bases-showPrintButton').checked : true,
+      showSummaryCards: document.getElementById('input-bases-showSummaryCards') ? document.getElementById('input-bases-showSummaryCards').checked : true,
+      showSchedules: document.getElementById('input-bases-showSchedules') ? document.getElementById('input-bases-showSchedules').checked : true,
+      showCategoriesDetail: document.getElementById('input-bases-showCategoriesDetail') ? document.getElementById('input-bases-showCategoriesDetail').checked : true,
+      showRegistrationProcess: document.getElementById('input-bases-showRegistrationProcess') ? document.getElementById('input-bases-showRegistrationProcess').checked : true,
+      showKitPickup: document.getElementById('input-bases-showKitPickup') ? document.getElementById('input-bases-showKitPickup').checked : true,
+      showClosingBanner: document.getElementById('input-bases-showClosingBanner') ? document.getElementById('input-bases-showClosingBanner').checked : true,
       summary: {
         distances: getVal('input-basesDistances') || '250m • 500m • 1km • 2km • 4km',
         price: getVal('input-basesPrice') || '$15.000 CLP',
@@ -3654,3 +3680,46 @@ function initHeaderManager() {
     }
   });
 }
+
+// 21. Gestor de Pie de Página (Footer & Redes)
+function initFooterManager() {
+  const saveBtns = [
+    document.getElementById('btn-save-footer'),
+    document.getElementById('btn-save-footer-bottom')
+  ].filter(Boolean);
+
+  if (!saveBtns.length) return;
+
+  const handleSave = async (clickedBtn) => {
+    const originalHtml = clickedBtn.innerHTML;
+    saveBtns.forEach(b => { b.disabled = true; });
+    clickedBtn.innerHTML = `
+      <span class="inline-block animate-spin mr-2">⟳</span> Guardando...
+    `;
+
+    try {
+      const payload = collectCmsFormData();
+      const json = await cmsFetch('/admin/api/content', {
+        method: 'POST',
+        body: JSON.stringify(payload)
+      });
+
+      if (json && json.success) {
+        showAdminToast('¡Configuración del Footer guardada con éxito!', 'success');
+      } else {
+        showAdminToast(json?.error || 'Error al guardar el footer', 'error');
+      }
+    } catch (err) {
+      showAdminToast(err.message || 'Error de conexión al guardar.', 'error');
+    } finally {
+      saveBtns.forEach(b => { b.disabled = false; });
+      clickedBtn.innerHTML = originalHtml;
+      if (window.lucide) window.lucide.createIcons();
+    }
+  };
+
+  saveBtns.forEach(btn => {
+    btn.addEventListener('click', () => handleSave(btn));
+  });
+}
+

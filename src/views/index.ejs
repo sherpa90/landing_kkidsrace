@@ -1100,61 +1100,107 @@
   </main>
 
   <!-- PIE DE PÁGINA (FOOTER) - Con espacio inferior para no solapar el botón flotante en móvil -->
+  <%
+    const footerCfg = content.footer || {};
+    const footerSocial = footerCfg.socialLinks || {};
+    const showBases = footerCfg.showBasesLink !== false;
+    const basesLabel = footerCfg.basesLinkText || 'Bases & Reglamento';
+    const showAdmin = footerCfg.showAdminLink !== false;
+    const showSocial = footerCfg.showSocialLinks !== false;
+  %>
   <footer class="border-t border-slate-800 bg-slate-900 pt-12 pb-28 md:pb-12 relative z-10 text-xs text-slate-400 transition-colors">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row items-center justify-between gap-6">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
       
-      <!-- Marca y Copyright -->
-      <div class="flex items-center gap-3">
-        <% if (content.brand?.logoUrl) { %>
-        <img src="<%= content.brand.logoUrl %>" alt="" class="h-7 w-auto object-contain">
-        <% } else { %>
-        <div class="w-7 h-7 rounded-xl bg-gradient-to-tr <%= theme.gradient %> p-[1px]">
-          <div class="w-full h-full bg-slate-900 rounded-xl flex items-center justify-center">
-            <i data-lucide="<%= content.brand?.logoIcon || 'trophy' %>" class="w-3.5 h-3.5 text-yellow-400"></i>
+      <!-- Fila Superior: Marca, Descripción y Redes Sociales -->
+      <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-6 pb-8 border-b border-slate-800/80">
+        <div class="max-w-md space-y-2">
+          <div class="flex items-center gap-3">
+            <% if (content.brand?.logoUrl) { %>
+            <img src="<%= content.brand.logoUrl %>" alt="" class="h-8 w-auto object-contain">
+            <% } else { %>
+            <div class="w-8 h-8 rounded-xl bg-gradient-to-tr <%= theme.gradient %> p-[1px]">
+              <div class="w-full h-full bg-slate-900 rounded-xl flex items-center justify-center">
+                <i data-lucide="<%= content.brand?.logoIcon || 'trophy' %>" class="w-4 h-4 text-yellow-400"></i>
+              </div>
+            </div>
+            <% } %>
+            <span class="font-black text-white text-base tracking-tight"><%= content.brand?.name || 'KKIDSRACE 2026' %></span>
           </div>
+          <% if (footerCfg.description) { %>
+          <p class="text-xs text-slate-400 leading-relaxed"><%= footerCfg.description %></p>
+          <% } %>
+        </div>
+
+        <!-- Redes Sociales Oficiales -->
+        <% if (showSocial) { %>
+        <div class="flex flex-wrap items-center gap-3">
+          <% if (footerSocial.instagram) { %>
+          <a href="<%= footerSocial.instagram %>" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-pink-600 text-slate-400 hover:text-white flex items-center justify-center transition-all" aria-label="Instagram" title="Instagram">
+            <i data-lucide="instagram" class="w-4 h-4"></i>
+          </a>
+          <% } %>
+          <% if (footerSocial.facebook) { %>
+          <a href="<%= footerSocial.facebook %>" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-blue-600 text-slate-400 hover:text-white flex items-center justify-center transition-all" aria-label="Facebook" title="Facebook">
+            <i data-lucide="facebook" class="w-4 h-4"></i>
+          </a>
+          <% } %>
+          <% if (footerSocial.tiktok) { %>
+          <a href="<%= footerSocial.tiktok %>" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-black text-slate-400 hover:text-white flex items-center justify-center transition-all" aria-label="TikTok" title="TikTok">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.24 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z"/></svg>
+          </a>
+          <% } %>
+          <% if (footerSocial.youtube) { %>
+          <a href="<%= footerSocial.youtube %>" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-red-600 text-slate-400 hover:text-white flex items-center justify-center transition-all" aria-label="YouTube" title="YouTube">
+            <i data-lucide="youtube" class="w-4 h-4"></i>
+          </a>
+          <% } %>
+          <% if (footerSocial.twitter) { %>
+          <a href="<%= footerSocial.twitter %>" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-sky-500 text-slate-400 hover:text-white flex items-center justify-center transition-all" aria-label="Twitter / X" title="Twitter / X">
+            <i data-lucide="twitter" class="w-4 h-4"></i>
+          </a>
+          <% } %>
+          <% if (footerSocial.whatsapp) { %>
+          <% const cleanFooterWa = footerSocial.whatsapp.replace(/[^0-9]/g, ''); %>
+          <a href="https://wa.me/<%= cleanFooterWa %>" target="_blank" rel="noopener noreferrer" class="w-9 h-9 rounded-xl bg-slate-800/80 hover:bg-emerald-600 text-slate-400 hover:text-white flex items-center justify-center transition-all" aria-label="WhatsApp" title="WhatsApp">
+            <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.711 2.598 2.664-.698c.97.581 1.83.89 2.796.89 3.183 0 5.768-2.587 5.769-5.766.001-3.182-2.585-5.777-5.769-5.777zm3.364 8.163c-.144.405-.837.774-1.17.822-.313.044-.72.062-2.312-.6-1.905-.793-3.13-2.735-3.225-2.861-.095-.127-.778-1.036-.778-1.975 0-.939.492-1.401.667-1.591.175-.19.381-.238.508-.238.127 0 .254.001.365.006.118.005.277-.045.433.33.16.386.545 1.332.593 1.428.048.096.08.207.016.334-.064.127-.096.206-.19.317-.095.111-.2.248-.286.334-.095.096-.195.2-.084.391.111.19.493.813 1.058 1.317.728.649 1.341.851 1.532.946.191.096.302.079.413-.048.111-.127.476-.556.603-.746.127-.19.254-.159.429-.095.175.063 1.11.523 1.3.618.19.096.317.143.365.223.048.079.048.461-.096.866z"/></svg>
+          </a>
+          <% } %>
         </div>
         <% } %>
-        <span class="font-bold text-white"><%= content.brand?.name || 'Kids Race 2026' %></span>
-        <span class="text-slate-600">|</span>
-        <span><%= content.footer?.copyright || '© 2026 Kids Race. Todos los derechos reservados.' %></span>
       </div>
 
-      <!-- Redes Sociales y Acceso Admin -->
-      <div class="flex items-center gap-4">
-        <% if (content.footer?.socialLinks?.twitter) { %>
-        <a href="<%= content.footer.socialLinks.twitter %>" target="_blank" rel="noopener" class="text-slate-400 hover:text-white transition-colors" aria-label="Twitter">
-          <i data-lucide="twitter" class="w-4 h-4"></i>
-        </a>
-        <% } %>
-        <% if (content.footer?.socialLinks?.github || content.footer?.socialLinks?.instagram) { %>
-        <a href="<%= content.footer?.socialLinks?.instagram || content.footer?.socialLinks?.github %>" target="_blank" rel="noopener" class="text-slate-400 hover:text-white transition-colors" aria-label="Instagram">
-          <i data-lucide="instagram" class="w-4 h-4"></i>
-        </a>
-        <% } %>
-        <% if (content.footer?.socialLinks?.linkedin || content.footer?.socialLinks?.facebook) { %>
-        <a href="<%= content.footer?.socialLinks?.facebook || content.footer?.socialLinks?.linkedin %>" target="_blank" rel="noopener" class="text-slate-400 hover:text-white transition-colors" aria-label="Facebook">
-          <i data-lucide="facebook" class="w-4 h-4"></i>
-        </a>
-        <% } %>
-        <a href="/bases" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors font-bold flex items-center gap-1.5 text-xs mr-2" title="Ver Bases y Reglamento">
-          <i data-lucide="file-text" class="w-3.5 h-3.5 text-yellow-400"></i>
-          <span>Bases & Reglamento</span>
-        </a>
-        <a href="/admin" class="ml-2 text-xs text-blue-400 hover:text-blue-300 flex items-center gap-1 font-bold">
-          <i data-lucide="shield" class="w-3.5 h-3.5"></i>
-          CMS Admin
-        </a>
+      <!-- Fila Inferior: Copyright & Enlaces Legales/Admin -->
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-4 text-slate-500">
+        <div>
+          <span><%= footerCfg.copyright || '© 2026 KKIDSRACE. Todos los derechos reservados.' %></span>
+        </div>
+        
+        <div class="flex flex-wrap items-center gap-4 text-xs font-semibold">
+          <% if (showBases) { %>
+          <a href="/bases" target="_blank" rel="noopener noreferrer" class="text-slate-400 hover:text-white transition-colors flex items-center gap-1 text-amber-500 hover:text-amber-400 font-bold" title="Abrir Bases en pestaña nueva">
+            <i data-lucide="file-text" class="w-3.5 h-3.5"></i>
+            <span><%= basesLabel %></span>
+          </a>
+          <% } %>
+          <% if (showAdmin) { %>
+          <a href="/admin" class="text-slate-500 hover:text-blue-400 flex items-center gap-1 transition-colors">
+            <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+            <span>CMS Admin</span>
+          </a>
+          <% } %>
+        </div>
       </div>
 
     </div>
   </footer>
 
   <!-- BOTÓN FLOTANTE MÓVIL TÁCTIL (FLOATING CTA PILL CON MÁRGENES SEGUROS) -->
+  <% if (footerCfg.showFloatingCta !== false) { %>
   <div id="mobile-sticky-cta" class="fixed bottom-3 inset-x-3 z-40 md:hidden transition-all duration-300 ease-out translate-y-28 opacity-0 pointer-events-none">
     <div class="bg-white/95 dark:bg-gray-950/95 border border-slate-200/90 dark:border-white/10 shadow-[0_8px_30px_rgb(0,0,0,0.18)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.6)] rounded-2xl p-2.5 backdrop-blur-lg flex items-center justify-between gap-2.5 max-w-sm mx-auto">
       <div class="flex flex-col min-w-0 pl-1">
         <span class="text-[11px] font-black uppercase text-blue-600 dark:text-yellow-400 tracking-wider truncate">
-          <%= activeRace ? activeRace.name : (content.brand?.name || 'Kids Race 2026') %>
+          <%= (typeof activeRace !== 'undefined' && activeRace) ? activeRace.name : (content.brand?.name || 'Kids Race 2026') %>
         </span>
         <span class="text-[10px] text-slate-500 dark:text-gray-400 font-medium truncate">
           🏅 Kit y medalla oficial
@@ -1166,14 +1212,17 @@
       </a>
     </div>
   </div>
+  <% } %>
 
   <!-- BOTÓN FLOTANTE WHATSAPP -->
+  <% if (footerCfg.showFloatingWhatsapp !== false) { %>
   <% 
-    const rawContactPhone = content.contact?.phone || content.registrationForm?.contactWhatsapp || '+56 9 8765 4321';
+    const rawContactPhone = footerCfg.whatsappNumber || content.contact?.phone || content.registrationForm?.contactWhatsapp || '+56 9 8765 4321';
     const cleanWaNumber = rawContactPhone.replace(/[^0-9]/g, '');
+    const waMsg = footerCfg.whatsappMessage || 'Hola, tengo una consulta sobre la Corrida KKIDSRACE 2026';
   %>
   <% if (cleanWaNumber) { %>
-  <a href="https://wa.me/<%= cleanWaNumber %>?text=<%= encodeURIComponent('Hola, tengo una consulta sobre la Corrida KKIDSRACE 2026') %>" 
+  <a href="https://wa.me/<%= cleanWaNumber %>?text=<%= encodeURIComponent(waMsg) %>" 
      target="_blank" 
      rel="noopener noreferrer"
      class="fixed bottom-20 md:bottom-6 right-4 sm:right-6 z-40 flex items-center gap-2 px-3.5 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white rounded-full shadow-lg shadow-emerald-500/30 hover:shadow-xl hover:scale-105 active:scale-95 transition-all duration-200 group touch-manipulation"
@@ -1187,6 +1236,7 @@
     </div>
     <span class="text-xs font-bold tracking-tight hidden sm:inline-block">¿Dudas? Escríbenos</span>
   </a>
+  <% } %>
   <% } %>
 
   <!-- Scripts de la Landing Page -->
