@@ -3,6 +3,7 @@
 function initAllAdminModules() {
   const modules = [
     ['Iconos Lucide', () => { if (window.lucide) window.lucide.createIcons(); }],
+    ['Navegación Móvil', initMobileNavigation],
     ['Toggles Visuales', initToggleVisuals],
     ['Pestañas', initAdminTabs],
     ['Guardado CMS', initCmsSaveForm],
@@ -71,6 +72,95 @@ function showAdminToast(message, type = 'success') {
   }, 3500);
 }
 
+// Navegación Móvil: Control del Menú Hamburguesa, Drawer Lateral y Backdrop
+function initMobileNavigation() {
+  const toggleMobileBtn = document.getElementById('btn-toggle-mobile-menu');
+  const closeMobileBtn = document.getElementById('btn-close-mobile-menu');
+  const sidebarNav = document.getElementById('sidebar-nav');
+  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+
+  function openMobileSidebar() {
+    if (!sidebarNav) return;
+    sidebarNav.classList.remove('-translate-x-full', 'hidden');
+    sidebarNav.classList.add('translate-x-0');
+    if (sidebarBackdrop) {
+      sidebarBackdrop.classList.remove('hidden');
+    }
+    document.body.style.overflow = 'hidden';
+  }
+
+  function closeMobileSidebar() {
+    if (!sidebarNav) return;
+    sidebarNav.classList.add('-translate-x-full');
+    sidebarNav.classList.remove('translate-x-0');
+    if (sidebarBackdrop) {
+      sidebarBackdrop.classList.add('hidden');
+    }
+    document.body.style.overflow = '';
+  }
+
+  function toggleMobileSidebar() {
+    if (!sidebarNav) return;
+    const isClosed = sidebarNav.classList.contains('-translate-x-full');
+    if (isClosed) {
+      openMobileSidebar();
+    } else {
+      closeMobileSidebar();
+    }
+  }
+
+  if (toggleMobileBtn) {
+    toggleMobileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMobileSidebar();
+    });
+  }
+
+  if (closeMobileBtn) {
+    closeMobileBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeMobileSidebar();
+    });
+  }
+
+  if (sidebarBackdrop) {
+    sidebarBackdrop.addEventListener('click', (e) => {
+      e.stopPropagation();
+      closeMobileSidebar();
+    });
+    sidebarBackdrop.addEventListener('touchstart', (e) => {
+      e.stopPropagation();
+      closeMobileSidebar();
+    }, { passive: true });
+  }
+
+  // Cerrar al pulsar Escape
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && sidebarBackdrop && !sidebarBackdrop.classList.contains('hidden')) {
+      closeMobileSidebar();
+    }
+  });
+
+  // Cerrar el drawer móvil al pinchar cualquier tab
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (window.innerWidth < 768) {
+        closeMobileSidebar();
+      }
+    });
+  });
+
+  // Si la pantalla cambia a tamaño de escritorio (>= 768px), limpiar backdrop y overflow
+  window.addEventListener('resize', () => {
+    if (window.innerWidth >= 768) {
+      closeMobileSidebar();
+    }
+  });
+
+  window._openMobileSidebar = openMobileSidebar;
+  window._closeMobileSidebar = closeMobileSidebar;
+}
+
 // 2. Pestañas de Navegación del Dashboard
 function initAdminTabs() {
   const tabButtons = document.querySelectorAll('.tab-btn');
@@ -110,8 +200,10 @@ function initAdminTabs() {
 
   function hideSidebarForFullWidth() {
     if (sidebarNav) {
-      sidebarNav.classList.add('hidden');
-      sidebarNav.classList.remove('md:block');
+      // Ocultar la columna fija solo en pantallas de escritorio (md+),
+      // preservando el funcionamiento del drawer deslizante en móviles
+      sidebarNav.classList.add('md:hidden');
+      sidebarNav.classList.remove('md:block', 'hidden');
     }
     if (layoutWrapper) {
       layoutWrapper.classList.remove('max-w-7xl');
@@ -123,7 +215,7 @@ function initAdminTabs() {
 
   function showSidebarFromFullWidth() {
     if (sidebarNav) {
-      sidebarNav.classList.remove('hidden');
+      sidebarNav.classList.remove('md:hidden', 'hidden');
       sidebarNav.classList.add('md:block');
     }
     if (layoutWrapper) {
@@ -205,10 +297,17 @@ function initAdminTabs() {
 
       // En móviles, cerrar el drawer lateral al pinchar cualquier tab
       if (window.innerWidth < 768) {
-        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
-        if (sidebarNav) sidebarNav.classList.add('-translate-x-full');
-        if (sidebarBackdrop) sidebarBackdrop.classList.add('hidden');
-        document.body.style.overflow = '';
+        if (typeof window._closeMobileSidebar === 'function') {
+          window._closeMobileSidebar();
+        } else {
+          const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+          if (sidebarNav) {
+            sidebarNav.classList.add('-translate-x-full');
+            sidebarNav.classList.remove('translate-x-0');
+          }
+          if (sidebarBackdrop) sidebarBackdrop.classList.add('hidden');
+          document.body.style.overflow = '';
+        }
       }
 
       if (window.lucide) window.lucide.createIcons();
@@ -1249,37 +1348,6 @@ function initLeadsManager() {
       }
     });
   }
-
-  // Menú Móvil (Drawer Toggle)
-  const toggleMobileBtn = document.getElementById('btn-toggle-mobile-menu');
-  const closeMobileBtn = document.getElementById('btn-close-mobile-menu');
-  const sidebarNav = document.getElementById('sidebar-nav');
-  const sidebarBackdrop = document.getElementById('sidebar-backdrop');
-
-  function openMobileSidebar() {
-    if (sidebarNav) sidebarNav.classList.remove('-translate-x-full');
-    if (sidebarBackdrop) sidebarBackdrop.classList.remove('hidden');
-    document.body.style.overflow = 'hidden';
-  }
-
-  function closeMobileSidebar() {
-    if (sidebarNav) sidebarNav.classList.add('-translate-x-full');
-    if (sidebarBackdrop) sidebarBackdrop.classList.add('hidden');
-    document.body.style.overflow = '';
-  }
-
-  if (toggleMobileBtn) toggleMobileBtn.addEventListener('click', openMobileSidebar);
-  if (closeMobileBtn) closeMobileBtn.addEventListener('click', closeMobileSidebar);
-  if (sidebarBackdrop) sidebarBackdrop.addEventListener('click', closeMobileSidebar);
-
-  // Cerrar el drawer móvil al pinchar cualquier tab
-  document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.addEventListener('click', () => {
-      if (window.innerWidth < 768) {
-        closeMobileSidebar();
-      }
-    });
-  });
 }
 
 // 8. Gestión y Programación de Corridas (Administrador)

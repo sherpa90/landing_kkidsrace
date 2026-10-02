@@ -140,13 +140,13 @@
   <div id="main-layout-wrapper" class="flex-1 flex flex-col md:flex-row <%= role === 'admin' ? 'max-w-7xl' : 'max-w-none w-full' %> w-full mx-auto p-3 sm:p-6 gap-6 relative">
     
     <!-- Backdrop Móvil -->
-    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden md:hidden"></div>
+    <div id="sidebar-backdrop" class="fixed inset-0 bg-slate-950/80 backdrop-blur-sm z-40 hidden md:hidden cursor-pointer" role="button" tabindex="0" aria-label="Cerrar Menú"></div>
 
     <!-- BARRA LATERAL DE NAVEGACIÓN (TABS) -->
-    <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-72 bg-slate-900 border-r border-slate-800 z-50 p-4 transform -translate-x-full transition-transform duration-200 ease-in-out <%= role === 'admin' ? 'md:translate-x-0 md:static md:w-64 md:bg-transparent md:border-r-0 md:z-auto md:p-0 md:block' : 'hidden' %> flex-shrink-0 space-y-2 overflow-y-auto">
+    <aside id="sidebar-nav" class="fixed inset-y-0 left-0 w-72 max-w-[85vw] bg-slate-900 border-r border-slate-800 z-50 p-4 transform -translate-x-full transition-transform duration-200 ease-in-out <%= role === 'admin' ? 'md:translate-x-0 md:static md:w-64 md:bg-transparent md:border-r-0 md:z-auto md:p-0 md:block' : 'md:hidden' %> flex-shrink-0 space-y-2 overflow-y-auto">
       <div class="flex items-center justify-between md:hidden pb-3 mb-2 border-b border-slate-800">
         <span class="font-black text-sm text-white">Menú del Panel</span>
-        <button type="button" id="btn-close-mobile-menu" class="p-1.5 text-slate-400 hover:text-white rounded-lg">✕</button>
+        <button type="button" id="btn-close-mobile-menu" class="p-1.5 text-slate-400 hover:text-white rounded-lg cursor-pointer" aria-label="Cerrar Menú">✕</button>
       </div>
 
       <div class="p-3 bg-slate-900 rounded-2xl border border-slate-800 mb-3 shadow-sm">
@@ -2805,7 +2805,7 @@
                   <span class="hidden sm:inline">Exportar CSV</span>
                 </a>
 
-                <button type="button" id="btn-toggle-fullscreen-leads" class="px-3.5 py-2.5 rounded-2xl text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 shadow-md active:scale-95 transition-all flex items-center justify-center gap-1.5 shrink-0 cursor-pointer" title="Alternar entre pantalla completa y menú visible">
+                <button type="button" id="btn-toggle-fullscreen-leads" class="hidden md:flex px-3.5 py-2.5 rounded-2xl text-xs font-bold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 border border-slate-700 shadow-md active:scale-95 transition-all items-center justify-center gap-1.5 shrink-0 cursor-pointer" title="Alternar entre pantalla completa y menú visible">
                   <i data-lucide="maximize-2" id="icon-fullscreen-leads" class="w-4 h-4 text-blue-400"></i>
                   <span id="text-fullscreen-leads" class="hidden sm:inline">Pantalla Completa</span>
                 </button>
