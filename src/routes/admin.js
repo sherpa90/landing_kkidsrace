@@ -527,21 +527,29 @@ router.post('/api/upload-proof', auth.requireAuth, validateCsrf, imageService.up
 // Endpoint de Registro Rápido de Participantes (Accesible para Administrador y Editor)
 router.post('/api/inscriptions/quick-register', auth.requireAuth, validateCsrf, async (req, res) => {
   try {
+    const rawTutor = (req.body && typeof req.body.tutor === 'object' && req.body.tutor !== null) ? req.body.tutor : {};
     const {
       raceId,
       raceName,
-      tutorFirstName: rawTutorFirstName,
-      tutorLastName: rawTutorLastName,
-      tutorRut: rawTutorRut,
-      email: rawEmail,
-      phone: rawPhone,
-      emergencyContact: rawEmergencyContact,
+      tutorFirstName: flatTutorFirstName,
+      tutorLastName: flatTutorLastName,
+      tutorRut: flatTutorRut,
+      email: flatEmail,
+      phone: flatPhone,
+      emergencyContact: flatEmergencyContact,
       paymentMethod: rawPaymentMethod,
       paymentProof: rawPaymentProof,
       kitReceived: rawKitReceived,
       consentGiven: rawConsentGiven,
       children: rawChildren
     } = req.body;
+
+    const rawTutorFirstName = flatTutorFirstName || rawTutor.firstName;
+    const rawTutorLastName = flatTutorLastName || rawTutor.lastName;
+    const rawTutorRut = flatTutorRut || rawTutor.rut;
+    const rawEmail = flatEmail !== undefined ? flatEmail : rawTutor.email;
+    const rawPhone = flatPhone || rawTutor.phone;
+    const rawEmergencyContact = flatEmergencyContact || rawTutor.emergencyContact;
 
     const tutorFirstName = sanitizeField(rawTutorFirstName, 60);
     const tutorLastName = sanitizeField(rawTutorLastName, 60);

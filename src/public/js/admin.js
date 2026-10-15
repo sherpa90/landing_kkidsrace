@@ -4706,16 +4706,22 @@ function initQuickRegisterModal() {
 
   // Resetear formulario a su estado inicial
   function resetQuickRegisterForm() {
-    form.reset();
-    proofUrlInput.value = '';
-    proofPlaceholder.classList.remove('hidden');
-    proofPreviewContainer.classList.add('hidden');
-    proofPreviewContainer.classList.remove('flex');
+    if (form && typeof form.reset === 'function') {
+      form.reset();
+    }
+    if (proofUrlInput) proofUrlInput.value = '';
+    if (proofPlaceholder) proofPlaceholder.classList.remove('hidden');
+    if (proofPreviewContainer) {
+      proofPreviewContainer.classList.add('hidden');
+      proofPreviewContainer.classList.remove('flex');
+    }
     if (proofFileInput) proofFileInput.value = '';
-    errorBox.classList.add('hidden');
-    errorText.textContent = '';
-    rutFeedback.classList.add('hidden');
-    rutFeedback.textContent = '';
+    if (errorBox) errorBox.classList.add('hidden');
+    if (errorText) errorText.textContent = '';
+    if (rutFeedback) {
+      rutFeedback.classList.add('hidden');
+      rutFeedback.textContent = '';
+    }
 
     // Seleccionar por defecto efectivo
     const efectivoRadio = document.querySelector('input[name="qr_payment_method"][value="efectivo"]');
@@ -4723,8 +4729,10 @@ function initQuickRegisterModal() {
     updatePaymentMethodVisuals();
 
     // Reestablecer niños a exactamente 1 niño
-    childrenList.innerHTML = '';
-    childrenList.appendChild(createChildCard(0));
+    if (childrenList) {
+      childrenList.innerHTML = '';
+      childrenList.appendChild(createChildCard(0));
+    }
 
     // Desmarcar sin correo
     if (noEmailCheck) noEmailCheck.checked = false;
@@ -4777,13 +4785,15 @@ function initQuickRegisterModal() {
       return;
     }
 
-    const prevPlaceholderHtml = proofPlaceholder.innerHTML;
-    proofPlaceholder.innerHTML = `
-      <div class="py-4 text-xs text-blue-300 font-bold flex items-center justify-center gap-2">
-        <span class="inline-block animate-spin text-sm">⟳</span>
-        <span>Optimizando y guardando comprobante...</span>
-      </div>
-    `;
+    const prevPlaceholderHtml = proofPlaceholder ? proofPlaceholder.innerHTML : '';
+    if (proofPlaceholder) {
+      proofPlaceholder.innerHTML = `
+        <div class="py-4 text-xs text-blue-300 font-bold flex items-center justify-center gap-2">
+          <span class="inline-block animate-spin text-sm">⟳</span>
+          <span>Optimizando y guardando comprobante...</span>
+        </div>
+      `;
+    }
 
     try {
       const fd = new FormData();
@@ -4807,11 +4817,11 @@ function initQuickRegisterModal() {
         proofPreviewContainer.classList.add('flex');
         showAdminToast('Comprobante adjuntado con éxito', 'success');
       } else {
-        proofPlaceholder.innerHTML = prevPlaceholderHtml;
+        if (proofPlaceholder) proofPlaceholder.innerHTML = prevPlaceholderHtml;
         showAdminToast(data.error || 'Error subiendo comprobante', 'error');
       }
     } catch (err) {
-      proofPlaceholder.innerHTML = prevPlaceholderHtml;
+      if (proofPlaceholder) proofPlaceholder.innerHTML = prevPlaceholderHtml;
       showAdminToast(err.message || 'Error de conexión', 'error');
     }
   }
@@ -4820,6 +4830,7 @@ function initQuickRegisterModal() {
   function openModal() {
     resetQuickRegisterForm();
     modal.classList.remove('hidden');
+    modal.style.display = 'flex';
     document.body.style.overflow = 'hidden';
     setTimeout(() => {
       if (rutInput) rutInput.focus();
@@ -4829,15 +4840,18 @@ function initQuickRegisterModal() {
   // Cerrar Modal
   function closeModal() {
     modal.classList.add('hidden');
+    modal.style.display = 'none';
     document.body.style.overflow = '';
   }
 
-  // Eventos de apertura
-  openBtns.forEach(btn => {
-    btn.addEventListener('click', (e) => {
+  // Eventos de apertura mediante delegación global (captura clics en botones e iconos Lucide)
+  document.addEventListener('click', (e) => {
+    const btn = e.target.closest('.btn-open-quick-register');
+    if (btn) {
       e.preventDefault();
+      e.stopPropagation();
       openModal();
-    });
+    }
   });
 
   // Eventos de cierre
