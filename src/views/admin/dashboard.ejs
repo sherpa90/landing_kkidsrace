@@ -2983,16 +2983,22 @@
                   <!-- Barra de Estado de Pago y Acciones -->
                   <div class="flex items-center justify-between pt-1 gap-2">
                     <div>
+                      <% const hasImgProof = lead.paymentProof && (lead.paymentProof.startsWith('/') || lead.paymentProof.startsWith('http')) && lead.paymentProof !== 'EFECTIVO' && lead.paymentProof !== 'TRANSFERENCIA'; %>
                       <% if (lead.paymentMethod === 'efectivo' || lead.paymentProof === 'EFECTIVO') { %>
                       <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 text-xs font-bold shadow-sm">
                         <i data-lucide="banknote" class="w-3.5 h-3.5 text-emerald-400"></i>
                         <span>Efectivo (Mesa)</span>
                       </span>
-                      <% } else if (lead.paymentProof) { %>
+                      <% } else if (hasImgProof) { %>
                       <button type="button" class="btn-view-proof inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-900 active:scale-95 transition-all text-xs font-bold shadow-sm" data-proof-url="<%= lead.paymentProof %>" data-pupil="<%= lead.kidName || 'Pupilo' %>" data-tutor="<%= lead.name || 'Tutor' %>">
                         <i data-lucide="receipt" class="w-3.5 h-3.5"></i>
                         <span>Ver Comprobante</span>
                       </button>
+                      <% } else if (lead.paymentMethod === 'transferencia' || lead.paymentProof === 'TRANSFERENCIA') { %>
+                      <span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-950/90 text-blue-300 border border-blue-500/50 text-xs font-bold shadow-sm">
+                        <i data-lucide="credit-card" class="w-3.5 h-3.5 text-blue-400"></i>
+                        <span>Transferencia</span>
+                      </span>
                       <% } else { %>
                       <span class="text-amber-400/90 bg-amber-950/40 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5">
                         <i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i>
@@ -3121,16 +3127,22 @@
 
                       <!-- Comprobante de Pago (Agrandar al Pinchar) -->
                       <td class="py-3.5 px-4">
+                        <% const hasImgProof = lead.paymentProof && (lead.paymentProof.startsWith('/') || lead.paymentProof.startsWith('http')) && lead.paymentProof !== 'EFECTIVO' && lead.paymentProof !== 'TRANSFERENCIA'; %>
                         <% if (lead.paymentMethod === 'efectivo' || lead.paymentProof === 'EFECTIVO') { %>
                         <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold" title="Pago registrado en efectivo">
                           <i data-lucide="banknote" class="w-3.5 h-3.5 text-emerald-400"></i>
                           <span>Efectivo</span>
                         </span>
-                        <% } else if (lead.paymentProof) { %>
+                        <% } else if (hasImgProof) { %>
                         <button type="button" class="btn-view-proof inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-950 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900 transition-all text-[11px] font-bold cursor-pointer" data-proof-url="<%= lead.paymentProof %>" data-pupil="<%= lead.kidName || 'Pupilo' %>" data-tutor="<%= lead.name || 'Tutor' %>" title="Agrandar comprobante">
                           <i data-lucide="zoom-in" class="w-3.5 h-3.5"></i>
                           <span>Ver Foto</span>
                         </button>
+                        <% } else if (lead.paymentMethod === 'transferencia' || lead.paymentProof === 'TRANSFERENCIA') { %>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-950/80 text-blue-300 border border-blue-500/40 text-[11px] font-bold" title="Transferencia bancaria registrada (comprobante opcional)">
+                          <i data-lucide="credit-card" class="w-3.5 h-3.5 text-blue-400"></i>
+                          <span>Transferencia</span>
+                        </span>
                         <% } else { %>
                         <span class="text-slate-500 text-[11px] italic">Pendiente</span>
                         <% } %>
@@ -4426,9 +4438,9 @@
                 <div class="flex items-center gap-2">
                   <span class="text-base">💳</span>
                   <span class="text-xs font-black text-white">Transferencia Bancaria</span>
-                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold">Comprobante Obligatorio</span>
+                  <span class="text-[9px] px-1.5 py-0.2 rounded bg-blue-500/20 text-blue-300 border border-blue-500/30 font-bold">Comprobante Opcional</span>
                 </div>
-                <p class="text-[11px] text-slate-400">Transferencia electrónica. Requiere adjuntar foto o captura de comprobante.</p>
+                <p class="text-[11px] text-slate-400">Transferencia electrónica. Comprobante digital <strong>opcional</strong> (puedes adjuntarlo si dispones de él).</p>
               </div>
             </label>
           </div>
@@ -4439,7 +4451,7 @@
               <label class="font-bold text-white flex items-center gap-1.5">
                 <i data-lucide="upload-cloud" class="w-4 h-4 text-blue-400"></i>
                 <span>Adjuntar Comprobante de Transferencia</span>
-                <span class="text-red-400">*</span>
+                <span class="text-slate-400 text-[10px] font-normal">(Opcional)</span>
               </label>
               <span class="text-[10px] text-slate-400 font-mono">JPG, PNG o WebP (Máx. 5MB)</span>
             </div>

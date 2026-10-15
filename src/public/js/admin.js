@@ -5004,11 +5004,16 @@ function initQuickRegisterModal() {
       tr.setAttribute('data-distance', lead.distance);
 
       const isEfectivo = lead.paymentMethod === 'efectivo' || lead.paymentProof === 'EFECTIVO';
+      const hasImageProof = lead.paymentProof && (lead.paymentProof.startsWith('/') || lead.paymentProof.startsWith('http')) && lead.paymentProof !== 'EFECTIVO' && lead.paymentProof !== 'TRANSFERENCIA';
+      const isTransferencia = lead.paymentMethod === 'transferencia' || lead.paymentProof === 'TRANSFERENCIA';
+
       const proofHtml = isEfectivo
         ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold" title="Pago registrado en efectivo"><i data-lucide="banknote" class="w-3.5 h-3.5 text-emerald-400"></i><span>Efectivo</span></span>`
-        : (lead.paymentProof
+        : (hasImageProof
           ? `<button type="button" class="btn-view-proof inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-950 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900 transition-all text-[11px] font-bold cursor-pointer" data-proof-url="${lead.paymentProof}" data-pupil="${lead.kidName || 'Pupilo'}" data-tutor="${lead.tutorName || 'Tutor'}" title="Agrandar comprobante"><i data-lucide="zoom-in" class="w-3.5 h-3.5"></i><span>Ver Foto</span></button>`
-          : `<span class="text-slate-500 text-[11px] italic">Pendiente</span>`);
+          : (isTransferencia
+            ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-blue-950/80 text-blue-300 border border-blue-500/40 text-[11px] font-bold" title="Transferencia bancaria registrada (comprobante opcional)"><i data-lucide="credit-card" class="w-3.5 h-3.5 text-blue-400"></i><span>Transferencia</span></span>`
+            : `<span class="text-slate-500 text-[11px] italic">Pendiente</span>`));
 
       tr.innerHTML = `
         <td class="py-3.5 px-4 text-center">
@@ -5172,11 +5177,11 @@ function initQuickRegisterModal() {
         }
       }
 
-      // VALIDACIÓN CRUCIAL DE MÉTODO DE PAGO
-      // "con la salvedad que el comprobante de pago es opcional y debe existir la opcion de efectivo, pero debe ser obligatoria una de las 2 opciones."
+      // VALIDACIÓN DE MÉTODO DE PAGO
+      // "el comprobante de pago es opcional y debe existir la opcion de efectivo, pero debe ser obligatoria una de las 2 opciones."
       const paymentMethodRadio = document.querySelector('input[name="qr_payment_method"]:checked');
       if (!paymentMethodRadio) {
-        showError('Debe seleccionar obligatoriamente una opción de pago: "Efectivo" o "Transferencia con comprobante".');
+        showError('Debe seleccionar obligatoriamente una opción de pago: "Efectivo" o "Transferencia".');
         return;
       }
 
@@ -5185,12 +5190,6 @@ function initQuickRegisterModal() {
 
       if (paymentMethod !== 'efectivo' && paymentMethod !== 'transferencia') {
         showError('Método de pago no válido. Selecciona Efectivo o Transferencia.');
-        return;
-      }
-
-      if (paymentMethod === 'transferencia' && !paymentProofUrl) {
-        showError('Para la opción de transferencia bancaria, el comprobante de pago es obligatorio. Por favor sube la captura.');
-        if (proofDropzone) proofDropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
         return;
       }
 
@@ -5253,7 +5252,7 @@ function initQuickRegisterModal() {
         emergencyContact,
         email: email || '',
         paymentMethod,
-        paymentProof: paymentMethod === 'transferencia' ? paymentProofUrl : (paymentProofUrl || 'EFECTIVO'),
+        paymentProof: paymentProofUrl || (paymentMethod === 'efectivo' ? 'EFECTIVO' : 'TRANSFERENCIA'),
         kitReceived,
         consentGiven: true,
         children

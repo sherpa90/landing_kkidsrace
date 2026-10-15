@@ -606,32 +606,26 @@ router.post('/api/inscriptions/quick-register', auth.requireAuth, validateCsrf, 
     }
 
     // 2. Validación de Método de Pago y Comprobante:
-    // "con la salvedad que el comprobante de pago es opcional y debe existir la opcion de efectivo, pero debe ser obligatoria una de las 2 opciones."
+    // Obligatorio seleccionar una de las 2 opciones (Efectivo o Transferencia); comprobante es opcional en ambas.
     if (!paymentMethod || (paymentMethod !== 'efectivo' && paymentMethod !== 'transferencia')) {
       return res.status(400).json({
         success: false,
-        error: 'Debe seleccionar obligatoriamente una de las dos opciones de pago: "Efectivo" o "Transferencia con comprobante".'
+        error: 'Debe seleccionar obligatoriamente una de las dos opciones de pago: "Efectivo" o "Transferencia".'
       });
     }
 
     let finalProof = '';
-    if (paymentMethod === 'transferencia') {
-      if (!paymentProof) {
-        return res.status(400).json({
-          success: false,
-          error: 'Para la opción de transferencia, debes adjuntar obligatoriamente el comprobante de pago.'
-        });
-      }
+    if (paymentProof && typeof paymentProof === 'string' && paymentProof.trim()) {
       if (!paymentProof.startsWith('/admin/api/proofs/') && !paymentProof.startsWith('/uploads/')) {
         return res.status(400).json({
           success: false,
-          error: 'El comprobante de transferencia no es válido. Súbelo nuevamente.'
+          error: 'El comprobante adjunto no tiene un formato válido. Súbelo nuevamente.'
         });
       }
-      finalProof = paymentProof;
-    } else if (paymentMethod === 'efectivo') {
-      // Para efectivo, el comprobante es opcional: si no subió nada, guardamos 'EFECTIVO'
-      finalProof = paymentProof || 'EFECTIVO';
+      finalProof = paymentProof.trim();
+    } else {
+      // El comprobante es opcional para ambas modalidades
+      finalProof = paymentMethod === 'efectivo' ? 'EFECTIVO' : 'TRANSFERENCIA';
     }
 
     // 3. Carrera activa o seleccionada
