@@ -83,6 +83,8 @@ async function createTableIfNotExists() {
     ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS kid_last_name VARCHAR(100);
     ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS shirt_size VARCHAR(20);
     ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS kit_received BOOLEAN DEFAULT FALSE;
+    ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS payment_method VARCHAR(50);
+    ALTER TABLE inscriptions ADD COLUMN IF NOT EXISTS registered_by VARCHAR(100);
   `;
   try {
     await pool.query(sql);
@@ -158,6 +160,9 @@ async function saveInscription(data) {
   const subject = (data.subject || (distance ? `Inscripción - ${distance}` : 'Kids Race')).trim();
   const message = (data.message || data.medicalNotes || '').trim();
   const paymentProof = (data.paymentProof || '').trim();
+  const paymentMethod = (data.paymentMethod || (data.paymentProof && data.paymentProof !== 'EFECTIVO' ? 'transferencia' : (data.paymentProof === 'EFECTIVO' ? 'efectivo' : 'efectivo'))).trim();
+  const registeredBy = (data.registeredBy || 'web').trim();
+  const kitReceived = Boolean(data.kitReceived === true || data.kitReceived === 'true');
   const tutorRut = (data.tutorRut || data.rut || '').trim();
   const now = new Date().toISOString();
 
@@ -174,13 +179,15 @@ async function saveInscription(data) {
           id, race_id, race_name, name, tutor_first_name, tutor_last_name,
           email, phone, kid_name, kid_first_name, kid_last_name, kid_age,
           distance, shirt_size, emergency_contact, bib_number,
-          consent_given, subject, message, payment_proof, tutor_rut, created_at, read
+          consent_given, subject, message, payment_proof, tutor_rut, created_at, read,
+          kit_received, payment_method, registered_by
         )
         VALUES (
           $1, $2, $3, $4, $5, $6,
           $7, $8, $9, $10, $11, $12,
           $13, $14, $15, $16,
-          $17, $18, $19, $20, $21, $22, false
+          $17, $18, $19, $20, $21, $22, false,
+          $23, $24, $25
         )
         RETURNING *;
       `;
@@ -188,7 +195,8 @@ async function saveInscription(data) {
         id, raceId, raceName, name, tutorFirstName, tutorLastName,
         email, phone, kidName, kidFirstName, kidLastName, kidAge,
         distance, shirtSize, emergencyContact, bibNumber,
-        consentGiven, subject, message, paymentProof, tutorRut, now
+        consentGiven, subject, message, paymentProof, tutorRut, now,
+        kitReceived, paymentMethod, registeredBy
       ];
       const result = await pool.query(sql, values);
       return { success: true, lead: result.rows[0], bibNumber, source: 'postgresql' };
@@ -199,7 +207,8 @@ async function saveInscription(data) {
         id, raceId, raceName, name, tutorFirstName, tutorLastName,
         email, phone, kidName, kidFirstName, kidLastName, kidAge,
         shirtSize, distance, emergencyContact, bibNumber, consentGiven,
-        subject, message, paymentProof, tutorRut
+        subject, message, paymentProof, tutorRut,
+        paymentMethod, registeredBy, kitReceived
       });
       return { success: true, bibNumber, source: 'local_backup' };
     }
@@ -210,7 +219,8 @@ async function saveInscription(data) {
     id, raceId, raceName, name, tutorFirstName, tutorLastName,
     email, phone, kidName, kidFirstName, kidLastName, kidAge,
     shirtSize, distance, emergencyContact, bibNumber, consentGiven,
-    subject, message, paymentProof, tutorRut
+    subject, message, paymentProof, tutorRut,
+    paymentMethod, registeredBy, kitReceived
   });
   return { success: true, bibNumber, source: 'local' };
 }
@@ -246,6 +256,8 @@ async function getInscriptions() {
         subject: row.subject,
         message: row.message,
         paymentProof: row.payment_proof || '',
+        paymentMethod: row.payment_method || (row.payment_proof && row.payment_proof !== 'EFECTIVO' ? 'transferencia' : (row.payment_proof === 'EFECTIVO' ? 'efectivo' : 'efectivo')),
+        registeredBy: row.registered_by || 'web',
         tutorRut: row.tutor_rut || '',
         createdAt: row.created_at,
         read: row.read,
@@ -270,7 +282,13 @@ async function getInscriptions() {
   }
 
   // Respaldo local
-  return contentStore.getLeads().map(l => ({ ...l, source: 'local' }));
+  return contentStore.getLeads().map(l => ({
+    ...l,
+    paymentMethod: l.paymentMethod || (l.paymentProof && l.paymentProof !== 'EFECTIVO' ? 'transferencia' : (l.paymentProof === 'EFECTIVO' ? 'efectivo' : 'efectivo')),
+    registeredBy: l.registeredBy || 'web',
+    kitReceived: Boolean(l.kitReceived),
+    source: 'local'
+  }));
 }
 
 // Eliminar una inscripción
@@ -331,19 +349,23 @@ function isPostgresConnected() {
 }
 
 async function updateKitReceived(id, kitReceived) {
+  let ok = false;
   if (pool && isConnected) {
     try {
       await pool.query(
         'UPDATE inscriptions SET kit_received = $1 WHERE id = $2',
         [kitReceived, id]
       );
-      return { success: true };
+      ok = true;
     } catch (err) {
-      console.error('Error actualizando kit_received:', err.message);
-      return { success: false, error: err.message };
+      console.error('Error actualizando kit_received en PostgreSQL:', err.message);
     }
   }
-  return { success: false, error: 'Sin conexión a PostgreSQL' };
+  const localRes = contentStore.updateLeadKitReceived(id, kitReceived);
+  if (ok || localRes.success) {
+    return { success: true };
+  }
+  return { success: false, error: 'No se pudo actualizar el estado del kit.' };
 }
 
 module.exports = {

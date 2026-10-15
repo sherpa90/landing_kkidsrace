@@ -10,11 +10,11 @@
     "faviconUrl": "/images/default-favicon.svg"
   },
   "countdown": {
-    "targetDate": "2026-11-29T10:00:00",
+    "targetDate": "2026-10-18T09:00:00",
     "eventDateDisplay": "Domingo 29 de Noviembre, 2026",
-    "eventTime": "10:00 AM",
-    "locationName": "Sector Costanera • Pedraplén",
-    "locationCity": "Puerto Varas",
+    "eventTime": "09:00 AM",
+    "locationName": "Parque Bicentenario",
+    "locationCity": "Santiago",
     "badge": "🏃‍♂️ ¡FALTAN SÓLO!"
   },
   "seo": {
@@ -397,6 +397,25 @@
   },
   "races": [
     {
+      "id": "race-1792026157624-e915",
+      "name": "KidsRun 2026 - Primavera",
+      "year": 2026,
+      "date": "2026-10-18T09:00:00",
+      "dateDisplay": "",
+      "time": "09:00 AM",
+      "location": "Parque Bicentenario",
+      "city": "Santiago",
+      "status": "active",
+      "circuits": [
+        "500m",
+        "1K",
+        "2K",
+        "3K"
+      ],
+      "maxParticipants": 600,
+      "createdAt": "2026-10-15T01:02:37.625Z"
+    },
+    {
       "id": "race-1790214610537-bkga",
       "name": "XIV Corrida KKIDSRACE 2026 - Puerto Varas",
       "year": 2026,
@@ -405,7 +424,7 @@
       "time": "10:00 AM",
       "location": "Sector Costanera • Pedraplén",
       "city": "Puerto Varas",
-      "status": "active",
+      "status": "inactive",
       "circuits": [
         "250 Metros babykidsrace (0 a 3 años)",
         "250 Metros planos (4 y 5 años)",

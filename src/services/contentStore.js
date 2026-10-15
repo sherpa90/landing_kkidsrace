@@ -116,6 +116,9 @@ function addLead(leadData) {
       message: (leadData.message || leadData.medicalNotes || '').trim(),
       subject: (leadData.subject || `Inscripción - ${leadData.distance || 'Kids Race'}`).trim(),
       paymentProof: (leadData.paymentProof || '').trim(),
+      paymentMethod: (leadData.paymentMethod || (leadData.paymentProof && leadData.paymentProof !== 'EFECTIVO' ? 'transferencia' : (leadData.paymentProof === 'EFECTIVO' ? 'efectivo' : 'efectivo'))).trim(),
+      registeredBy: (leadData.registeredBy || 'web').trim(),
+      kitReceived: Boolean(leadData.kitReceived === true || leadData.kitReceived === 'true'),
       consentGiven: Boolean(leadData.consentGiven !== false), // Consentimiento de tutor legal
       createdAt: new Date().toISOString(),
       status: 'confirmed',
@@ -320,6 +323,23 @@ function deleteLeadsBulk(ids) {
   }
 }
 
+function updateLeadKitReceived(id, kitReceived) {
+  try {
+    let leads = getLeads();
+    const idx = leads.findIndex(l => l.id === id);
+    if (idx !== -1) {
+      leads[idx].kitReceived = Boolean(kitReceived === true || kitReceived === 'true');
+      const tempFile = `${LEADS_FILE}.tmp`;
+      fs.writeFileSync(tempFile, JSON.stringify(leads, null, 2), 'utf-8');
+      fs.renameSync(tempFile, LEADS_FILE);
+      return { success: true };
+    }
+    return { success: false, error: 'Inscripción no encontrada' };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
 // Configuración de Paletas de Colores para el tema moderno
 // Colores corporativos: Rojo (#ef4444), Verde (#10b981), Amarillo (#facc15)
 const COLOR_THEMES = {
@@ -488,6 +508,7 @@ module.exports = {
   addLead,
   deleteLead,
   deleteLeadsBulk,
+  updateLeadKitReceived,
   getRaces,
   getActiveRace,
   saveRace,

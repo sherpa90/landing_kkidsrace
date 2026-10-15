@@ -8,6 +8,29 @@ const db = require('../services/db');
 const { rateLimit } = require('../middleware/rateLimit');
 const { validateCsrf } = require('../middleware/csrf');
 const imageService = require('../services/imageService');
+const emailService = require('../services/emailService');
+
+function sanitizeField(value, maxLen = 255) {
+  if (typeof value !== 'string') return '';
+  return value.replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, '').substring(0, maxLen).trim();
+}
+
+function isValidRut(rut) {
+  if (!rut || typeof rut !== 'string') return false;
+  const clean = rut.replace(/\./g, '').replace(/-/g, '').trim().toUpperCase();
+  if (!/^\d{7,8}[0-9K]$/.test(clean)) return false;
+  const body = clean.slice(0, -1);
+  let dv = clean.slice(-1);
+  let sum = 0;
+  let mul = 2;
+  for (let i = body.length - 1; i >= 0; i--) {
+    sum += parseInt(body[i], 10) * mul;
+    mul = mul === 7 ? 2 : mul + 1;
+  }
+  const expected = 11 - (sum % 11);
+  const expectedDv = expected === 11 ? '0' : expected === 10 ? 'K' : String(expected);
+  return dv === expectedDv;
+}
 
 // Sincronizar usuario de variables de entorno una sola vez al arrancar
 auth.syncEnvAdmin();
@@ -443,7 +466,7 @@ router.get('/api/inscriptions/export', auth.requireAuth, async (req, res) => {
   const leads = await db.getInscriptions();
 
   // Encabezados limpios respetando privacidad y máxima organización de datos
-  const headers = ['N° Inscripción', 'Corrida', 'RUT Tutor', 'Nombre Tutor', 'Apellido Tutor', 'Nombre Pupilo/a', 'Apellido Pupilo/a', 'Edad', 'Talla Polera', 'Distancia/Circuito', 'Email Contacto', 'Teléfono Contacto', 'Teléfono Emergencia', 'Comprobante URL', 'Consentimiento', 'Fecha Registro'];
+  const headers = ['N° Inscripción', 'Corrida', 'RUT Tutor', 'Nombre Tutor', 'Apellido Tutor', 'Nombre Pupilo/a', 'Apellido Pupilo/a', 'Edad', 'Talla Polera', 'Distancia/Circuito', 'Email Contacto', 'Teléfono Contacto', 'Teléfono Emergencia', 'Método Pago', 'Comprobante URL', 'Kit Entregado', 'Registrado Por', 'Consentimiento', 'Fecha Registro'];
   
   const rows = leads.map(l => [
     sanitizeCsvCell(l.bibNumber || ''),
@@ -459,7 +482,10 @@ router.get('/api/inscriptions/export', auth.requireAuth, async (req, res) => {
     sanitizeCsvCell(l.email || ''),
     sanitizeCsvCell(l.phone || ''),
     sanitizeCsvCell(l.emergencyContact || l.phone || ''),
-    sanitizeCsvCell(l.paymentProof || ''),
+    sanitizeCsvCell(l.paymentMethod === 'efectivo' || l.paymentProof === 'EFECTIVO' ? 'Efectivo' : 'Transferencia'),
+    sanitizeCsvCell(l.paymentProof === 'EFECTIVO' ? 'Efectivo (Presencial)' : (l.paymentProof || '')),
+    sanitizeCsvCell(l.kitReceived ? 'SI' : 'NO'),
+    sanitizeCsvCell(l.registeredBy || 'Web'),
     sanitizeCsvCell(l.consentGiven ? 'SI' : 'NO'),
     sanitizeCsvCell(new Date(l.createdAt).toLocaleString('es-ES'))
   ]);
@@ -469,6 +495,306 @@ router.get('/api/inscriptions/export', auth.requireAuth, async (req, res) => {
   res.header('Content-Type', 'text/csv; charset=utf-8');
   res.attachment(`inscripciones_kidsrace_${new Date().toISOString().split('T')[0]}.csv`);
   res.send(csvContent);
+});
+
+// Endpoint para subir comprobante de pago desde el Panel de Administración (Admin y Editor)
+router.post('/api/upload-proof', auth.requireAuth, validateCsrf, imageService.upload.single('proof'), async (req, res) => {
+  try {
+    if (!req.file) {
+      return res.status(400).json({ success: false, error: 'No se ha adjuntado ningún archivo de comprobante.' });
+    }
+    if (req.file.size > 5 * 1024 * 1024) {
+      return res.status(400).json({
+        success: false,
+        error: 'El comprobante supera el tamaño máximo permitido de 5 MB.'
+      });
+    }
+    const result = await imageService.processAndSaveImage(req.file.buffer, req.file.originalname, 'payment_proof');
+    return res.json({
+      success: true,
+      message: 'Comprobante guardado y optimizado con éxito.',
+      data: result
+    });
+  } catch (err) {
+    console.error('[admin/upload-proof] Error procesando comprobante:', err.message);
+    return res.status(500).json({
+      success: false,
+      error: 'Error procesando el comprobante. Verifica que sea una imagen válida (JPG, PNG, WebP).'
+    });
+  }
+});
+
+// Endpoint de Registro Rápido de Participantes (Accesible para Administrador y Editor)
+router.post('/api/inscriptions/quick-register', auth.requireAuth, validateCsrf, async (req, res) => {
+  try {
+    const {
+      raceId,
+      raceName,
+      tutorFirstName: rawTutorFirstName,
+      tutorLastName: rawTutorLastName,
+      tutorRut: rawTutorRut,
+      email: rawEmail,
+      phone: rawPhone,
+      emergencyContact: rawEmergencyContact,
+      paymentMethod: rawPaymentMethod,
+      paymentProof: rawPaymentProof,
+      kitReceived: rawKitReceived,
+      consentGiven: rawConsentGiven,
+      children: rawChildren
+    } = req.body;
+
+    const tutorFirstName = sanitizeField(rawTutorFirstName, 60);
+    const tutorLastName = sanitizeField(rawTutorLastName, 60);
+    const tutorRut = sanitizeField(rawTutorRut, 20);
+    const phone = sanitizeField(rawPhone, 30);
+    let email = sanitizeField(rawEmail, 254);
+    const emergencyContact = sanitizeField(rawEmergencyContact, 30) || phone;
+    const paymentMethod = sanitizeField(rawPaymentMethod, 30).toLowerCase();
+    const paymentProof = sanitizeField(rawPaymentProof, 500);
+    const kitReceived = Boolean(rawKitReceived === true || rawKitReceived === 'true');
+    const consentGiven = Boolean(rawConsentGiven !== false && rawConsentGiven !== 'false');
+
+    // 1. Validar Apoderado / Tutor
+    if (!tutorFirstName || !tutorLastName) {
+      return res.status(400).json({
+        success: false,
+        error: 'El Nombre y Apellido del tutor o apoderado son obligatorios.'
+      });
+    }
+
+    if (!tutorRut) {
+      return res.status(400).json({
+        success: false,
+        error: 'El RUN / RUT del apoderado o tutor es obligatorio.'
+      });
+    }
+
+    if (!isValidRut(tutorRut)) {
+      return res.status(400).json({
+        success: false,
+        error: 'El RUT/RUN ingresado no es válido. Verifica el dígito verificador (ej: 12.345.678-9).'
+      });
+    }
+
+    if (!phone) {
+      return res.status(400).json({
+        success: false,
+        error: 'El teléfono / WhatsApp de contacto es obligatorio.'
+      });
+    }
+
+    // Email: si viene informado, validar formato; si no viene (registro presencial), asignar uno de contingencia
+    if (email) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          error: 'Por favor introduce un correo electrónico válido.'
+        });
+      }
+    } else {
+      const cleanRutBody = tutorRut.replace(/[^0-9kK]/g, '').toLowerCase();
+      email = `presencial.${cleanRutBody}@kidsrace.local`;
+    }
+
+    // 2. Validación de Método de Pago y Comprobante:
+    // "con la salvedad que el comprobante de pago es opcional y debe existir la opcion de efectivo, pero debe ser obligatoria una de las 2 opciones."
+    if (!paymentMethod || (paymentMethod !== 'efectivo' && paymentMethod !== 'transferencia')) {
+      return res.status(400).json({
+        success: false,
+        error: 'Debe seleccionar obligatoriamente una de las dos opciones de pago: "Efectivo" o "Transferencia con comprobante".'
+      });
+    }
+
+    let finalProof = '';
+    if (paymentMethod === 'transferencia') {
+      if (!paymentProof) {
+        return res.status(400).json({
+          success: false,
+          error: 'Para la opción de transferencia, debes adjuntar obligatoriamente el comprobante de pago.'
+        });
+      }
+      if (!paymentProof.startsWith('/admin/api/proofs/') && !paymentProof.startsWith('/uploads/')) {
+        return res.status(400).json({
+          success: false,
+          error: 'El comprobante de transferencia no es válido. Súbelo nuevamente.'
+        });
+      }
+      finalProof = paymentProof;
+    } else if (paymentMethod === 'efectivo') {
+      // Para efectivo, el comprobante es opcional: si no subió nada, guardamos 'EFECTIVO'
+      finalProof = paymentProof || 'EFECTIVO';
+    }
+
+    // 3. Carrera activa o seleccionada
+    const activeRace = contentStore.getActiveRace();
+    const targetRaceId = sanitizeField(raceId, 64) || (activeRace ? activeRace.id : 'race-2026-primavera');
+    const targetRaceName = sanitizeField(raceName, 255) || (activeRace ? activeRace.name : 'Kids Race 2026');
+
+    // 4. Procesar participantes (uno o varios niños)
+    let childrenArray = [];
+    if (Array.isArray(rawChildren) && rawChildren.length > 0) {
+      childrenArray = rawChildren;
+    } else if (req.body.kidFirstName || req.body.kidName) {
+      childrenArray = [{
+        kidFirstName: req.body.kidFirstName || req.body.kidName,
+        kidLastName: req.body.kidLastName || '',
+        kidName: req.body.kidName,
+        kidAge: req.body.kidAge,
+        shirtSize: req.body.shirtSize || '4',
+        distance: req.body.distance,
+        medicalNotes: req.body.medicalNotes
+      }];
+    }
+
+    if (childrenArray.length === 0) {
+      return res.status(400).json({
+        success: false,
+        error: 'Debes ingresar los datos de al menos un participante (pupilo/a).'
+      });
+    }
+
+    const ALLOWED_SHIRT_SIZES = ['2', '4', '8', '12', '16', 'S', 'M'];
+    const results = [];
+    const name = `${tutorFirstName} ${tutorLastName}`.trim();
+
+    for (let idx = 0; idx < childrenArray.length; idx++) {
+      const child = childrenArray[idx];
+      const kidFirstName = sanitizeField(child.kidFirstName, 60);
+      const kidLastName = sanitizeField(child.kidLastName, 60);
+      let kidName = sanitizeField(child.kidName, 120);
+      if (!kidName && (kidFirstName || kidLastName)) {
+        kidName = `${kidFirstName} ${kidLastName}`.trim();
+      }
+
+      if (!kidFirstName || !kidLastName) {
+        return res.status(400).json({
+          success: false,
+          error: `Ingresa Nombre y Apellido para el participante #${idx + 1}.`
+        });
+      }
+
+      const kidAge = parseInt(child.kidAge, 10);
+      if (isNaN(kidAge) || kidAge < 0 || kidAge > 14) {
+        return res.status(400).json({
+          success: false,
+          error: `La edad de "${kidName}" debe estar en el rango de 0 a 14 años.`
+        });
+      }
+
+      const shirtSize = sanitizeField(child.shirtSize, 10) || '4';
+      if (!ALLOWED_SHIRT_SIZES.includes(shirtSize)) {
+        return res.status(400).json({
+          success: false,
+          error: `Selecciona una talla válida (2, 4, 8, 12, 16, S, M) para "${kidName}".`
+        });
+      }
+
+      const distance = sanitizeField(child.distance, 100);
+      if (!distance) {
+        return res.status(400).json({
+          success: false,
+          error: `Debes seleccionar un circuito o distancia para "${kidName}".`
+        });
+      }
+
+      const medicalNotes = sanitizeField(child.medicalNotes, 500) || 'Ninguna';
+
+      const saveResult = await db.saveInscription({
+        raceId: targetRaceId,
+        raceName: targetRaceName,
+        tutorFirstName,
+        tutorLastName,
+        name,
+        email,
+        phone,
+        tutorRut,
+        kidFirstName,
+        kidLastName,
+        kidName,
+        kidAge,
+        shirtSize,
+        distance,
+        emergencyContact,
+        medicalNotes,
+        paymentProof: finalProof,
+        paymentMethod,
+        registeredBy: req.session.username || 'staff',
+        kitReceived,
+        consentGiven,
+        subject: `Registro Rápido ${distance} - ${kidName}`
+      });
+
+      const assignedBib = saveResult.bibNumber || (saveResult.lead ? saveResult.lead.bib_number : '0100');
+      const leadId = saveResult.lead ? saveResult.lead.id : (saveResult.id || `lead_${Date.now()}_${idx}`);
+
+      results.push({
+        id: leadId,
+        bibNumber: assignedBib,
+        kidName,
+        kidFirstName,
+        kidLastName,
+        kidAge,
+        shirtSize,
+        distance,
+        tutorName: name,
+        tutorFirstName,
+        tutorLastName,
+        tutorRut,
+        email,
+        phone,
+        emergencyContact,
+        paymentMethod,
+        paymentProof: finalProof,
+        kitReceived,
+        registeredBy: req.session.username || 'staff',
+        createdAt: new Date().toISOString(),
+        success: saveResult.success
+      });
+
+      // Despacho opcional de email si no es dominio .local
+      if (saveResult.success && !email.endsWith('@kidsrace.local')) {
+        try {
+          emailService.sendInscriptionConfirmation({
+            raceName: targetRaceName,
+            name,
+            tutorFirstName,
+            tutorLastName,
+            email,
+            kidName,
+            kidFirstName,
+            kidLastName,
+            kidAge,
+            shirtSize,
+            bibNumber: assignedBib,
+            distance,
+            tutorRut
+          }).catch(err => {
+            console.warn('[quick-register/email] No se pudo enviar confirmación a ' + email + ':', err.message);
+          });
+        } catch (mailErr) {
+          console.warn('[quick-register/email] Error disparando confirmación:', mailErr.message);
+        }
+      }
+    }
+
+    return res.json({
+      success: true,
+      count: results.length,
+      tutorName: name,
+      tutorRut,
+      paymentMethod,
+      kitReceived,
+      message: results.length > 1
+        ? `¡${results.length} participantes registrados exitosamente con modalidad ${paymentMethod === 'efectivo' ? 'Efectivo' : 'Transferencia'}!`
+        : `¡Participante registrado exitosamente (N° ${results[0]?.bibNumber}) con modalidad ${paymentMethod === 'efectivo' ? 'Efectivo' : 'Transferencia'}!`,
+      children: results
+    });
+
+  } catch (err) {
+    console.error('[quick-register] Error:', err);
+    return res.status(500).json({ success: false, error: err.message || 'Error interno en el servidor.' });
+  }
 });
 
 // Servir Comprobantes de Pago de forma Segura (SOLO Administradores y Editores autenticados)

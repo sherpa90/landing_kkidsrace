@@ -28,7 +28,8 @@ function initAllAdminModules() {
     ['Preguntas Frecuentes', initFaqsManager],
     ['Hero Preview', initHeroLivePreview],
     ['Pestaña Navegador', initBrowserTabLivePreview],
-    ['Reportes & BI', initReportsManager]
+    ['Reportes & BI', initReportsManager],
+    ['Registro Rápido', initQuickRegisterModal]
   ];
 
   modules.forEach(([name, fn]) => {
@@ -4522,4 +4523,790 @@ function initReportsManager() {
   // Render inicial al cargar
   renderReportsDashboard();
 }
+
+// ─── 12. Modal de Registro Rápido de Participantes (Mesa de Acreditación / Terreno) ───
+function initQuickRegisterModal() {
+  const modal = document.getElementById('quick-register-modal');
+  if (!modal) return;
+
+  const openBtns = document.querySelectorAll('.btn-open-quick-register');
+  const closeBtn = document.getElementById('btn-close-quick-register');
+  const cancelBtn = document.getElementById('btn-cancel-quick-register');
+  const submitBtn = document.getElementById('btn-submit-quick-register');
+  const submitBtnText = document.getElementById('btn-submit-quick-register-text');
+  const form = document.getElementById('form-quick-register');
+  const errorBox = document.getElementById('qr-error-box');
+  const errorText = document.getElementById('qr-error-text');
+  const addChildBtn = document.getElementById('btn-qr-add-child');
+  const childrenList = document.getElementById('qr-children-list');
+  const raceSelect = document.getElementById('qr-race-id');
+  const rutInput = document.getElementById('qr-tutor-rut');
+  const rutFeedback = document.getElementById('qr-rut-feedback');
+  const firstNameInput = document.getElementById('qr-tutor-first-name');
+  const lastNameInput = document.getElementById('qr-tutor-last-name');
+  const phoneInput = document.getElementById('qr-tutor-phone');
+  const emergencyInput = document.getElementById('qr-tutor-emergency');
+  const samePhoneBtn = document.getElementById('btn-qr-same-phone');
+  const noEmailCheck = document.getElementById('qr-no-email-check');
+  const emailInput = document.getElementById('qr-tutor-email');
+  const kitReceivedCheck = document.getElementById('qr-kit-received');
+
+  // Elementos de Método de Pago
+  const paymentMethodRadios = document.querySelectorAll('input[name="qr_payment_method"]');
+  const cardEfectivo = document.getElementById('qr-card-efectivo');
+  const cardTransferencia = document.getElementById('qr-card-transferencia');
+  const proofUploadPanel = document.getElementById('qr-proof-upload-panel');
+  const efectivoNotice = document.getElementById('qr-efectivo-notice');
+  const proofDropzone = document.getElementById('qr-proof-dropzone');
+  const proofFileInput = document.getElementById('qr-proof-file-input');
+  const proofPlaceholder = document.getElementById('qr-proof-placeholder');
+  const proofPreviewContainer = document.getElementById('qr-proof-preview-container');
+  const proofPreviewImg = document.getElementById('qr-proof-preview-img');
+  const proofFilename = document.getElementById('qr-proof-filename');
+  const removeProofBtn = document.getElementById('btn-qr-remove-proof');
+  const proofUrlInput = document.getElementById('qr-proof-url');
+
+  // Categorías de carrera desde el servidor
+  let categories = [];
+  try {
+    const catScript = document.getElementById('cms-categories-data');
+    if (catScript && catScript.textContent) {
+      categories = JSON.parse(catScript.textContent);
+    }
+  } catch (e) {}
+
+  if (!categories || categories.length === 0) {
+    categories = [
+      { distance: '250 Metros babykidsrace', badge: '0 a 3 años', title: 'Baby Kids Race' },
+      { distance: '250 Metros planos', badge: '4 y 5 años', title: 'Mini Runners' },
+      { distance: '500 Metros planos', badge: '6 y 7 años', title: 'Pequeños Rayos' },
+      { distance: '500 Metros NEE', badge: '4 a 9 años NEE', title: 'Circuito Inclusivo NEE' },
+      { distance: '1 Kilómetro', badge: '8 y 9 años', title: 'Jóvenes Promesas' },
+      { distance: '1 Kilómetro NEE', badge: '10 a 14 años NEE', title: 'Desafío Inclusivo NEE' },
+      { distance: '2 Kilómetros', badge: '10 a 12 años', title: 'Desafío Titanes' },
+      { distance: '4 Kilómetros', badge: '13 y 14 años', title: 'Gran Fondo Juvenil' }
+    ];
+  }
+
+  const SHIRT_SIZES = ['2', '4', '8', '12', '16', 'S', 'M'];
+
+  // Validación de RUT chileno (Módulo 11)
+  function isValidRutChecksum(rut) {
+    if (!rut || typeof rut !== 'string') return false;
+    const clean = rut.replace(/[^0-9kK]/g, '').toUpperCase();
+    if (clean.length < 8 || clean.length > 9) return false;
+    const body = clean.slice(0, -1);
+    const dv = clean.slice(-1);
+    let sum = 0;
+    let mul = 2;
+    for (let i = body.length - 1; i >= 0; i--) {
+      sum += parseInt(body[i], 10) * mul;
+      mul = mul === 7 ? 2 : mul + 1;
+    }
+    const expected = 11 - (sum % 11);
+    const expectedDv = expected === 11 ? '0' : expected === 10 ? 'K' : String(expected);
+    return dv === expectedDv;
+  }
+
+  // Formato automático de RUT chileno (ej: 12.345.678-9)
+  function formatRut(val) {
+    let clean = (val || '').replace(/[^0-9kK]/g, '').toUpperCase();
+    if (clean.length === 0) return '';
+    if (clean.length > 9) clean = clean.substring(0, 9);
+    if (clean.length === 1) return clean;
+    const body = clean.slice(0, -1);
+    const dv = clean.slice(-1);
+    let formattedBody = '';
+    for (let i = body.length - 1, j = 1; i >= 0; i--, j++) {
+      formattedBody = body.charAt(i) + formattedBody;
+      if (j % 3 === 0 && i > 0) formattedBody = '.' + formattedBody;
+    }
+    return `${formattedBody}-${dv}`;
+  }
+
+  // Creación dinámica de tarjeta de pupilo/a
+  function createChildCard(index) {
+    const card = document.createElement('div');
+    card.className = 'qr-child-card p-3.5 rounded-2xl bg-slate-900/90 border border-slate-700/80 space-y-3 relative';
+    card.setAttribute('data-child-idx', index);
+
+    const distanceOptions = categories.map(c =>
+      `<option value="${c.distance}">${c.distance} - ${c.title || ''} (${c.badge || ''})</option>`
+    ).join('');
+
+    const shirtOptions = SHIRT_SIZES.map(s =>
+      `<option value="${s}" ${s === '4' ? 'selected' : ''}>Talla ${s}</option>`
+    ).join('');
+
+    card.innerHTML = `
+      <div class="flex items-center justify-between border-b border-slate-800 pb-2">
+        <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+          <span class="w-5 h-5 rounded-full bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-[10px] font-black">${index + 1}</span>
+          <span>Participante #${index + 1}</span>
+        </span>
+        ${index > 0 ? `
+        <button type="button" class="btn-qr-remove-child text-[11px] font-bold text-red-400 hover:text-red-300 px-2 py-0.5 rounded-lg bg-red-950/40 hover:bg-red-900/50 border border-red-500/30 transition-all cursor-pointer">
+          ✕ Eliminar
+        </button>` : ''}
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-2.5">
+        <div class="space-y-1 sm:col-span-1">
+          <label class="text-[11px] font-bold text-slate-300">Nombre Pupilo/a *</label>
+          <input type="text" class="qr-kid-first-name admin-input w-full px-3 py-2 text-xs text-white bg-slate-950 border-slate-700 rounded-xl focus:border-emerald-500" placeholder="Ej: Mateo" required>
+        </div>
+
+        <div class="space-y-1 sm:col-span-1">
+          <label class="text-[11px] font-bold text-slate-300">Apellido Pupilo/a *</label>
+          <input type="text" class="qr-kid-last-name admin-input w-full px-3 py-2 text-xs text-white bg-slate-950 border-slate-700 rounded-xl focus:border-emerald-500" placeholder="Ej: Pérez" required>
+        </div>
+
+        <div class="space-y-1 sm:col-span-1">
+          <label class="text-[11px] font-bold text-slate-300">Edad (Años) *</label>
+          <input type="number" min="0" max="14" class="qr-kid-age admin-input w-full px-3 py-2 text-xs text-white bg-slate-950 border-slate-700 rounded-xl focus:border-emerald-500" placeholder="0-14" required>
+        </div>
+
+        <div class="space-y-1 sm:col-span-1">
+          <label class="text-[11px] font-bold text-slate-300">Talla Polera *</label>
+          <select class="qr-kid-shirt admin-input w-full px-3 py-2 text-xs text-white bg-slate-950 border-slate-700 rounded-xl cursor-pointer focus:border-emerald-500">
+            ${shirtOptions}
+          </select>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-1">
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold text-slate-300">Distancia / Categoría *</label>
+          <select class="qr-kid-distance admin-input w-full px-3 py-2 text-xs text-white bg-slate-950 border-slate-700 rounded-xl cursor-pointer focus:border-emerald-500">
+            ${distanceOptions}
+          </select>
+        </div>
+
+        <div class="space-y-1">
+          <label class="text-[11px] font-bold text-slate-300">Observaciones médicas / alergias</label>
+          <input type="text" class="qr-kid-medical admin-input w-full px-3 py-2 text-xs text-white bg-slate-950 border-slate-700 rounded-xl focus:border-emerald-500" placeholder="Opcional (Ej: Asma leve, Ninguna)">
+        </div>
+      </div>
+    `;
+
+    return card;
+  }
+
+  // Re-indexar tarjetas de niños
+  function reindexChildCards() {
+    const cards = childrenList.querySelectorAll('.qr-child-card');
+    cards.forEach((card, idx) => {
+      card.setAttribute('data-child-idx', idx);
+      const titleSpan = card.querySelector('.text-xs.font-bold span:last-child');
+      const badgeSpan = card.querySelector('.text-xs.font-bold span:first-child');
+      if (titleSpan) titleSpan.textContent = `Participante #${idx + 1}`;
+      if (badgeSpan) badgeSpan.textContent = `${idx + 1}`;
+    });
+  }
+
+  // Resetear formulario a su estado inicial
+  function resetQuickRegisterForm() {
+    form.reset();
+    proofUrlInput.value = '';
+    proofPlaceholder.classList.remove('hidden');
+    proofPreviewContainer.classList.add('hidden');
+    proofPreviewContainer.classList.remove('flex');
+    if (proofFileInput) proofFileInput.value = '';
+    errorBox.classList.add('hidden');
+    errorText.textContent = '';
+    rutFeedback.classList.add('hidden');
+    rutFeedback.textContent = '';
+
+    // Seleccionar por defecto efectivo
+    const efectivoRadio = document.querySelector('input[name="qr_payment_method"][value="efectivo"]');
+    if (efectivoRadio) efectivoRadio.checked = true;
+    updatePaymentMethodVisuals();
+
+    // Reestablecer niños a exactamente 1 niño
+    childrenList.innerHTML = '';
+    childrenList.appendChild(createChildCard(0));
+
+    // Desmarcar sin correo
+    if (noEmailCheck) noEmailCheck.checked = false;
+    if (emailInput) {
+      emailInput.disabled = false;
+      emailInput.placeholder = 'correo@ejemplo.com';
+    }
+
+    if (kitReceivedCheck) kitReceivedCheck.checked = true;
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  // Actualizar aspectos visuales según método de pago seleccionado
+  function updatePaymentMethodVisuals() {
+    const selected = document.querySelector('input[name="qr_payment_method"]:checked')?.value || 'efectivo';
+
+    if (selected === 'efectivo') {
+      if (cardEfectivo) {
+        cardEfectivo.className = 'relative flex items-start gap-3 p-3.5 rounded-2xl border-2 border-emerald-500/60 bg-emerald-950/30 cursor-pointer transition-all hover:bg-emerald-950/50';
+      }
+      if (cardTransferencia) {
+        cardTransferencia.className = 'relative flex items-start gap-3 p-3.5 rounded-2xl border-2 border-slate-800 bg-slate-900/60 cursor-pointer transition-all hover:bg-slate-900 hover:border-slate-700';
+      }
+      if (proofUploadPanel) proofUploadPanel.classList.add('hidden');
+      if (efectivoNotice) efectivoNotice.classList.remove('hidden');
+    } else {
+      if (cardEfectivo) {
+        cardEfectivo.className = 'relative flex items-start gap-3 p-3.5 rounded-2xl border-2 border-slate-800 bg-slate-900/60 cursor-pointer transition-all hover:bg-slate-900 hover:border-slate-700';
+      }
+      if (cardTransferencia) {
+        cardTransferencia.className = 'relative flex items-start gap-3 p-3.5 rounded-2xl border-2 border-blue-500/60 bg-blue-950/30 cursor-pointer transition-all hover:bg-blue-950/50';
+      }
+      if (proofUploadPanel) proofUploadPanel.classList.remove('hidden');
+      if (efectivoNotice) efectivoNotice.classList.add('hidden');
+    }
+  }
+
+  // Manejo de subida de comprobante
+  async function handleProofUpload(file) {
+    if (!file) return;
+
+    if (!['image/jpeg', 'image/png', 'image/webp'].includes(file.type)) {
+      showAdminToast('Solo se admiten imágenes JPG, PNG o WebP.', 'error');
+      return;
+    }
+
+    if (file.size > 5 * 1024 * 1024) {
+      showAdminToast('El comprobante supera el tamaño máximo permitido de 5 MB.', 'error');
+      return;
+    }
+
+    const prevPlaceholderHtml = proofPlaceholder.innerHTML;
+    proofPlaceholder.innerHTML = `
+      <div class="py-4 text-xs text-blue-300 font-bold flex items-center justify-center gap-2">
+        <span class="inline-block animate-spin text-sm">⟳</span>
+        <span>Optimizando y guardando comprobante...</span>
+      </div>
+    `;
+
+    try {
+      const fd = new FormData();
+      fd.append('proof', file);
+
+      const res = await fetch('/admin/api/upload-proof', {
+        method: 'POST',
+        headers: {
+          'X-CSRF-Token': getCsrfToken()
+        },
+        body: fd
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success && data.data && data.data.url) {
+        proofUrlInput.value = data.data.url;
+        proofPreviewImg.src = data.data.url;
+        proofFilename.textContent = file.name;
+        proofPlaceholder.classList.add('hidden');
+        proofPreviewContainer.classList.remove('hidden');
+        proofPreviewContainer.classList.add('flex');
+        showAdminToast('Comprobante adjuntado con éxito', 'success');
+      } else {
+        proofPlaceholder.innerHTML = prevPlaceholderHtml;
+        showAdminToast(data.error || 'Error subiendo comprobante', 'error');
+      }
+    } catch (err) {
+      proofPlaceholder.innerHTML = prevPlaceholderHtml;
+      showAdminToast(err.message || 'Error de conexión', 'error');
+    }
+  }
+
+  // Abrir Modal
+  function openModal() {
+    resetQuickRegisterForm();
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    setTimeout(() => {
+      if (rutInput) rutInput.focus();
+    }, 100);
+  }
+
+  // Cerrar Modal
+  function closeModal() {
+    modal.classList.add('hidden');
+    document.body.style.overflow = '';
+  }
+
+  // Eventos de apertura
+  openBtns.forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.preventDefault();
+      openModal();
+    });
+  });
+
+  // Eventos de cierre
+  if (closeBtn) closeBtn.addEventListener('click', closeModal);
+  if (cancelBtn) cancelBtn.addEventListener('click', closeModal);
+  modal.addEventListener('click', (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && !modal.classList.contains('hidden')) {
+      closeModal();
+    }
+  });
+
+  // Cambio de método de pago
+  paymentMethodRadios.forEach(radio => {
+    radio.addEventListener('change', updatePaymentMethodVisuals);
+  });
+
+  // Drag and drop y clic para comprobante
+  if (proofDropzone && proofFileInput) {
+    proofDropzone.addEventListener('click', (e) => {
+      if (e.target !== removeProofBtn && !removeProofBtn?.contains(e.target)) {
+        proofFileInput.click();
+      }
+    });
+
+    proofFileInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (file) handleProofUpload(file);
+    });
+
+    proofDropzone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      proofDropzone.classList.add('border-blue-400', 'bg-blue-900/30');
+    });
+
+    proofDropzone.addEventListener('dragleave', () => {
+      proofDropzone.classList.remove('border-blue-400', 'bg-blue-900/30');
+    });
+
+    proofDropzone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      proofDropzone.classList.remove('border-blue-400', 'bg-blue-900/30');
+      const file = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (file) handleProofUpload(file);
+    });
+  }
+
+  // Quitar comprobante cargado
+  if (removeProofBtn) {
+    removeProofBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      proofUrlInput.value = '';
+      if (proofFileInput) proofFileInput.value = '';
+      proofPreviewImg.src = '';
+      proofPreviewContainer.classList.add('hidden');
+      proofPreviewContainer.classList.remove('flex');
+      proofPlaceholder.classList.remove('hidden');
+    });
+  }
+
+  // RUT autoformato y validación interactiva
+  if (rutInput) {
+    rutInput.addEventListener('input', (e) => {
+      const cur = e.target.value;
+      const formatted = formatRut(cur);
+      e.target.value = formatted;
+
+      if (formatted.length >= 8) {
+        if (isValidRutChecksum(formatted)) {
+          rutFeedback.className = 'text-[10px] text-emerald-400 font-bold block';
+          rutFeedback.textContent = '✓ RUT válido';
+        } else {
+          rutFeedback.className = 'text-[10px] text-amber-400 font-medium block';
+          rutFeedback.textContent = '⚠ Dígito verificador no coincide';
+        }
+      } else {
+        rutFeedback.className = 'text-[10px] hidden text-amber-400 font-medium';
+        rutFeedback.textContent = '';
+      }
+    });
+  }
+
+  // Botón "Mismo teléfono" para contacto de emergencia
+  if (samePhoneBtn && phoneInput && emergencyInput) {
+    samePhoneBtn.addEventListener('click', () => {
+      emergencyInput.value = phoneInput.value;
+      emergencyInput.focus();
+    });
+  }
+
+  // Checkbox "Sin correo"
+  if (noEmailCheck && emailInput) {
+    noEmailCheck.addEventListener('change', () => {
+      if (noEmailCheck.checked) {
+        emailInput.value = '';
+        emailInput.disabled = true;
+        emailInput.placeholder = 'Inscripción presencial (sin correo)';
+      } else {
+        emailInput.disabled = false;
+        emailInput.placeholder = 'correo@ejemplo.com';
+        emailInput.focus();
+      }
+    });
+  }
+
+  // Botón agregar otro pupilo/a
+  if (addChildBtn && childrenList) {
+    addChildBtn.addEventListener('click', () => {
+      const curCount = childrenList.querySelectorAll('.qr-child-card').length;
+      if (curCount >= 6) {
+        showAdminToast('Máximo 6 menores por registro grupal familiar.', 'error');
+        return;
+      }
+      const newCard = createChildCard(curCount);
+      childrenList.appendChild(newCard);
+      reindexChildCards();
+      newCard.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+      const firstIn = newCard.querySelector('.qr-kid-first-name');
+      if (firstIn) firstIn.focus();
+      if (window.lucide) window.lucide.createIcons();
+    });
+
+    // Delegación para eliminar pupilo
+    childrenList.addEventListener('click', (e) => {
+      const removeBtn = e.target.closest('.btn-qr-remove-child');
+      if (removeBtn) {
+        const card = removeBtn.closest('.qr-child-card');
+        if (card) {
+          card.remove();
+          reindexChildCards();
+        }
+      }
+    });
+  }
+
+  // Función para insertar participante registrado en tiempo real en la tabla y en móvil
+  function appendLeadToDashboard(lead) {
+    // 1. Agregar a la tabla de escritorio
+    const tableBody = document.querySelector('#tab-leads table tbody');
+    const noDesktopRow = document.getElementById('no-participants-row');
+    if (noDesktopRow) noDesktopRow.remove();
+
+    if (tableBody) {
+      const tr = document.createElement('tr');
+      tr.id = `lead-row-${lead.id}`;
+      tr.className = 'participant-row hover:bg-slate-800/40 transition-colors border-b border-slate-800/60';
+      tr.setAttribute('data-search', `${lead.bibNumber} ${lead.kidName} ${lead.tutorName} ${lead.tutorRut} ${lead.distance}`);
+      tr.setAttribute('data-distance', lead.distance);
+
+      const isEfectivo = lead.paymentMethod === 'efectivo' || lead.paymentProof === 'EFECTIVO';
+      const proofHtml = isEfectivo
+        ? `<span class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-950/80 text-emerald-300 border border-emerald-500/40 text-[11px] font-bold" title="Pago registrado en efectivo"><i data-lucide="banknote" class="w-3.5 h-3.5 text-emerald-400"></i><span>Efectivo</span></span>`
+        : (lead.paymentProof
+          ? `<button type="button" class="btn-view-proof inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl bg-emerald-950 text-emerald-300 border border-emerald-500/40 hover:bg-emerald-900 transition-all text-[11px] font-bold cursor-pointer" data-proof-url="${lead.paymentProof}" data-pupil="${lead.kidName || 'Pupilo'}" data-tutor="${lead.tutorName || 'Tutor'}" title="Agrandar comprobante"><i data-lucide="zoom-in" class="w-3.5 h-3.5"></i><span>Ver Foto</span></button>`
+          : `<span class="text-slate-500 text-[11px] italic">Pendiente</span>`);
+
+      tr.innerHTML = `
+        <td class="py-3.5 px-4 text-center">
+          <input type="checkbox" class="lead-select-checkbox w-4 h-4 rounded text-blue-600 bg-slate-950 border-slate-700 focus:ring-blue-500 cursor-pointer" value="${lead.id}">
+        </td>
+        <td class="py-3.5 px-4 font-black font-mono text-emerald-400 text-sm">
+          #${lead.bibNumber || '0000'}
+        </td>
+        <td class="py-3.5 px-4 font-bold text-white">
+          ${lead.kidName || `${lead.kidFirstName || ''} ${lead.kidLastName || ''}`}
+        </td>
+        <td class="py-3.5 px-4 text-slate-300 font-mono">
+          ${lead.kidAge !== null && lead.kidAge !== undefined ? `${lead.kidAge} años` : '-'}
+        </td>
+        <td class="py-3.5 px-4 text-center">
+          <span class="inline-block px-2.5 py-1 rounded-lg bg-blue-950/70 text-blue-300 border border-blue-500/30 text-xs font-black font-mono">
+            Talla ${lead.shirtSize || '4'}
+          </span>
+        </td>
+        <td class="py-3.5 px-4 text-slate-300 text-xs">
+          <span class="font-medium text-white">${lead.distance}</span>
+        </td>
+        <td class="py-3.5 px-4">
+          <div class="font-bold text-white">${lead.tutorName}</div>
+          <div class="text-[11px] font-mono text-slate-500">${lead.email}</div>
+        </td>
+        <td class="py-3.5 px-4 font-mono font-bold text-amber-300 text-[11px]">
+          ${lead.tutorRut || '-'}
+        </td>
+        <td class="py-3.5 px-4 font-mono text-slate-300">
+          ${lead.emergencyContact || lead.phone || '-'}
+        </td>
+        <td class="py-3.5 px-4">
+          ${proofHtml}
+        </td>
+        <td class="py-3.5 px-4 text-center">
+          <label class="inline-flex items-center justify-center cursor-pointer" title="Kit entregado">
+            <input type="checkbox" class="kit-received-checkbox w-4 h-4 rounded accent-emerald-500 cursor-pointer" data-id="${lead.id}" ${lead.kitReceived ? 'checked' : ''}>
+          </label>
+        </td>
+        <td class="py-3.5 px-4 text-slate-400 text-[11px] font-mono">
+          ${new Date().toLocaleDateString('es-ES')}
+        </td>
+        <td class="py-3.5 px-4 text-right">
+          <button type="button" class="btn-delete-lead text-slate-500 hover:text-red-400 p-1.5 rounded-lg hover:bg-slate-800 transition-colors cursor-pointer" data-lead-id="${lead.id}" title="Eliminar registro">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+          </button>
+        </td>
+      `;
+
+      tableBody.insertBefore(tr, tableBody.firstChild);
+    }
+
+    // 2. Agregar a la lista de móvil
+    const mobileList = document.getElementById('participants-mobile-list');
+    if (mobileList) {
+      const card = document.createElement('div');
+      card.className = 'participant-row bg-gradient-to-b from-slate-900/90 to-slate-950/90 border border-slate-800/90 hover:border-blue-500/40 rounded-3xl p-4.5 sm:p-5 space-y-3.5 transition-all shadow-lg shadow-black/20 relative overflow-hidden';
+      card.setAttribute('data-search', `${lead.bibNumber} ${lead.kidName} ${lead.tutorName} ${lead.tutorRut} ${lead.distance}`);
+      card.setAttribute('data-distance', lead.distance);
+
+      const isEfectivo = lead.paymentMethod === 'efectivo' || lead.paymentProof === 'EFECTIVO';
+      const proofBtnHtml = isEfectivo
+        ? `<span class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 text-xs font-bold shadow-sm"><i data-lucide="banknote" class="w-3.5 h-3.5 text-emerald-400"></i><span>Efectivo (Mesa)</span></span>`
+        : (lead.paymentProof
+          ? `<button type="button" class="btn-view-proof inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-emerald-950/90 text-emerald-300 border border-emerald-500/50 hover:bg-emerald-900 active:scale-95 transition-all text-xs font-bold shadow-sm" data-proof-url="${lead.paymentProof}" data-pupil="${lead.kidName || 'Pupilo'}" data-tutor="${lead.tutorName || 'Tutor'}"><i data-lucide="receipt" class="w-3.5 h-3.5"></i><span>Ver Comprobante</span></button>`
+          : `<span class="text-amber-400/90 bg-amber-950/40 border border-amber-500/30 px-3 py-1.5 rounded-xl text-xs font-semibold inline-flex items-center gap-1.5"><i data-lucide="clock" class="w-3.5 h-3.5 text-amber-400"></i><span>Comprobante Pendiente</span></span>`);
+
+      card.innerHTML = `
+        <div class="flex items-start justify-between gap-3 border-b border-slate-800/80 pb-3">
+          <div class="flex items-center gap-2.5">
+            <span class="w-2.5 h-2.5 rounded-full ${lead.kitReceived ? 'bg-emerald-500 shadow-md shadow-emerald-500/50' : 'bg-amber-500 animate-pulse'}"></span>
+            <div>
+              <span class="text-base font-black text-white block leading-tight">${lead.kidName}</span>
+              <span class="text-[11px] text-slate-400 font-mono">${lead.kidAge ? `${lead.kidAge} años` : ''} &bull; Talla <strong class="text-white">${lead.shirtSize || '4'}</strong></span>
+            </div>
+          </div>
+          <span class="text-xs font-black font-mono text-emerald-400 bg-emerald-950/80 border border-emerald-500/30 px-2.5 py-1 rounded-xl shrink-0">
+            #${lead.bibNumber || '0000'}
+          </span>
+        </div>
+
+        <div class="text-xs text-slate-300 space-y-1">
+          <div><strong class="text-white">Circuito:</strong> ${lead.distance}</div>
+          <div><strong class="text-white">Tutor:</strong> ${lead.tutorName} (${lead.tutorRut})</div>
+          <div><strong class="text-white">Tel:</strong> ${lead.phone}</div>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80 gap-2">
+          ${proofBtnHtml}
+          <label class="inline-flex items-center gap-2 text-xs font-bold text-slate-300 cursor-pointer">
+            <input type="checkbox" class="kit-received-checkbox w-4 h-4 rounded accent-emerald-500 cursor-pointer" data-id="${lead.id}" ${lead.kitReceived ? 'checked' : ''}>
+            <span>Kit Entregado</span>
+          </label>
+        </div>
+      `;
+
+      mobileList.insertBefore(card, mobileList.firstChild);
+    }
+
+    // 3. Incrementar contador badge
+    const badge = document.getElementById('participants-count-badge');
+    if (badge) {
+      const cur = parseInt(badge.textContent, 10) || 0;
+      badge.textContent = cur + 1;
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  // ENVÍO DEL FORMULARIO DE REGISTRO RÁPIDO
+  if (submitBtn) {
+    submitBtn.addEventListener('click', async () => {
+      errorBox.classList.add('hidden');
+      errorText.textContent = '';
+
+      const tutorFirstName = (firstNameInput?.value || '').trim();
+      const tutorLastName = (lastNameInput?.value || '').trim();
+      const tutorRut = (rutInput?.value || '').trim();
+      const phone = (phoneInput?.value || '').trim();
+      const emergencyContact = (emergencyInput?.value || '').trim() || phone;
+      const isNoEmail = noEmailCheck ? noEmailCheck.checked : false;
+      const email = isNoEmail ? '' : (emailInput?.value || '').trim();
+      const kitReceived = kitReceivedCheck ? kitReceivedCheck.checked : true;
+      const selectedRaceOpt = raceSelect?.options[raceSelect.selectedIndex];
+      const raceId = raceSelect?.value || 'race-2026-primavera';
+      const raceName = selectedRaceOpt?.getAttribute('data-name') || selectedRaceOpt?.textContent || 'Kids Race 2026';
+
+      // Validación Apoderado
+      if (!tutorFirstName || !tutorLastName) {
+        showError('Por favor ingresa tanto el Nombre como el Apellido del tutor o apoderado.');
+        if (!tutorFirstName && firstNameInput) firstNameInput.focus();
+        else if (lastNameInput) lastNameInput.focus();
+        return;
+      }
+
+      if (!tutorRut) {
+        showError('El RUN / RUT del apoderado o tutor es obligatorio.');
+        if (rutInput) rutInput.focus();
+        return;
+      }
+
+      if (!isValidRutChecksum(tutorRut)) {
+        showError('El RUT ingresado no es válido. Verifica el número y su dígito verificador.');
+        if (rutInput) rutInput.focus();
+        return;
+      }
+
+      if (!phone) {
+        showError('El teléfono de contacto es obligatorio para coordinar con el apoderado.');
+        if (phoneInput) phoneInput.focus();
+        return;
+      }
+
+      if (!isNoEmail && email) {
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(email)) {
+          showError('Por favor ingresa un correo electrónico válido o marca la casilla "Sin correo".');
+          if (emailInput) emailInput.focus();
+          return;
+        }
+      }
+
+      // VALIDACIÓN CRUCIAL DE MÉTODO DE PAGO
+      // "con la salvedad que el comprobante de pago es opcional y debe existir la opcion de efectivo, pero debe ser obligatoria una de las 2 opciones."
+      const paymentMethodRadio = document.querySelector('input[name="qr_payment_method"]:checked');
+      if (!paymentMethodRadio) {
+        showError('Debe seleccionar obligatoriamente una opción de pago: "Efectivo" o "Transferencia con comprobante".');
+        return;
+      }
+
+      const paymentMethod = paymentMethodRadio.value;
+      const paymentProofUrl = (proofUrlInput?.value || '').trim();
+
+      if (paymentMethod !== 'efectivo' && paymentMethod !== 'transferencia') {
+        showError('Método de pago no válido. Selecciona Efectivo o Transferencia.');
+        return;
+      }
+
+      if (paymentMethod === 'transferencia' && !paymentProofUrl) {
+        showError('Para la opción de transferencia bancaria, el comprobante de pago es obligatorio. Por favor sube la captura.');
+        if (proofDropzone) proofDropzone.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        return;
+      }
+
+      // Validación Pupilos
+      const childCards = childrenList.querySelectorAll('.qr-child-card');
+      if (childCards.length === 0) {
+        showError('Debes agregar al menos un participante (pupilo/a).');
+        return;
+      }
+
+      const children = [];
+      for (let i = 0; i < childCards.length; i++) {
+        const card = childCards[i];
+        const kidFirstName = (card.querySelector('.qr-kid-first-name')?.value || '').trim();
+        const kidLastName = (card.querySelector('.qr-kid-last-name')?.value || '').trim();
+        const kidAgeRaw = card.querySelector('.qr-kid-age')?.value;
+        const kidAge = parseInt(kidAgeRaw, 10);
+        const shirtSize = card.querySelector('.qr-kid-shirt')?.value || '4';
+        const distance = card.querySelector('.qr-kid-distance')?.value || '';
+        const medicalNotes = (card.querySelector('.qr-kid-medical')?.value || '').trim();
+
+        if (!kidFirstName || !kidLastName) {
+          showError(`Ingresa Nombre y Apellido para el participante #${i + 1}.`);
+          const fnIn = card.querySelector('.qr-kid-first-name');
+          if (fnIn) fnIn.focus();
+          return;
+        }
+
+        if (isNaN(kidAge) || kidAge < 0 || kidAge > 14) {
+          showError(`La edad del participante #${i + 1} (${kidFirstName}) debe estar entre 0 y 14 años.`);
+          const ageIn = card.querySelector('.qr-kid-age');
+          if (ageIn) ageIn.focus();
+          return;
+        }
+
+        if (!distance) {
+          showError(`Selecciona la distancia para el participante #${i + 1} (${kidFirstName}).`);
+          return;
+        }
+
+        children.push({
+          kidFirstName,
+          kidLastName,
+          kidName: `${kidFirstName} ${kidLastName}`.trim(),
+          kidAge,
+          shirtSize,
+          distance,
+          medicalNotes
+        });
+      }
+
+      // Preparar payload de envío
+      const payload = {
+        raceId,
+        raceName,
+        tutorFirstName,
+        tutorLastName,
+        tutorRut,
+        phone,
+        emergencyContact,
+        email: email || '',
+        paymentMethod,
+        paymentProof: paymentMethod === 'transferencia' ? paymentProofUrl : (paymentProofUrl || 'EFECTIVO'),
+        kitReceived,
+        consentGiven: true,
+        children
+      };
+
+      // Deshabilitar botón durante el envío
+      submitBtn.disabled = true;
+      const prevSubmitHtml = submitBtnText.innerHTML;
+      submitBtnText.innerHTML = `<span class="inline-block animate-spin mr-1">⟳</span> Registrando...`;
+
+      try {
+        const res = await cmsFetch('/admin/api/inscriptions/quick-register', {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+
+        if (res.success) {
+          showAdminToast(res.message || '¡Participante registrado exitosamente!', 'success');
+
+          // Insertar en la interfaz de inmediato
+          if (Array.isArray(res.children)) {
+            res.children.forEach(childLead => {
+              appendLeadToDashboard({
+                id: childLead.id,
+                bibNumber: childLead.bibNumber,
+                kidName: childLead.kidName,
+                kidAge: childLead.kidAge,
+                shirtSize: childLead.shirtSize,
+                distance: childLead.distance,
+                tutorName: `${tutorFirstName} ${tutorLastName}`.trim(),
+                tutorRut,
+                email: email || 'presencial',
+                phone,
+                emergencyContact,
+                paymentMethod,
+                paymentProof: childLead.paymentProof,
+                kitReceived
+              });
+            });
+          }
+
+          closeModal();
+          resetQuickRegisterForm();
+        } else {
+          showError(res.error || 'Ocurrió un error al procesar la inscripción.');
+        }
+      } catch (err) {
+        showError(err.message || 'Error de conexión con el servidor.');
+      } finally {
+        submitBtn.disabled = false;
+        submitBtnText.innerHTML = prevSubmitHtml;
+      }
+    });
+  }
+
+  function showError(msg) {
+    if (errorBox && errorText) {
+      errorText.textContent = msg;
+      errorBox.classList.remove('hidden');
+      errorBox.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    } else {
+      showAdminToast(msg, 'error');
+    }
+  }
+
+  // Inicializar estado de niños con 1 participante
+  resetQuickRegisterForm();
+}
+
 
